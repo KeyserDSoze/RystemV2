@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rystem.Utility.TryCatch
+namespace Rystem
 {
     public static class Try
     {

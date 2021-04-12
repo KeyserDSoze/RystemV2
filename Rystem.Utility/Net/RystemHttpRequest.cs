@@ -16,7 +16,7 @@ namespace System.Net
         public Uri Uri { get; }
         public int Timeout { get; private set; } = 30_000;
         public HttpMethod Method { get; private set; } = HttpMethod.Get;
-        public Dictionary<string, string> Headers { get; private set; }
+        public Dictionary<string, string> Headers { get; private set; } = new Dictionary<string, string>();
         public bool KeepAlive { get; private set; } = true;
         public byte[] Body { get; private set; }
         public Stream BodyAsStream { get; private set; }

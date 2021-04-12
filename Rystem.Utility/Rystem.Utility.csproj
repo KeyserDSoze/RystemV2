@@ -2,11 +2,34 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Alessandro Rapiti</Authors>
+    <Company>Rystem</Company>
+    <Product>Rystem</Product>
+    <Description>Library that allows to speed up the basic operations on system libraries like:
+- added directly to string the methods to transform to json, csv, bson, byte array, stream and viceversa.
+- added directly to Uri object the possibility to compose in fluid method the request.
+- added a different approach to catch the exceptions.
+- added a real random, and a guid with time-inverse approach.
+- added a NoContext() method to Task class to perform a quick ConfigureAwait(false)
+- added a ToResult() method to Task class to perform a quick ConfigureAwait(false).GetAwaiter().GetResult()
+- added a fast crypting with Aes and fast hash with Sha256</Description>
+    <Copyright>2021</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>rystem.png</PackageIcon>
+    <RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="rystem.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
