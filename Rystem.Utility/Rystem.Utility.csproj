@@ -13,7 +13,8 @@
 - added a real random, and a guid with time-inverse approach.
 - added a NoContext() method to Task class to perform a quick ConfigureAwait(false)
 - added a ToResult() method to Task class to perform a quick ConfigureAwait(false).GetAwaiter().GetResult()
-- added a fast crypting with Aes and fast hash with Sha256</Description>
+- added a fast crypting with Aes and fast hash with Sha256
+- added a fast ToBase45() and ToBase64() method and their viceversa FromBase45() and FromBase64()</Description>
     <Copyright>2021</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>rystem.png</PackageIcon>
