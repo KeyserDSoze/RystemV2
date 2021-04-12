@@ -11,3 +11,13 @@
 - added a fast ToBase45() and ToBase64() method and their viceversa FromBase45() and FromBase64()
 
 ## Methods
+
+### Json
+      ```var falseNueve = new FalseNueve()
+      {
+          Al = "a",
+          Ol = "b"
+      };
+      var json = falseNueve.ToJson();
+      var falseNueve2 = json.FromJson<FalseNueve>();
+      ```
