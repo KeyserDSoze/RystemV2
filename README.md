@@ -45,12 +45,12 @@
       List<CsvModel> csvsComparer = firstCsv.FromCsv<CsvModel>().ToList();
 
 ### Aes
-      #### Before install the Aes Password, SaltKey, IVKey
+      //Before install the Aes Password, SaltKey, IVKey in a static constructor or during startup.
        static Crypting()
         {
             CryptingExtensions.Aes.Configure("4a4a4a4a", "4a4a4a4a", "4a4a4a4a4a4a4a4a");
         }
-      #### After that
+      //After that use it everywhere
       var falseNueve = new FalseNueve()
       {
           Al = "a",
@@ -59,3 +59,55 @@
       string crypting1 = falseNueve.Encrypt();
       var falseNueve2 = crypting1.Decrypt<FalseNueve>();
       string crypting2 = "Message to Encrypt".Encrypt();
+      string decrypting2 = crypting2.Decrypt();
+      
+ ### Sha256
+      var falseNueve = new FalseNueve()
+      {
+          Al = "a",
+          Ol = "b"
+      };
+      string crypting1 = falseNueve.ToHash();
+      string crypting2 = "Message to Hash".ToHash();
+      
+ ### Webrequest as fluid as possible
+      //simple request
+      string response = await new Uri("https://www.google.com")
+                .CreateHttpRequest()
+                .Build()
+                .InvokeAsync();
+      //response with a json
+      var response = await new Uri("https://jsonplaceholder.typicode.com/todos/1")
+                .CreateHttpRequest()
+                .Build()
+                .InvokeAsync<Rootobject>();
+                
+ ### Try/Catch
+      await Try.Execute(async () =>
+            {
+                await Task.Delay(10);
+                throw new ArgumentException("aaaaa");
+            })
+                .Catch<ArgumentException>(async x =>
+                {
+                    await Task.Delay(10);
+                })
+                .InvokeAsync();
+                
+### Base64
+      var falseNueve = new FalseNueve()
+      {
+          Al = "a",
+          Ol = "b"
+      };
+      string crypting1 = falseNueve.ToBase64();
+      var falseNueve2 = crypting1.FromBase64<FalseNueve>();
+      
+### Base45
+      var falseNueve = new FalseNueve()
+      {
+          Al = "a",
+          Ol = "b"
+      };
+      string crypting1 = falseNueve.ToBase45();
+      var falseNueve2 = crypting1.FromBase45<FalseNueve>();
