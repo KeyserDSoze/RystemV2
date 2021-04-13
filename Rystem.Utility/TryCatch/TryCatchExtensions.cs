@@ -9,7 +9,7 @@ namespace Rystem
     public static class Try
     {
         public static Catcher Execute(Func<Task> action) => new(action);
-        public static Catcher<T> Catch<T>(Func<Task<T>> action) => new(action);
+        public static Catcher<T> Execute<T>(Func<Task<T>> action) => new(action);
     }
     public class Catcher
     {
