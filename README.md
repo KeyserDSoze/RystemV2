@@ -20,4 +20,42 @@
       };
       var json = falseNueve.ToJson();
       var falseNueve2 = json.FromJson<FalseNueve>();
+ 
+### Bson
+      var falseNueve = new FalseNueve()
+      {
+          Al = "a",
+          Ol = "b"
+      };
+      var bson = falseNueve.ToBson();
+      var falseNueve2 = bson.FromBson<FalseNueve>();
       
+### Csv
+      List<CsvModel> csvs = new List<CsvModel>();
+      for (int i = 0; i < 100; i++)
+          csvs.Add(new CsvModel()
+          {
+              Name = "Ale",
+              Babel = "dsjakld,dsjakdljsa\",\"dsakdljsa\",dsadksa;dl,\",\",",
+              Hotel = i,
+              Value = 33D,
+              Nothing = 34
+          });
+      string firstCsv = csvs.ToCsv();
+      List<CsvModel> csvsComparer = firstCsv.FromCsv<CsvModel>().ToList();
+
+### Aes
+      #### Before install the Aes Password, SaltKey, IVKey
+       static Crypting()
+        {
+            CryptingExtensions.Aes.Configure("4a4a4a4a", "4a4a4a4a", "4a4a4a4a4a4a4a4a");
+        }
+      #### After that
+      var falseNueve = new FalseNueve()
+      {
+          Al = "a",
+          Ol = "b"
+      };
+      string crypting1 = falseNueve.Encrypt();
+      var falseNueve2 = crypting1.Decrypt<FalseNueve>();
+      string crypting2 = "Message to Encrypt".Encrypt();
