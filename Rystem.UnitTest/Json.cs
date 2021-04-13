@@ -17,8 +17,8 @@ namespace Rystem.UnitTest
                 Al = "a",
                 Ol = "b"
             };
-            var bson = falseNueve.ToJson();
-            var falseNueve2 = bson.FromJson<FalseNueve>();
+            var json = falseNueve.ToJson();
+            var falseNueve2 = json.FromJson<FalseNueve>();
             Assert.Equal("a", falseNueve2.Al);
             Assert.Equal("b", falseNueve2.Ol);
         }

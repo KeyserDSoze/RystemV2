@@ -13,34 +13,34 @@ namespace Rystem.UnitTest
         public async Task TryToCatch()
         {
             string a = string.Empty;
-            await Try.Catch(async () =>
+            await Try.Execute(async () =>
             {
                 await Task.Delay(10);
                 throw new ArgumentException("aaaaa");
             })
-                .WithException<ArgumentException>(async x =>
+                .Catch<ArgumentException>(async x =>
                 {
                     await Task.Delay(10);
                     a = x.ToString();
                 })
-                .ExecuteAsync();
+                .InvokeAsync();
             Assert.NotEqual(string.Empty, a);
         }
         [Fact]
         public async Task TryToNotCatch()
         {
             string a = string.Empty;
-            await Try.Catch(async () =>
+            await Try.Execute(async () =>
             {
                 await Task.Delay(10);
                 throw new Exception("aaaaa");
             })
-                .WithException<ArgumentException>(async x =>
+                .Catch<ArgumentException>(async x =>
                 {
                     await Task.Delay(10);
                     a = x.ToString();
                 })
-                .ExecuteAsync();
+                .InvokeAsync();
             Assert.Equal(string.Empty, a);
         }
     }

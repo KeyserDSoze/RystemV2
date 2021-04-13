@@ -8,21 +8,21 @@ namespace Rystem
 {
     public static class Try
     {
-        public static Catch Catch(Func<Task> action) => new(action);
-        public static Catch<T> Catch<T>(Func<Task<T>> action) => new(action);
+        public static Catcher Execute(Func<Task> action) => new(action);
+        public static Catcher<T> Catch<T>(Func<Task<T>> action) => new(action);
     }
-    public class Catch
+    public class Catcher
     {
         private readonly Func<Task> Action;
         private readonly Dictionary<Type, Func<Exception, Task>> Catches = new();
-        internal Catch(Func<Task> action) => Action = action;
-        public Catch WithException<TException>(Func<Exception, Task> action)
+        internal Catcher(Func<Task> action) => Action = action;
+        public Catcher Catch<TException>(Func<Exception, Task> action)
             where TException : Exception
         {
             Catches.Add(typeof(TException), action);
             return this;
         }
-        public async Task<CatchResponse> ExecuteAsync()
+        public async Task<CatchResponse> InvokeAsync()
         {
             try
             {
@@ -38,18 +38,18 @@ namespace Rystem
             }
         }
     }
-    public class Catch<T>
+    public class Catcher<T>
     {
         private readonly Func<Task<T>> Action;
-        internal Catch(Func<Task<T>> action) => Action = action;
+        internal Catcher(Func<Task<T>> action) => Action = action;
         private readonly Dictionary<Type, Func<Exception, Task>> Catches = new();
-        public Catch<T> WithException<TException>(Func<Exception, Task> action)
+        public Catcher<T> Catch<TException>(Func<Exception, Task> action)
             where TException : Exception
         {
             Catches.Add(typeof(TException), action);
             return this;
         }
-        public async Task<CatchResponse<T>> ExecuteAsync()
+        public async Task<CatchResponse<T>> InvokeAsync()
         {
             try
             {

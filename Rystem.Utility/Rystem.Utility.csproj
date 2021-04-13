@@ -19,6 +19,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>rystem.png</PackageIcon>
     <RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>
+    <PackageId>Rystem</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
