@@ -111,3 +111,39 @@
       };
       string crypting1 = falseNueve.ToBase45();
       var falseNueve2 = crypting1.FromBase45<FalseNueve>();
+      
+### Task
+      Task task = new Task();
+      
+      //Instead to use
+      task.ConfigureAwait(false);
+      //Use
+      task.NoContext();
+      
+      //Instead to use
+      task.NoContext().GetAwaiter().GetResult()
+      //Use
+      task.ToResult();
+      
+### Reflection/Properties
+     //Simplify fetching properties
+     var falseNueve = new FalseNueve()
+      {
+          Al = "a",
+          Ol = "b"
+      };
+      var properties1 = falseNueve.GetType().FetchProperties();
+      //after the first, the other times you call FetchProperties from an object you get properties very fast.
+      var properties2 = falseNueve.GetType().FetchProperties();
+     
+### Random
+      //Get true random number
+      int maxValue = 60;
+      int value = Alea.GetNumber(maxValue);
+      //value goes from 0 to 60
+      
+### TimedKey
+      //Simplify string.Format("{0:d19}{1}", DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks, Guid.NewGuid().ToString("N"))
+      Alea.GetTimedKey();
+      
+      
