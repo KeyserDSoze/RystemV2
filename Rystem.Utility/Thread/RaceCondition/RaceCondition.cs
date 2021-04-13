@@ -9,9 +9,12 @@ namespace Rystem.Utility.Thread
     internal sealed class RaceCondition
     {
         private readonly object Semaphore = new();
+        private DateTime LastExecutionPlusExpirationTime;
+        internal bool IsExpired => DateTime.UtcNow > LastExecutionPlusExpirationTime;
         private bool IsLocked { get; set; }
         public async Task<RaceConditionResponse> ExecuteAsync(Func<Task> action)
         {
+            LastExecutionPlusExpirationTime = DateTime.UtcNow.AddDays(1);
             var isTheFirst = false;
             var isWaiting = false;
             await WaitAsync().NoContext();
@@ -41,7 +44,7 @@ namespace Rystem.Utility.Thread
                 while (IsLocked)
                 {
                     isWaiting = true;
-                    await Task.Delay(120).NoContext();
+                    await Task.Delay(4).NoContext();
                 }
             }
         }

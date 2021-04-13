@@ -13,9 +13,17 @@ namespace Rystem.UnitTest
         public async Task RunInBackground()
         {
             Action action = async () => await CountAsync(2);
-            action.RunInBackground(3, 300);
+            action.RunInBackground("3", 300);
             await Task.Delay(1200);
-            action.StopRunningInBackground(3);
+            action.StopRunningInBackground("3");
+            Assert.Equal(8, Counter);
+        }
+        [Fact]
+        public async Task RunInBackground2()
+        {
+            Ghost.Run(async () => await CountAsync(2), runningTime: 300);
+            await Task.Delay(1200);
+            Ghost.Stop();
             Assert.Equal(8, Counter);
         }
         private int Counter;

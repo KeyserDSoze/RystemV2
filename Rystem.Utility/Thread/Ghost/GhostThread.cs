@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Rystem.Utility
 {
-    internal class GhostThread
+    internal sealed class GhostThread
     {
-        private static readonly Dictionary<int, System.Timers.Timer> Actions = new();
+        private static readonly Dictionary<string, System.Timers.Timer> Actions = new();
         private static readonly object Semaphore = new();
-        public static void AddTask(Action action, int id, int milliseconds)
+        public static void AddTask(Action action, string id, int milliseconds)
         {
             lock (Semaphore)
             {
@@ -29,7 +29,7 @@ namespace Rystem.Utility
                 Actions.Add(id, performanceTimer);
             }
         }
-        public static void RemoveTask(int id)
+        public static void RemoveTask(string id)
         {
             lock (Semaphore)
             {

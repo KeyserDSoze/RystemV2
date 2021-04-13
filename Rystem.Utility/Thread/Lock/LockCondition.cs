@@ -9,10 +9,13 @@ namespace Rystem.Utility.Thread
     internal sealed class LockCondition
     {
         private readonly object Semaphore = new();
+        private DateTime LastExecutionPlusExpirationTime;
+        internal bool IsExpired => DateTime.UtcNow > LastExecutionPlusExpirationTime;
         private bool IsLocked { get; set; }
         public async Task<LockConditionResponse> ExecuteAsync(Func<Task> action)
         {
             DateTime start = DateTime.UtcNow;
+            LastExecutionPlusExpirationTime = start.AddDays(1);
             while (!Lock())
                 await Task.Delay(2).NoContext();
             Exception exception = default;
