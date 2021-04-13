@@ -13,6 +13,7 @@ Nuget version: https://www.nuget.org/packages/Rystem/
 - added a fast ToBase45() and ToBase64() method and their viceversa FromBase45() and FromBase64()
 
 ## Methods
+To understand better how Rystem works please see Rystem.UnitTest project
 
 ### Json
       var falseNueve = new FalseNueve()
@@ -148,4 +149,45 @@ Nuget version: https://www.nuget.org/packages/Rystem/
       //Simplify string.Format("{0:d19}{1}", DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks, Guid.NewGuid().ToString("N"))
       Alea.GetTimedKey();
       
+### Concurrency -> Race Condition
+      //Use on a task
+      Func<Task> action = async () => await CountAsync(v);
+      //and Run under Race Condition
+      List<Task> tasks = new List<Task>();
+      for (int i = 0; i < 20; i++)
+      {
+          tasks.Add(action.RunUnderRaceConditionAsync(key));
+      }
+      await Task.WhenAll(tasks);
+      //only the first method really runs.
       
+      //you may use also the RaceCondition static class
+      await RaceCondition.RunAsync(action, key);
+      
+### Concurrency -> Lock
+      //Use on a task
+      Func<Task> action = async () => await CountAsync(v);
+      //and Run under Lock
+      List<Task> tasks = new List<Task>();
+      for (int i = 0; i < 20; i++)
+      {
+          tasks.Add(Execute());
+      }
+      await Task.WhenAll(tasks);
+      async Task Execute()
+      {
+          var x = await action.LockAsync(key);
+          if (x.InException)
+              Error++;
+      };
+      //all method runs in a queue based on the key.
+      
+      //you may also use
+      await Lock.RunAsync(action, key);
+      
+### Thread -> Run in background a task continuously
+      //In this example we are running as Task id 3 a method CountAsync(2) continuously every 300 milliseconds.
+      Action action = async () => await CountAsync(2);
+      action.RunInBackground(3, 300);
+      await Task.Delay(1200);
+      action.StopRunningInBackground(3);
