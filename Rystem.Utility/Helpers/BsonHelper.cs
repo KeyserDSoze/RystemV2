@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace System
+namespace Rystem.Text
 {
     public static class BsonExtensions
     {

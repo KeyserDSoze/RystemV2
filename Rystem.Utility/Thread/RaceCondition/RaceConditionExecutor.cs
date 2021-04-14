@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rystem.Utility.Thread
+namespace Rystem.Concurrency
 {
-    internal sealed class RaceCondition
+    internal sealed class RaceConditionExecutor
     {
         private readonly object Semaphore = new();
         private DateTime LastExecutionPlusExpirationTime;

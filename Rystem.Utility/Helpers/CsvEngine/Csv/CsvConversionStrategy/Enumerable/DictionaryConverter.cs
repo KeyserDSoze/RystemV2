@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Rystem.Conversion
+namespace Rystem.Text
 {
     internal class DictionaryConverter : Converter, ICsvInterpreter
     {

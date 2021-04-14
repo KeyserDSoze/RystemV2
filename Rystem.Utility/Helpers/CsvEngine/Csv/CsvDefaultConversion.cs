@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Rystem
+namespace Rystem.Text
 {
     internal class CsvDefaultConversion<TEntity>
         where TEntity : new()

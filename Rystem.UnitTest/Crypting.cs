@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Rystem.Security.Cryptography;
+using Rystem.Text;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +13,7 @@ namespace Rystem.UnitTest
     {
         static Crypting()
         {
-            CryptingExtensions.Aes.Configure("4a4a4a4a", "4a4a4a4a", "4a4a4a4a4a4a4a4a");
+            Crypto.Aes.Configure("4a4a4a4a", "4a4a4a4a", "4a4a4a4a4a4a4a4a");
         }
         [Fact]
         public void Aes()

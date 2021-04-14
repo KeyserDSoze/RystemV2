@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Rystem.Conversion
+namespace Rystem.Text
 {
     internal abstract class Converter
     {

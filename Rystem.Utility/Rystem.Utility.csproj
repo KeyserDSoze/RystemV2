@@ -16,13 +16,14 @@
 - added a fast crypting with Aes and fast hash with Sha256
 - added a fast ToBase45() and ToBase64() method and their viceversa FromBase45() and FromBase64()
 - added a fast Lock and RaceCondition dealing for your task.
-- added a fast method to run a task in background continuously.</Description>
+- added a fast method to run a task in background continuously
+- added a fast method to schedule a batch operation in background with FIFO or LIFO queue.</Description>
     <Copyright>2021</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>rystem.png</PackageIcon>
     <RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>
     <PackageId>Rystem</PackageId>
-    <Version>1.0.3</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

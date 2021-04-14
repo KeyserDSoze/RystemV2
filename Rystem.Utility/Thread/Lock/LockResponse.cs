@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rystem.Utility.Thread
+namespace Rystem.Concurrency
 {
-    public sealed class LockConditionResponse
+    public sealed class LockResponse
     {
         public TimeSpan ExecutionTime { get; }
         public AggregateException Exceptions { get; }
         public bool InException => this.Exceptions != null;
-        public LockConditionResponse(TimeSpan executionTime, IList<Exception> exceptions)
+        public LockResponse(TimeSpan executionTime, IList<Exception> exceptions)
         {
             this.ExecutionTime = executionTime;
             if (exceptions != null && exceptions.Count > 0)

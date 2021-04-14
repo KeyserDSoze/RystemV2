@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
-namespace System.Text
+namespace Rystem.Text
 {
     public static class Base45Extensions
     {

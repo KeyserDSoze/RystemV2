@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Rystem.Conversion
+namespace Rystem.Text
 {
     internal class StartConversion : Converter, ICsvInterpreter
     {

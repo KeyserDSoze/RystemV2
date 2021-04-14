@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Rystem.BackgroundWork;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rystem.Utility.Thread
+namespace Rystem.Concurrency
 {
-    internal sealed class RaceConditionInstances
+    internal sealed class Races
     {
-        private readonly Dictionary<string, RaceCondition> RaceConditions = new();
-        private RaceConditionInstances() { }
-        static RaceConditionInstances()
+        private readonly Dictionary<string, RaceConditionExecutor> RaceConditions = new();
+        private Races()
         {
             Action loop = () =>
             {
@@ -24,16 +24,16 @@ namespace Rystem.Utility.Thread
                         Instance.RaceConditions.Remove(keyToRemove);
                 }
             };
-            loop.RunInBackground("Rystem.Background.RaceCondition", 1000 * 60 * 60);
+            loop.RunInBackground("Rystem.Background.Races", 1000 * 60 * 60);
         }
-        public static RaceConditionInstances Instance { get; } = new();
+        public static Races Instance { get; } = new();
         private static readonly object Semaphore = new();
         public async Task<RaceConditionResponse> RunAsync(Func<Task> action, string id)
         {
             if (!RaceConditions.ContainsKey(id))
                 lock (Semaphore)
                     if (!RaceConditions.ContainsKey(id))
-                        RaceConditions.Add(id, new RaceCondition());
+                        RaceConditions.Add(id, new RaceConditionExecutor());
             return await RaceConditions[id].ExecuteAsync(action).NoContext();
         }
     }
