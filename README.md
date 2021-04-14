@@ -15,7 +15,7 @@ Nuget version: https://www.nuget.org/packages/Rystem/
 ## Methods
 To understand better how Rystem works please see Rystem.UnitTest project
 
-### Json
+### Json (Rystem.Text)
       var falseNueve = new FalseNueve()
       {
           Al = "a",
@@ -24,7 +24,7 @@ To understand better how Rystem works please see Rystem.UnitTest project
       var json = falseNueve.ToJson();
       var falseNueve2 = json.FromJson<FalseNueve>();
  
-### Bson
+### Bson (Rystem.Text)
       var falseNueve = new FalseNueve()
       {
           Al = "a",
@@ -33,7 +33,7 @@ To understand better how Rystem works please see Rystem.UnitTest project
       var bson = falseNueve.ToBson();
       var falseNueve2 = bson.FromBson<FalseNueve>();
       
-### Csv
+### Csv (Rystem.Text)
       List<CsvModel> csvs = new List<CsvModel>();
       for (int i = 0; i < 100; i++)
           csvs.Add(new CsvModel()
@@ -47,7 +47,7 @@ To understand better how Rystem works please see Rystem.UnitTest project
       string firstCsv = csvs.ToCsv();
       List<CsvModel> csvsComparer = firstCsv.FromCsv<CsvModel>().ToList();
 
-### Aes
+### Aes (Rystem.Security.Cryptography)
       //Before install the Aes Password, SaltKey, IVKey in a static constructor or during startup.
        static Crypting()
         {
@@ -64,7 +64,7 @@ To understand better how Rystem works please see Rystem.UnitTest project
       string crypting2 = "Message to Encrypt".Encrypt();
       string decrypting2 = crypting2.Decrypt();
       
- ### Sha256
+ ### Sha256 (Rystem.Security.Cryptography)
       var falseNueve = new FalseNueve()
       {
           Al = "a",
@@ -73,7 +73,7 @@ To understand better how Rystem works please see Rystem.UnitTest project
       string crypting1 = falseNueve.ToHash();
       string crypting2 = "Message to Hash".ToHash();
       
- ### Webrequest as fluid as possible
+ ### Webrequest as fluid as possible (Rystem.Net)
       //simple request
       string response = await new Uri("https://www.google.com")
                 .CreateHttpRequest()
@@ -85,7 +85,7 @@ To understand better how Rystem works please see Rystem.UnitTest project
                 .Build()
                 .InvokeAsync<Rootobject>();
                 
- ### Try/Catch
+ ### Try/Catch (Rystem)
       await Try.Execute(async () =>
             {
                 await Task.Delay(10);
@@ -97,7 +97,7 @@ To understand better how Rystem works please see Rystem.UnitTest project
                 })
                 .InvokeAsync();
                 
-### Base64
+### Base64 (Rystem.Text)
       var falseNueve = new FalseNueve()
       {
           Al = "a",
@@ -106,7 +106,7 @@ To understand better how Rystem works please see Rystem.UnitTest project
       string crypting1 = falseNueve.ToBase64();
       var falseNueve2 = crypting1.FromBase64<FalseNueve>();
       
-### Base45
+### Base45 (Rystem.Text)
       var falseNueve = new FalseNueve()
       {
           Al = "a",
@@ -115,7 +115,7 @@ To understand better how Rystem works please see Rystem.UnitTest project
       string crypting1 = falseNueve.ToBase45();
       var falseNueve2 = crypting1.FromBase45<FalseNueve>();
       
-### Task
+### Task (System.Threading.Tasks)
       Task task = new Task();
       
       //Instead to use
@@ -128,7 +128,7 @@ To understand better how Rystem works please see Rystem.UnitTest project
       //Use
       task.ToResult();
       
-### Reflection/Properties
+### Reflection/Properties (Rystem.Reflection)
      //Simplify fetching properties
      var falseNueve = new FalseNueve()
       {
@@ -139,17 +139,17 @@ To understand better how Rystem works please see Rystem.UnitTest project
       //after the first, the other times you call FetchProperties from an object you get properties very fast.
       var properties2 = falseNueve.GetType().FetchProperties();
      
-### Random
+### Random (Rystem)
       //Get true random number
       int maxValue = 60;
       int value = Alea.GetNumber(maxValue);
       //value goes from 0 to 60
       
-### TimedKey
+### TimedKey (Rystem)
       //Simplify string.Format("{0:d19}{1}", DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks, Guid.NewGuid().ToString("N"))
       Alea.GetTimedKey();
       
-### Concurrency -> Race Condition
+### Concurrency -> Race Condition (Rystem.Concurrency)
       //Use on a task
       Func<Task> action = async () => await CountAsync(v);
       //and Run under Race Condition
@@ -164,7 +164,7 @@ To understand better how Rystem works please see Rystem.UnitTest project
       //you may use also the RaceCondition static class
       await RaceCondition.RunAsync(action, key);
       
-### Concurrency -> Lock
+### Concurrency -> Lock (Rystem.Concurrency)
       //Use on a task
       Func<Task> action = async () => await CountAsync(v);
       //and Run under Lock
@@ -185,9 +185,35 @@ To understand better how Rystem works please see Rystem.UnitTest project
       //you may also use
       await Lock.RunAsync(action, key);
       
-### Thread -> Run in background a task continuously
+### Thread -> Ghost (Rystem.BackgroundWork)
+      //Run in background a task continuously
       //In this example we are running as Task id 3 a method CountAsync(2) continuously every 300 milliseconds.
       Action action = async () => await CountAsync(2);
-      action.RunInBackground(3, 300);
+      action.RunInBackground("3", 300);
       await Task.Delay(1200);
-      action.StopRunningInBackground(3);
+      action.StopRunningInBackground("3");
+      
+      //you may also use
+      Ghost.Run(async () => await CountAsync(2), "3", 300);
+      await Task.Delay(1200);
+      Ghost.Stop("3");
+      
+### Thread -> Sequence (Rystem.BackgroundWork)
+      //Manage a queue with a T object to allow a batch operation after a maximum buffer elements or a maximum retention of time. 
+      //Before install the Aes Password, SaltKey, IVKey in a static constructor or during startup.
+       static EnqueueSample()
+       {
+            Sequence.Create<IFalseNueve>(500, TimeSpan.FromSeconds(2), Evaluate, QueueName, QueueType.FirstInFirstOut);
+       }
+       
+       //Use with
+       var falseNueve = new FalseNueve()
+       {
+            Al = "a",
+            Ol = "b"
+       };
+       falseNueve.Enqueue(QueueName);
+       //Force the batch (if you need to force)
+       Sequence.Flush(QueueName, true);
+       //Destroy the queue
+       Sequence.Destroy(QueueName);
