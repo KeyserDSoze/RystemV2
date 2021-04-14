@@ -1,4 +1,4 @@
-﻿namespace Rystem.Conversion
+﻿namespace Rystem.Text
 {
     internal static class ConverterConstant
     {

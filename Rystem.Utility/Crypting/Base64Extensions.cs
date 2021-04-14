@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace System.Text
+namespace Rystem.Text
 {
     public static class Base64Extensions
     {

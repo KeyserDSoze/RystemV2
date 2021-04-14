@@ -1,6 +1,7 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 
-namespace System
+namespace Rystem
 {
     public static class Alea
     {

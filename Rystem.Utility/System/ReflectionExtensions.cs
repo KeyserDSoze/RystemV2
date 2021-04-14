@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace System
+namespace Rystem.Reflection
 {
     public static class ReflectionExtensions
     {

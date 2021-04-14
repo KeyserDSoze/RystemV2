@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rystem.Text;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,9 +7,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace System
+namespace Rystem.Security.Cryptography
 {
-    public static class CryptingExtensions
+    public static class Crypto
     {
         public static class Aes
         {
@@ -42,7 +43,7 @@ namespace System
         public static string Encrypt(this string message)
         {
             if (!Aes.IsConfigured)
-                throw new ArgumentException("Please use CryptingExtensions.Aes.Configure() method to configure Password (length 8), SaltKey (length 8) and VIKey (length 16).");
+                throw new ArgumentException("Please use Crypto.Aes.Configure() method to configure Password (length 8), SaltKey (length 8) and VIKey (length 16).");
             byte[] plainTextBytes = Encoding.UTF8.GetBytes(message);
             byte[] cipherTextBytes;
             using (var memoryStream = new MemoryStream())

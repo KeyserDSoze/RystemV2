@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Rystem.Conversion
+namespace Rystem.Text
 {
     internal class ArrayConverter : Converter, ICsvInterpreter
     {

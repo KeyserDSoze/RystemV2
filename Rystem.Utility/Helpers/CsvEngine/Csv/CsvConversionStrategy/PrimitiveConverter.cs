@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace Rystem.Conversion
+namespace Rystem.Text
 {
     internal class PrimitiveConverter : Converter, ICsvInterpreter
     {

@@ -1,11 +1,11 @@
-﻿using Rystem.Conversion;
+﻿using Rystem.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Rystem.Conversion
+namespace Rystem.Text
 {
     internal class ObjectConverter : Converter, ICsvInterpreter
     {

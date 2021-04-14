@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Rystem.Conversion
+namespace Rystem.Text
 {
     internal class AbstractInterfaceConverter : Converter, ICsvInterpreter
     {

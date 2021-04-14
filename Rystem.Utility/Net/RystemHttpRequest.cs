@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Rystem.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +10,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 
-namespace System.Net
+namespace Rystem.Net
 {
     public class RystemHttpRequestBuilder
     {
