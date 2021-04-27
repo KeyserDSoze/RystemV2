@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rystem.Azure.IntegrationWithAzure
+namespace Rystem.Azure.IntegrationWithAzure.Storage
 {
     internal abstract class BaseStorageClient
     {

@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rystem.Azure.IntegrationWithAzure
+namespace Rystem.Azure.IntegrationWithAzure.Storage
 {
     internal class BlobStorageIntegration : BaseStorageClient
     {
@@ -54,17 +54,17 @@ namespace Rystem.Azure.IntegrationWithAzure
         }
         public async Task<bool> DeleteAsync(string name)
         {
-            var client = Context ?? await GetContextAsync().NoContext();
+            var client = Context ?? await GetContextAsync();
             return await client.GetBlobClient(name).DeleteIfExistsAsync().NoContext();
         }
         public async Task<bool> ExistsAsync(string name)
         {
-            var client = Context ?? await GetContextAsync().NoContext();
+            var client = Context ?? await GetContextAsync();
             return await client.GetBlobClient(name).ExistsAsync().NoContext();
         }
         public async Task<List<string>> SearchAsync(string prefix = null, int? takeCount = null, CancellationToken token = default)
         {
-            var client = Context ?? await GetContextAsync().NoContext();
+            var client = Context ?? await GetContextAsync();
             List<string> items = new List<string>();
             int count = 0;
             await foreach (var t in client.GetBlobsAsync(BlobTraits.None, BlobStates.None, prefix, token))
@@ -78,7 +78,7 @@ namespace Rystem.Azure.IntegrationWithAzure
         }
         public async Task<List<BlobPropertyWrapper>> FetchPropertiesAsync(string prefix = null, int? takeCount = null, CancellationToken token = default)
         {
-            var client = Context ?? await GetContextAsync().NoContext();
+            var client = Context ?? await GetContextAsync();
             List<BlobPropertyWrapper> items = new();
             int count = 0;
             await foreach (var blob in client.GetBlobsAsync(BlobTraits.All, BlobStates.All, prefix, token))
@@ -92,7 +92,7 @@ namespace Rystem.Azure.IntegrationWithAzure
         }
         public async Task<bool> SetBlobPropertiesAsync(string name, BlobHttpHeaders headers = default, Dictionary<string, string> metadata = default, Dictionary<string, string> tags = default, BlobRequestConditions headersConditions = default, BlobRequestConditions metadataConditions = default, BlobRequestConditions tagConditions = default, CancellationToken token = default)
         {
-            var client = Context ?? await GetContextAsync().NoContext();
+            var client = Context ?? await GetContextAsync();
             var blobClient = client.GetBlobClient(name);
             if (headers != default)
                 await blobClient.SetHttpHeadersAsync(headers, headersConditions, token).NoContext();
@@ -104,7 +104,7 @@ namespace Rystem.Azure.IntegrationWithAzure
         }
         public async Task<BlobWrapper> ReadAsync(string name, bool fetchProperties = false)
         {
-            var client = Context ?? await GetContextAsync().NoContext();
+            var client = Context ?? await GetContextAsync();
             var blobClient = client.GetBlobClient(name);
             var memoryStream = new MemoryStream();
             await blobClient.DownloadToAsync(memoryStream).NoContext();
@@ -126,7 +126,7 @@ namespace Rystem.Azure.IntegrationWithAzure
         }
         public async Task<List<BlobWrapper>> ListAsync(string prefix = null, int? takeCount = null, CancellationToken token = default)
         {
-            var client = Context ?? await GetContextAsync().NoContext();
+            var client = Context ?? await GetContextAsync();
             List<BlobWrapper> items = new();
             int count = 0;
             await foreach (var blob in client.GetBlobsAsync(BlobTraits.All, BlobStates.All, prefix, token))
@@ -140,7 +140,7 @@ namespace Rystem.Azure.IntegrationWithAzure
         }
         public async Task<bool> WriteBlockAsync(string name, Stream stream)
         {
-            var client = Context ?? await GetContextAsync().NoContext();
+            var client = Context ?? await GetContextAsync();
             BlockBlobClient cloudBlob = client.GetBlockBlobClient(name);
             stream.Position = 0;
             await cloudBlob.UploadAsync(stream).NoContext();
@@ -149,7 +149,7 @@ namespace Rystem.Azure.IntegrationWithAzure
         private const int MaximumAttemptForAppendWriting = 3;
         public async Task<bool> WriteAppendAsync(string name, Stream stream)
         {
-            var client = Context ?? await GetContextAsync().NoContext();
+            var client = Context ?? await GetContextAsync();
             int attempt = 0;
             AppendBlobClient appendBlob = client.GetAppendBlobClient(name);
             do
@@ -180,7 +180,7 @@ namespace Rystem.Azure.IntegrationWithAzure
         private const long PageSize = 512;
         public async Task<bool> WritePageAsync(string name, Stream stream, long offset)
         {
-            var client = Context ?? await GetContextAsync().NoContext();
+            var client = Context ?? await GetContextAsync();
             var pageBlob = client.GetPageBlobClient(name);
             if (!await pageBlob.ExistsAsync().NoContext())
                 await pageBlob.CreateAsync(PageSize);
@@ -208,7 +208,7 @@ namespace Rystem.Azure.IntegrationWithAzure
                 {
                     if (!BlobLockClients.ContainsKey(name))
                     {
-                        var client = Context ?? await GetContextAsync().NoContext();
+                        var client = Context ?? await GetContextAsync();
                         string officialName = $"_{name}.lock";
                         var preBlob = client.GetBlobClient(officialName);
                         if (!await preBlob.ExistsAsync().NoContext())
@@ -227,12 +227,12 @@ namespace Rystem.Azure.IntegrationWithAzure
             try
             {
                 string normalizedKey = key ?? string.Empty;
-                var blob = await this.GetBlobClientForLockAsync(normalizedKey).NoContext();
-                var lease = blob.Client.GetBlobLeaseClient(BlobLockClients[normalizedKey].LeaseId);
                 if (!this.TokenAcquireds.ContainsKey(normalizedKey))
                 {
+                    var blob = await this.GetBlobClientForLockAsync(normalizedKey).NoContext();
                     RaceConditionResponse response = await RaceCondition.RunAsync(async () =>
                     {
+                        var lease = blob.Client.GetBlobLeaseClient(BlobLockClients[normalizedKey].LeaseId);
                         Response<BlobLease> response = await lease.AcquireAsync(new TimeSpan(0, 1, 0)).NoContext();
                         this.TokenAcquireds.TryAdd(normalizedKey, lease);
                     }, BlobLockClients[normalizedKey].AcquireLockId).NoContext();
