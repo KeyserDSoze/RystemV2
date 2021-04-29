@@ -6,18 +6,21 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.IntegrationWithAzure.Storage
 {
-    internal abstract class BaseStorageClient
+    /// <summary>
+    /// Leave AccountKey empty if you want to connect through the managed identity. Not valid for TableStorage.
+    /// </summary>
+    public class StorageOptions
     {
-        private protected readonly string ConnectionString;
-        public BaseStorageClient(string accountName, string accountKey)
+        public string AccountName { get; init; }
+        public string AccountKey { get; init; }
+        public string ConnectionString => string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net", AccountName, AccountKey);
+    }
+    public abstract class BaseStorageClient
+    {
+        private protected StorageOptions Options;
+        public BaseStorageClient(StorageOptions options)
         {
-            ConnectionString = string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net", accountName, accountKey);
-        }
-
-        private protected readonly string AccountName;
-        public BaseStorageClient(string accountName)
-        {
-            AccountName = accountName;
+            Options = options;
         }
     }
 }

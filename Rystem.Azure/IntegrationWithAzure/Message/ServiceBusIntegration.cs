@@ -9,6 +9,18 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.IntegrationWithAzure.Message
 {
+    /// <summary>
+    /// Leave ConnectionString empty if you want to connect through the managed identity
+    /// </summary>
+    public class ServiceBusOptions
+    {
+        /// <summary>
+        /// for instance something.servicebus.windows.net
+        /// </summary>
+        public string FullyQualifiedName { get; init; }
+        public string ConnectionString { get; init; }
+        public ServiceBusProcessorOptions Options { get; init; }
+    }
 #warning AR - Missing dead lettering and defer
     /// <summary>
     /// https://github.com/Azure/azure-sdk-for-net/blob/Azure.Messaging.ServiceBus_7.1.2/sdk/servicebus/Azure.Messaging.ServiceBus/README.md
@@ -17,23 +29,21 @@ namespace Rystem.Azure.IntegrationWithAzure.Message
     {
         private readonly ServiceBusSender Client;
         private readonly ServiceBusProcessor ClientReader;
-        /// <summary>
-        /// for instance something.servicebus.windows.net
-        /// </summary>
-        /// <param name="fullyQualifiedName"></param>
-        /// <param name="queueName"></param>
-        public ServiceBusIntegration(string fullyQualifiedName, string queueName, ServiceBusProcessorOptions options, bool hasDefaultCredential)
+        
+        public ServiceBusIntegration(string queueName, ServiceBusOptions options)
         {
-            ServiceBusClient client = new(fullyQualifiedName, new DefaultAzureCredential());
-            this.Client = client.CreateSender(queueName);
-            this.ClientReader = client.CreateProcessor(queueName, options);
-        }
-
-        public ServiceBusIntegration(string connectionString, string queueName, ServiceBusProcessorOptions options)
-        {
-            ServiceBusClient client = new(connectionString);
-            this.Client = client.CreateSender(queueName);
-            this.ClientReader = client.CreateProcessor(queueName, options);
+            if (!string.IsNullOrWhiteSpace(options.ConnectionString))
+            {
+                ServiceBusClient client = new(options.ConnectionString);
+                this.Client = client.CreateSender(queueName);
+                this.ClientReader = client.CreateProcessor(queueName, options.Options);
+            }
+            else
+            {
+                ServiceBusClient client = new(options.FullyQualifiedName, new DefaultAzureCredential());
+                this.Client = client.CreateSender(queueName);
+                this.ClientReader = client.CreateProcessor(queueName, options.Options);
+            }
         }
 
         public async Task StartReadAsync(Func<ProcessMessageEventArgs, Task> onMessage, Func<ProcessErrorEventArgs, Task> onError, CancellationToken cancellationToken = default)

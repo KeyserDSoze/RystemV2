@@ -17,6 +17,6 @@ namespace Rystem
             TypeNameHandling = TypeNameHandling.Auto,
         };
         public static T DeepCopy<T>(this T original)
-            => original.ToJson(Options).FromJson<T>(Options);
+            => JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(original, Options), Options);
     }
 }

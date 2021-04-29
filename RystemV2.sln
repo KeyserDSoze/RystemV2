@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rystem.Utility", "Rystem.Ut
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rystem.UnitTest", "Rystem.UnitTest\Rystem.UnitTest.csproj", "{CE156CA5-DD83-4F0C-A1EE-403680EDCA0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rystem.Azure", "Rystem.Azure\Rystem.Azure.csproj", "{1BC3EC21-003A-4A9F-8B4B-3B36C6344998}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rystem.Azure", "Rystem.Azure\Rystem.Azure.csproj", "{1BC3EC21-003A-4A9F-8B4B-3B36C6344998}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rystem.Business", "Rystem.Business\Rystem.Business.csproj", "{CBF2E482-DB54-4E77-B542-9608CB2220EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{1BC3EC21-003A-4A9F-8B4B-3B36C6344998}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1BC3EC21-003A-4A9F-8B4B-3B36C6344998}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BC3EC21-003A-4A9F-8B4B-3B36C6344998}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBF2E482-DB54-4E77-B542-9608CB2220EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBF2E482-DB54-4E77-B542-9608CB2220EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBF2E482-DB54-4E77-B542-9608CB2220EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBF2E482-DB54-4E77-B542-9608CB2220EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

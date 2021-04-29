@@ -15,16 +15,16 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.IntegrationWithAzure.Storage
 {
-    internal class BlobStorageIntegration : BaseStorageClient
+    public class BlobStorageIntegration : BaseStorageClient
     {
         private BlobContainerClient Context;
-        private readonly string ContainerName;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
         private readonly string LockRaceId = Guid.NewGuid().ToString("N");
-        public BlobStorageIntegration(string containerName, string accountName) : base(accountName)
-            => ContainerName = containerName;
-        public BlobStorageIntegration(string containerName, string accountName, string accountKey) : base(accountName, accountKey)
-            => ContainerName = containerName;
+        private readonly string ContainerName;
+        public BlobStorageIntegration(string containerName, StorageOptions options) : base(options) 
+        {
+            this.ContainerName = containerName;
+        }
         private async Task<BlobContainerClient> GetContextAsync()
         {
             if (Context == null)
@@ -33,15 +33,15 @@ namespace Rystem.Azure.IntegrationWithAzure.Storage
                     if (Context == null)
                     {
                         BlobContainerClient blobClient = default;
-                        if (!string.IsNullOrWhiteSpace(ConnectionString))
+                        if (!string.IsNullOrWhiteSpace(Options.ConnectionString))
                         {
-                            var client = new BlobServiceClient(ConnectionString);
+                            var client = new BlobServiceClient(Options.ConnectionString);
                             blobClient = client.GetBlobContainerClient(ContainerName);
                         }
                         else
                         {
                             blobClient = new BlobContainerClient(new Uri(string.Format("https://{0}.blob.core.windows.net/{1}",
-                                                AccountName,
+                                                Options.AccountName,
                                                 ContainerName)),
                                                 new DefaultAzureCredential());
                         }

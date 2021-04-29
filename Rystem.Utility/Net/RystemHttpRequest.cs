@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Rystem.Text;
+﻿using Rystem.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -53,7 +52,7 @@ namespace Rystem.Net
             => AddToHeaders("User-Agent", useragent);
         public RystemHttpRequestBuilder WithContentType(string contentType)
             => AddToHeaders("Content-Type", contentType);
-        public RystemHttpRequestBuilder AddBody<T>(T entity, JsonSerializerSettings serializerOptions = null, EncodingType encodingType = EncodingType.UTF8)
+        public RystemHttpRequestBuilder AddBody<T>(T entity, JsonSerializerOptions serializerOptions = null, EncodingType encodingType = EncodingType.UTF8)
             => ExecuteAction(() => { Body = entity.ToJson(serializerOptions).ToByteArray(encodingType); BodyAsStream = null; });
         public RystemHttpRequestBuilder AddBody(string entity, EncodingType encodingType = EncodingType.UTF8)
             => ExecuteAction(() => { Body = entity.ToByteArray(encodingType); BodyAsStream = null; });
@@ -87,7 +86,7 @@ namespace Rystem.Net
             using StreamReader reader = new(httpWebResponse.GetResponseStream());
             return await reader.ReadToEndAsync().NoContext();
         }
-        public async Task<T> InvokeAsync<T>(JsonSerializerSettings options = null)
+        public async Task<T> InvokeAsync<T>(JsonSerializerOptions options = null)
             => (await InvokeAsync().NoContext()).FromJson<T>(options);
     }
 }

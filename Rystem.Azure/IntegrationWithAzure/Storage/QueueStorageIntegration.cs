@@ -12,12 +12,12 @@ namespace Rystem.Azure.IntegrationWithAzure.Storage
     internal class QueueStorageIntegration : BaseStorageClient
     {
         private QueueClient Context;
-        private readonly string QueueName;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
-        public QueueStorageIntegration(string queueName, string accountName) : base(accountName)
-            => QueueName = queueName;
-        public QueueStorageIntegration(string queueName, string accountName, string accountKey) : base(accountName, accountKey)
-            => QueueName = queueName;
+        private readonly string QueueName;
+        public QueueStorageIntegration(string queueName, StorageOptions options) : base(options)
+        {
+            this.QueueName = queueName;
+        }
         private async Task<QueueClient> GetContextAsync()
         {
             if (Context == null)
@@ -26,15 +26,15 @@ namespace Rystem.Azure.IntegrationWithAzure.Storage
                     if (Context == null)
                     {
                         QueueClient queueClient = default;
-                        if (!string.IsNullOrWhiteSpace(ConnectionString))
+                        if (!string.IsNullOrWhiteSpace(Options.ConnectionString))
                         {
-                            var client = new QueueServiceClient(ConnectionString);
+                            var client = new QueueServiceClient(Options.ConnectionString);
                             queueClient = client.GetQueueClient(QueueName);
                         }
                         else
                         {
                             queueClient = new QueueClient(new Uri(string.Format("https://{0}.queue.core.windows.net/{1}",
-                                                AccountName,
+                                                Options.AccountName,
                                                 QueueName)),
                                                 new DefaultAzureCredential());
                         }
