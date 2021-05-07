@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,6 +9,12 @@
     <ProjectReference Include="..\Rystem.Azure\Rystem.Azure.csproj" />
     <ProjectReference Include="..\Rystem.Business\Rystem.Business.csproj" />
     <ProjectReference Include="..\Rystem.Utility\Rystem.Utility.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
