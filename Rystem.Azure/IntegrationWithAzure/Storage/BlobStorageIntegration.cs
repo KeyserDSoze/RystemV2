@@ -4,6 +4,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using Rystem.Concurrency;
+using Rystem.IO;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,17 +16,15 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Storage
 {
-    public sealed record BlobStorageConfiguration (string ContainerName);
+    public sealed record BlobStorageConfiguration(string ContainerName);
     public sealed class BlobStorageIntegration : BaseStorageClient
     {
         private BlobContainerClient Context;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
         private readonly string LockRaceId = Guid.NewGuid().ToString("N");
-        private readonly BlobStorageConfiguration Configuration;
-        public BlobStorageIntegration(BlobStorageConfiguration configuration, StorageOptions options) : base(options) 
-        {
-            Configuration = configuration;
-        }
+        public BlobStorageConfiguration Configuration { get; }
+        public BlobStorageIntegration(BlobStorageConfiguration configuration, StorageOptions options) : base(options)
+            => Configuration = configuration;
         private async Task<BlobContainerClient> GetContextAsync()
         {
             if (Context == null)
@@ -37,18 +36,18 @@ namespace Rystem.Azure.Integration.Storage
                         if (!string.IsNullOrWhiteSpace(Options.AccountKey))
                         {
                             var client = new BlobServiceClient(Options.GetConnectionString());
-                            blobClient = client.GetBlobContainerClient(Configuration.ContainerName);
+                            blobClient = client.GetBlobContainerClient(Configuration.ContainerName.ToLower());
                         }
                         else
                         {
                             blobClient = new BlobContainerClient(new Uri(string.Format("https://{0}.blob.core.windows.net/{1}",
                                                 Options.AccountName,
-                                                Configuration.ContainerName)),
+                                                Configuration.ContainerName.ToLower())),
                                                 new DefaultAzureCredential());
                         }
+                        Context = blobClient;
                         if (!await blobClient.ExistsAsync().NoContext())
                             await blobClient.CreateIfNotExistsAsync().NoContext();
-                        Context = blobClient;
                     }
                 }, RaceId).NoContext();
             return Context;
@@ -145,6 +144,8 @@ namespace Rystem.Azure.Integration.Storage
             BlockBlobClient cloudBlob = client.GetBlockBlobClient(name);
             stream.Position = 0;
             await cloudBlob.UploadAsync(stream).NoContext();
+            if (stream is NotClosableStream)
+                (stream as NotClosableStream).ManualDispose();
             return true;
         }
         private const int MaximumAttemptForAppendWriting = 3;
@@ -176,6 +177,8 @@ namespace Rystem.Azure.Integration.Storage
                 }
                 attempt++;
             } while (attempt <= MaximumAttemptForAppendWriting);
+            if (stream is NotClosableStream)
+                (stream as NotClosableStream).ManualDispose();
             return attempt <= MaximumAttemptForAppendWriting;
         }
         private const long PageSize = 512;
@@ -195,6 +198,8 @@ namespace Rystem.Azure.Integration.Storage
                     finalizingStream[i] = i < stream.Length ? baseMemoryStream[i] : (byte)0;
                 await pageBlob.UploadPagesAsync(new MemoryStream(finalizingStream), PageSize * offset, null).NoContext();
             }
+            if (stream is NotClosableStream)
+                (stream as NotClosableStream).ManualDispose();
 #warning È sicuramente buggato, perchè scrive solo quando è in un if buggato
             return true;
         }

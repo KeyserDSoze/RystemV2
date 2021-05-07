@@ -1,6 +1,6 @@
 ﻿using Rystem.Azure.Installation;
+using Rystem.Azure.Integration;
 using Rystem.Business;
-using Rystem.Business.AzureAttribute;
 using Rystem.Business.Document;
 using Rystem.Text;
 using System;
@@ -18,6 +18,7 @@ namespace RystemV2
             public StorageSetting Storage { get; init; }
             public sealed record StorageSetting(string Name, string Key);
         }
+#warning Allow the loading through a json or appsettings directly
         static Program()
         {
             var settings = File.ReadAllText("appsettings.json").FromJson<AppSetting>();
@@ -29,9 +30,9 @@ namespace RystemV2
         static async Task Main(string[] args)
         {
             //(new Sample() as IDocument).Build();
-            await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.UpdateAsync().NoContext();
-            await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd3", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.UpdateAsync().NoContext();
-            var x = (await new Sample().ToListAsync().NoContext()).ToList();
+            await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.UpdateAsync(Installation.Inst00).NoContext();
+            await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd3", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.UpdateAsync(Installation.Inst00).NoContext();
+            var x = (await new Sample().ToListAsync(x => x.Ale1 == "dddd", Installation.Inst00).NoContext()).ToList();
         }
         public class Sample : IDocument
         {
@@ -50,7 +51,7 @@ namespace RystemV2
                     .WithAzure()
                     .WithTableStorage()
                     .AndWithAzure(Installation.Inst00)
-                    .WithTableStorage();
+                    .WithBlobStorage();
             }
         }
     }

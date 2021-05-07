@@ -29,7 +29,7 @@ namespace Rystem.Business.Document
                                 Integrations.Add(installation, new TableStorageImplementation<TEntity>(new TableStorageIntegration(configuration.Configurations, AzureManager.Instance.Storages[configuration.ServiceKey]), DefaultEntity));
                                 break;
                             case RystemServiceType.AzureBlobStorage:
-                                //Integrations.Add(installation, new BlobStorageIntegration<TEntity>(, this.DefaultEntity));
+                                Integrations.Add(installation, new BlobStorageImplementation<TEntity>(new BlobStorageIntegration(configuration.Configurations, AzureManager.Instance.Storages[configuration.ServiceKey]), this.DefaultEntity));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");

@@ -31,7 +31,7 @@ namespace Rystem.Business
                 new RystemService(RystemServiceType.AzureTableStorage, configuration, serviceKey ?? string.Empty));
             return RystemServiceProvider;
         }
-        public RystemDocumentServiceProvider WithBlob(BlobStorageConfiguration configuration = null, string serviceKey = null)
+        public RystemDocumentServiceProvider WithBlobStorage(BlobStorageConfiguration configuration = null, string serviceKey = null)
         {
             if (configuration == null)
                 configuration = new BlobStorageConfiguration(ReflectionHelper.NameOfCallingClass());

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rystem.IO;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,12 +25,13 @@ namespace Rystem
             => ConvertToStringAsync(entity).ToResult();
         public static async Task<Stream> ToStream(this string entity)
         {
-            MemoryStream memoryStream = new();
+            NotClosableStream memoryStream = new();
             using StreamWriter writer = new(memoryStream);
             await writer.WriteAsync(entity);
             memoryStream.Position = 0;
             return memoryStream;
         }
+       
         public static string ConvertToString(this byte[] entity, EncodingType type = EncodingType.UTF8)
         {
             switch (type)

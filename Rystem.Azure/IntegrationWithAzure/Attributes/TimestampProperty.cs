@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rystem.Business.AzureAttribute
+namespace Rystem.Azure.Integration
 {
     public class TimestampProperty : Attribute
     {

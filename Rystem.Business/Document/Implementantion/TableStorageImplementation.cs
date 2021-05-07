@@ -1,6 +1,6 @@
 ﻿using Microsoft.Azure.Cosmos.Table;
+using Rystem.Azure.Integration;
 using Rystem.Azure.Integration.Storage;
-using Rystem.Business.AzureAttribute;
 using Rystem.Text;
 using System;
 using System.Collections.Generic;

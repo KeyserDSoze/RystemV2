@@ -165,10 +165,7 @@ namespace Rystem
             UnaryExpression unaryExpression = (UnaryExpression)expression;
             dynamic aa = unaryExpression.Operand;
             if (aa.Member.PropertyType == typeof(bool))
-            {
-                //qui ci entra solo per i booleani, altrimenti la query è sbagliata
-                return aa.Member.Name + " eq false";
-            }
+                return $"{aa.Member.Name} eq false";
             return null;
         }
     }
@@ -197,7 +194,7 @@ namespace Rystem
             {
                 //qui ci entra solo per i booleani, altrimenti la query è sbagliata
                 string name = property.Name;
-                return name + " eq " + "true";
+                return $"{name} eq true";
             }
             return null;
         }
