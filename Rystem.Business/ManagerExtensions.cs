@@ -10,7 +10,7 @@ namespace Rystem.Business
     {
         private static readonly Dictionary<string, dynamic> Managers = new();
         private static readonly object Semaphore = new();
-        internal static dynamic DefaultManager<TEntity>(this TEntity entity, string baseKey, Func<TEntity, dynamic> managerCreator)
+        public static dynamic DefaultManager<TEntity>(this TEntity entity, string baseKey, Func<TEntity, dynamic> managerCreator)
         {
             string key = $"{baseKey}{entity.GetType().FullName}";
             if (!Managers.ContainsKey(key))

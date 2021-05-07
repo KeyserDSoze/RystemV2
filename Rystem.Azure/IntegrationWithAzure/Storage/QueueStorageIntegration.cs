@@ -7,17 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rystem.Azure.IntegrationWithAzure.Storage
+namespace Rystem.Azure.Integration.Storage
 {
-    internal class QueueStorageIntegration : BaseStorageClient
+    public sealed record QueueStorageConfiguration (string QueueName);
+    public sealed class QueueStorageIntegration : BaseStorageClient
     {
         private QueueClient Context;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
-        private readonly string QueueName;
-        public QueueStorageIntegration(string queueName, StorageOptions options) : base(options)
-        {
-            this.QueueName = queueName;
-        }
+        private readonly QueueStorageConfiguration Configuration;
+        public QueueStorageIntegration(QueueStorageConfiguration configuration, StorageOptions options) : base(options) 
+            => Configuration = configuration;
         private async Task<QueueClient> GetContextAsync()
         {
             if (Context == null)
@@ -26,16 +25,16 @@ namespace Rystem.Azure.IntegrationWithAzure.Storage
                     if (Context == null)
                     {
                         QueueClient queueClient = default;
-                        if (!string.IsNullOrWhiteSpace(Options.ConnectionString))
+                        if (!string.IsNullOrWhiteSpace(Options.AccountKey))
                         {
-                            var client = new QueueServiceClient(Options.ConnectionString);
-                            queueClient = client.GetQueueClient(QueueName);
+                            var client = new QueueServiceClient(Options.GetConnectionString());
+                            queueClient = client.GetQueueClient(Configuration.QueueName);
                         }
                         else
                         {
                             queueClient = new QueueClient(new Uri(string.Format("https://{0}.queue.core.windows.net/{1}",
                                                 Options.AccountName,
-                                                QueueName)),
+                                                Configuration.QueueName)),
                                                 new DefaultAzureCredential());
                         }
                         if (!await queueClient.ExistsAsync().NoContext())

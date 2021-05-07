@@ -11,17 +11,16 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rystem.Azure.IntegrationWithAzure.Storage
+namespace Rystem.Azure.Integration.Storage
 {
-    public class TableStorageIntegration : BaseStorageClient
+    public sealed record TableStorageConfiguration(string TableName);
+    public sealed class TableStorageIntegration : BaseStorageClient
     {
         private CloudTable Context;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
-        private readonly string TableName;
-        public TableStorageIntegration(string tableName, StorageOptions options) : base(options)
-        {
-            this.TableName = tableName;
-        }
+        public TableStorageConfiguration Configuration { get; }
+        public TableStorageIntegration(TableStorageConfiguration configuration, StorageOptions options) : base(options) 
+            => Configuration = configuration;
         private async Task<CloudTable> GetContextAsync()
         {
             if (Context == null)
@@ -29,9 +28,9 @@ namespace Rystem.Azure.IntegrationWithAzure.Storage
                 {
                     if (Context == null)
                     {
-                        var storageAccount = CloudStorageAccount.Parse(Options.ConnectionString);
+                        var storageAccount = CloudStorageAccount.Parse(Options.GetConnectionString());
                         var client = storageAccount.CreateCloudTableClient();
-                        var tableClient = client.GetTableReference(TableName);
+                        var tableClient = client.GetTableReference(Configuration.TableName);
                         if (!await tableClient.ExistsAsync().NoContext())
                             await tableClient.CreateIfNotExistsAsync().NoContext();
                         Context = tableClient;

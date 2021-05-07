@@ -15,5 +15,6 @@ namespace Rystem.Business.Document
         Task<bool> DeleteAsync(TEntity entity);
         Task<bool> UpdateBatchAsync(IEnumerable<TEntity> entities);
         Task<bool> DeleteBatchAsync(IEnumerable<TEntity> entities);
+        string GetName();
     }
 }

@@ -8,15 +8,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rystem.Azure.IntegrationWithAzure.Cache
+namespace Rystem.Azure.Integration.Cache
 {
-    public class RedisCacheOptions
-    {
-        public string ConnectionString { get; init; }
-        public TimeSpan ExpiringDefault { get; init; }
-        public int NumberOfClients { get; init; } = 1;
-    }
-    public class RedisCacheIntegration
+    public sealed record RedisCacheOptions(string ConnectionString, TimeSpan ExpiringDefault, int NumberOfClients = 1);
+    public sealed class RedisCacheIntegration
     {
         private int RoundRobin = -1;
         private IDatabase Cache

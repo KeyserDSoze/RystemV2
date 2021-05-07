@@ -8,16 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rystem.Azure.IntegrationWithAzure.Secrets
+namespace Rystem.Azure.Integration.Secrets
 {
-    public class KeyVaultOptions
-    {
-        public string Url { get; init; }
-        public SecretClientOptions SecretOptions { get; init; }
-        public CertificateClientOptions CertificateOptions { get; init; }
-        public KeyClientOptions KeyClientOptions { get; init; }
-    }
-    public class KeyVaultIntegration
+    public sealed record KeyVaultOptions(string Url, SecretClientOptions SecretOptions, CertificateClientOptions CertificateOptions, KeyClientOptions KeyOptions);
+
+    public sealed class KeyVaultIntegration
     {
         private readonly SecretClient SecretClient;
         private readonly CertificateClient CertificateClient;
@@ -26,7 +21,7 @@ namespace Rystem.Azure.IntegrationWithAzure.Secrets
         {
             SecretClient = new SecretClient(vaultUri: new Uri(options.Url), credential: new DefaultAzureCredential(), options: options.SecretOptions);
             CertificateClient = new CertificateClient(vaultUri: new Uri(options.Url), credential: new DefaultAzureCredential(), options: options.CertificateOptions);
-            KeyClient = new KeyClient(vaultUri: new Uri(options.Url), credential: new DefaultAzureCredential(), options: options.KeyClientOptions);
+            KeyClient = new KeyClient(vaultUri: new Uri(options.Url), credential: new DefaultAzureCredential(), options: options.KeyOptions);
         }
         public async Task<KeyVaultSecret> GetSecretAsync(string key, string version = null)
         {

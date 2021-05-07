@@ -7,42 +7,38 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rystem.Azure.IntegrationWithAzure.Message
+namespace Rystem.Azure.Integration.Message
 {
+    //for instance something.servicebus.windows.net
     /// <summary>
     /// Leave ConnectionString empty if you want to connect through the managed identity
     /// </summary>
-    public class ServiceBusOptions
-    {
-        /// <summary>
-        /// for instance something.servicebus.windows.net
-        /// </summary>
-        public string FullyQualifiedName { get; init; }
-        public string ConnectionString { get; init; }
-        public ServiceBusProcessorOptions Options { get; init; }
-    }
+    public sealed record ServiceBusOptions(string FullyQualifiedName, string ConnectionString, ServiceBusProcessorOptions Options = null);
+    public sealed record ServiceBusConfiguration(string QueueName);
 #warning AR - Missing dead lettering and defer
     /// <summary>
     /// https://github.com/Azure/azure-sdk-for-net/blob/Azure.Messaging.ServiceBus_7.1.2/sdk/servicebus/Azure.Messaging.ServiceBus/README.md
     /// </summary>
-    internal class ServiceBusIntegration
+    public sealed class ServiceBusIntegration
     {
         private readonly ServiceBusSender Client;
         private readonly ServiceBusProcessor ClientReader;
-        
-        public ServiceBusIntegration(string queueName, ServiceBusOptions options)
+
+        public ServiceBusIntegration(ServiceBusConfiguration configuration, ServiceBusOptions options)
         {
             if (!string.IsNullOrWhiteSpace(options.ConnectionString))
             {
                 ServiceBusClient client = new(options.ConnectionString);
-                this.Client = client.CreateSender(queueName);
-                this.ClientReader = client.CreateProcessor(queueName, options.Options);
+                this.Client = client.CreateSender(configuration.QueueName);
+                if (options.Options != null)
+                    this.ClientReader = client.CreateProcessor(configuration.QueueName, options.Options);
             }
             else
             {
                 ServiceBusClient client = new(options.FullyQualifiedName, new DefaultAzureCredential());
-                this.Client = client.CreateSender(queueName);
-                this.ClientReader = client.CreateProcessor(queueName, options.Options);
+                this.Client = client.CreateSender(configuration.QueueName);
+                if (options.Options != null)
+                    this.ClientReader = client.CreateProcessor(configuration.QueueName, options.Options);
             }
         }
 

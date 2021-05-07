@@ -4,7 +4,7 @@ using Azure.Messaging.EventHubs.Consumer;
 using Azure.Messaging.EventHubs.Processor;
 using Azure.Messaging.EventHubs.Producer;
 using Azure.Storage.Blobs;
-using Rystem.Azure.IntegrationWithAzure.Storage;
+using Rystem.Azure.Integration.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,41 +12,36 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rystem.Azure.IntegrationWithAzure.Message
+namespace Rystem.Azure.Integration.Message
 {
     /// <summary>
     /// Leave ConnectionString empty if you want to connect through the managed identity
     /// </summary>
-    public class EventHubOptions
-    {
-        public string FullyQualifiedName { get; init; }
-        public string ConnectionString { get; init; }
-        public EventProcessorClientOptions Options { get; init; }
-        public StorageOptions StorageOptions { get; init; }
-    }
-    internal class EventHubIntegration
+    public sealed record EventHubOptions(string FullyQualifiedName, string ConnectionString, EventProcessorClientOptions ProcessorOptions, StorageOptions StorageOptions);
+    public sealed record EventHubConfiguration(string EventHubName, string ConsumerGroup = null);
+    public sealed class EventHubIntegration
     {
         private readonly EventHubProducerClient Client;
         private readonly EventProcessorClient ClientReader;
-        public EventHubIntegration(string eventHubName, EventHubOptions options, string consumerGroup = null, EventProcessorClientOptions processorOptions = null)
+        public EventHubIntegration(EventHubConfiguration configuration, EventHubOptions options)
         {
             if (string.IsNullOrWhiteSpace(options.ConnectionString))
-                this.Client = new EventHubProducerClient(options.FullyQualifiedName, eventHubName, new DefaultAzureCredential());
+                this.Client = new EventHubProducerClient(options.FullyQualifiedName, configuration.EventHubName, new DefaultAzureCredential());
             else
-                this.Client = new EventHubProducerClient(options.ConnectionString, eventHubName);
+                this.Client = new EventHubProducerClient(options.ConnectionString, configuration.EventHubName);
 
-            if (!string.IsNullOrWhiteSpace(consumerGroup) && options.StorageOptions != null)
+            if (!string.IsNullOrWhiteSpace(configuration.ConsumerGroup) && options.StorageOptions != null)
             {
-                var containerName = $"{eventHubName.ToLower()}consumergroup";
+                var containerName = $"{configuration.EventHubName.ToLower()}consumergroup";
                 var storageClient = string.IsNullOrWhiteSpace(options.StorageOptions.AccountKey) ? new BlobContainerClient(new Uri(string.Format("https://{0}.blob.core.windows.net/{1}",
                                                 options.StorageOptions.AccountName,
                                                 containerName)),
                                                 new DefaultAzureCredential()) :
-                                                new BlobContainerClient(options.StorageOptions.ConnectionString, containerName);
+                                                new BlobContainerClient(options.StorageOptions.GetConnectionString(), containerName);
                 if (string.IsNullOrWhiteSpace(options.ConnectionString))
-                    ClientReader = new EventProcessorClient(storageClient, consumerGroup, options.FullyQualifiedName, eventHubName, new DefaultAzureCredential(), processorOptions);
+                    ClientReader = new EventProcessorClient(storageClient, configuration.ConsumerGroup, options.FullyQualifiedName, configuration.EventHubName, new DefaultAzureCredential(), options.ProcessorOptions);
                 else
-                    ClientReader = new EventProcessorClient(storageClient, consumerGroup, options.ConnectionString, eventHubName, processorOptions);
+                    ClientReader = new EventProcessorClient(storageClient, configuration.ConsumerGroup, options.ConnectionString, configuration.EventHubName, options.ProcessorOptions);
             }
         }
         public async Task<IEnumerable<string>> ListPartitionAsync()

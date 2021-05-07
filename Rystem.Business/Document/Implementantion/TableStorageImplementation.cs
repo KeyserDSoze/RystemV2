@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.Cosmos.Table;
-using Rystem.Azure.IntegrationWithAzure.Storage;
+using Rystem.Azure.Integration.Storage;
+using Rystem.Business.AzureAttribute;
 using Rystem.Text;
 using System;
 using System.Collections.Generic;
@@ -20,19 +21,26 @@ namespace Rystem.Business.Document.Implementantion
         private const string PartitionKey = "PartitionKey";
         private const string RowKey = "RowKey";
         private const string Timestamp = "Timestamp";
-        private const string ETag = "ETag";
+        private static readonly Type NoDocumentProperty = typeof(NoDocumentProperty);
+        private static readonly Type PartitionKeyProperty = typeof(PartitionKeyProperty);
+        private static readonly Type RowKeyProperty = typeof(RowKeyProperty);
+        private static readonly Type TimestampProperty = typeof(TimestampProperty);
         private readonly Type EntityType;
         private readonly TableStorageIntegration Integration;
-        internal TableStorageImplementation(TableStorageIntegration integration, TEntity entity)
+        internal TableStorageImplementation(TableStorageIntegration integration, Type entityType)
         {
             Integration = integration;
-            this.EntityType = entity.GetType();
+            this.EntityType = entityType;
             foreach (PropertyInfo pi in this.EntityType.GetProperties())
             {
-                if (pi.GetCustomAttribute(typeof(NoDocumentProperty)) != null)
+                if (pi.GetCustomAttribute(NoDocumentProperty) != null)
                     continue;
-                if (pi.Name == PartitionKey || pi.Name == RowKey || pi.Name == Timestamp || pi.Name == ETag)
-                    BaseProperties.Add(pi.Name, pi);
+                if (pi.GetCustomAttribute(PartitionKeyProperty) != null)
+                    BaseProperties.Add(PartitionKey, pi);
+                else if (pi.GetCustomAttribute(RowKeyProperty) != null)
+                    BaseProperties.Add(RowKey, pi);
+                else if (pi.GetCustomAttribute(TimestampProperty) != null)
+                    BaseProperties.Add(Timestamp, pi);
                 else if (pi.PropertyType == typeof(int) || pi.PropertyType == typeof(long) ||
                     pi.PropertyType == typeof(double) || pi.PropertyType == typeof(string) ||
                     pi.PropertyType == typeof(Guid) || pi.PropertyType == typeof(bool) ||
@@ -42,16 +50,16 @@ namespace Rystem.Business.Document.Implementantion
                     SpecialProperties.Add(pi);
             }
         }
+        private const string Asterisk = "*";
         private DynamicTableEntity GetBase(TEntity entity)
         {
             object partitionKey = BaseProperties[PartitionKey].GetValue(entity);
             object rowKey = BaseProperties[RowKey].GetValue(entity);
-            object eTag = BaseProperties[ETag].GetValue(entity);
             return new DynamicTableEntity()
             {
                 PartitionKey = (partitionKey ?? DateTime.UtcNow.ToString("yyyyMMdd")).ToString(),
                 RowKey = (rowKey ?? Alea.GetTimedKey()).ToString(),
-                ETag = eTag == null ? "*" : eTag.ToString(),
+                ETag = Asterisk,
             };
         }
         public Task<bool> DeleteAsync(TEntity entity)
@@ -87,6 +95,8 @@ namespace Rystem.Business.Document.Implementantion
             => Integration.UpdateBatchAsync(entities.Select(x => WriteEntity(x)));
         public Task<bool> DeleteBatchAsync(IEnumerable<TEntity> entities)
             => Integration.DeleteBatchAsync(entities.Select(x => GetBase(x)));
+        public string GetName()
+            => this.Integration.Configuration.TableName;
         private DynamicTableEntity WriteEntity(TEntity entity)
         {
             DynamicTableEntity dynamicTableEntity = this.GetBase(entity);
