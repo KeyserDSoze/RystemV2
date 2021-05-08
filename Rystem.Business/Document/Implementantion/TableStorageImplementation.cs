@@ -33,13 +33,13 @@ namespace Rystem.Business.Document.Implementantion
             this.EntityType = entityType;
             foreach (PropertyInfo pi in this.EntityType.GetProperties())
             {
-                if (pi.GetCustomAttribute(NoDocumentProperty) != null)
+                if (pi.GetCustomAttribute(NoDocumentProperty) != default)
                     continue;
-                if (pi.GetCustomAttribute(PartitionKeyProperty) != null)
+                if (pi.GetCustomAttribute(PartitionKeyProperty) != default)
                     BaseProperties.Add(PartitionKey, pi);
-                else if (pi.GetCustomAttribute(RowKeyProperty) != null)
+                else if (pi.GetCustomAttribute(RowKeyProperty) != default)
                     BaseProperties.Add(RowKey, pi);
-                else if (pi.GetCustomAttribute(TimestampProperty) != null)
+                else if (pi.GetCustomAttribute(TimestampProperty) != default)
                     BaseProperties.Add(Timestamp, pi);
                 else if (pi.PropertyType == typeof(int) || pi.PropertyType == typeof(long) ||
                     pi.PropertyType == typeof(double) || pi.PropertyType == typeof(string) ||
@@ -68,18 +68,18 @@ namespace Rystem.Business.Document.Implementantion
         public async Task<bool> ExistsAsync(TEntity entity)
         {
             var result = await Integration.GetAsync(GetBase(entity)).NoContext();
-            return result != null;
+            return result != default;
         }
 
-        public async Task<IEnumerable<TEntity>> GetAsync(TEntity entity, Expression<Func<TEntity, bool>> expression = null, int? takeCount = null)
+        public async Task<IEnumerable<TEntity>> GetAsync(TEntity entity, Expression<Func<TEntity, bool>> expression = default, int? takeCount = default)
         {
             string query = ToQuery(expression?.Body);
 
             return (await Integration.QueryAsync(query, takeCount, default)).Select(x => ReadEntity(x));
 
-            string ToQuery(Expression expressionAsExpression = null)
+            string ToQuery(Expression expressionAsExpression = default)
             {
-                if (expressionAsExpression == null)
+                if (expressionAsExpression == default)
                     return string.Empty;
                 string result = QueryStrategy.Create(expressionAsExpression);
                 if (!string.IsNullOrWhiteSpace(result))

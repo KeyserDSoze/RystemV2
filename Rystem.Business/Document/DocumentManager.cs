@@ -14,7 +14,7 @@ namespace Rystem.Business.Document
         where TEntity : IDocument
     {
         private readonly IDictionary<Installation, IDocumentImplementation<TEntity>> Integrations = new Dictionary<Installation, IDocumentImplementation<TEntity>>();
-        private readonly IDictionary<Installation, RystemService> DocumentConfiguration;
+        private readonly IDictionary<Installation, ProvidedService> DocumentConfiguration;
         private static readonly object TrafficLight = new();
         private IDocumentImplementation<TEntity> Integration(Installation installation)
         {
@@ -22,13 +22,13 @@ namespace Rystem.Business.Document
                 lock (TrafficLight)
                     if (!Integrations.ContainsKey(installation))
                     {
-                        RystemService configuration = DocumentConfiguration[installation];
+                        ProvidedService configuration = DocumentConfiguration[installation];
                         switch (configuration.Type)
                         {
-                            case RystemServiceType.AzureTableStorage:
+                            case ServiceProviderType.AzureTableStorage:
                                 Integrations.Add(installation, new TableStorageImplementation<TEntity>(new TableStorageIntegration(configuration.Configurations, AzureManager.Instance.Storages[configuration.ServiceKey]), DefaultEntity));
                                 break;
-                            case RystemServiceType.AzureBlobStorage:
+                            case ServiceProviderType.AzureBlobStorage:
                                 Integrations.Add(installation, new BlobStorageImplementation<TEntity>(new BlobStorageIntegration(configuration.Configurations, AzureManager.Instance.Storages[configuration.ServiceKey]), this.DefaultEntity));
                                 break;
                             default:
@@ -49,7 +49,7 @@ namespace Rystem.Business.Document
              => await Integration(installation).DeleteBatchAsync(entity).NoContext();
         public async Task<bool> ExistsAsync(TEntity entity, Installation installation)
             => await Integration(installation).ExistsAsync(entity).NoContext();
-        public async Task<IEnumerable<TEntity>> GetAsync(TEntity entity, Installation installation, Expression<Func<TEntity, bool>> expression = null, int? takeCount = null)
+        public async Task<IEnumerable<TEntity>> GetAsync(TEntity entity, Installation installation, Expression<Func<TEntity, bool>> expression = default, int? takeCount = default)
             => await Integration(installation).GetAsync(entity, expression, takeCount).NoContext();
         public async Task<bool> UpdateAsync(TEntity entity, Installation installation)
             => await Integration(installation).UpdateAsync(entity).NoContext();

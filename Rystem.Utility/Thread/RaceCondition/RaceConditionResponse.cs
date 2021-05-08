@@ -10,11 +10,11 @@ namespace Rystem.Concurrency
     {
         public bool IsExecuted { get; }
         public AggregateException Exceptions { get; }
-        public bool InException => this.Exceptions != null;
+        public bool InException => this.Exceptions != default;
         public RaceConditionResponse(bool isExecuted, IList<Exception> exceptions)
         {
             this.IsExecuted = isExecuted;
-            if (exceptions != null && exceptions.Count > 0)
+            if (exceptions != default && exceptions.Count > 0)
                 this.Exceptions = new AggregateException(exceptions);
         }
     }

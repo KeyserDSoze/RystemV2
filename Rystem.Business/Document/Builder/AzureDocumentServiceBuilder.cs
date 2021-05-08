@@ -21,24 +21,24 @@ namespace Rystem.Business
             RystemServiceProvider = rystemServiceProvider;
             Installation = installation;
         }
-        public RystemDocumentServiceProvider WithTableStorage(TableStorageConfiguration configuration = null, string serviceKey = null)
+        public RystemDocumentServiceProvider WithTableStorage(TableStorageConfiguration configuration = default, string serviceKey = default)
         {
-            if (configuration == null)
+            if (configuration == default)
                 configuration = new TableStorageConfiguration(ReflectionHelper.NameOfCallingClass());
-            else if (configuration.TableName != null)
+            else if (configuration.TableName != default)
                 configuration = configuration with { TableName = ReflectionHelper.NameOfCallingClass() };
             RystemServiceProvider.Services.Add(Installation,
-                new RystemService(RystemServiceType.AzureTableStorage, configuration, serviceKey ?? string.Empty));
+                new ProvidedService(ServiceProviderType.AzureTableStorage, configuration, serviceKey ?? string.Empty));
             return RystemServiceProvider;
         }
-        public RystemDocumentServiceProvider WithBlobStorage(BlobStorageConfiguration configuration = null, string serviceKey = null)
+        public RystemDocumentServiceProvider WithBlobStorage(BlobStorageConfiguration configuration = default, string serviceKey = default)
         {
-            if (configuration == null)
+            if (configuration == default)
                 configuration = new BlobStorageConfiguration(ReflectionHelper.NameOfCallingClass());
-            else if (configuration.ContainerName != null)
+            else if (configuration.ContainerName != default)
                 configuration = configuration with { ContainerName = ReflectionHelper.NameOfCallingClass() };
             RystemServiceProvider.Services.Add(Installation,
-                new RystemService(RystemServiceType.AzureBlobStorage, configuration, serviceKey ?? string.Empty));
+                new ProvidedService(ServiceProviderType.AzureBlobStorage, configuration, serviceKey ?? string.Empty));
             return RystemServiceProvider;
         }
     }

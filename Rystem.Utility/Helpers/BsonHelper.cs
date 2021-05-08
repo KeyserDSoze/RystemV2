@@ -26,7 +26,7 @@ namespace Rystem.Text
         }
         public static async Task<T> FromBson<T>(this Stream entity)
             => (await entity.ConvertToStringAsync().NoContext()).FromBson<T>();
-        public static T FromBson<T>(this byte[] entity, JsonSerializerSettings options = null)
+        public static T FromBson<T>(this byte[] entity, JsonSerializerSettings options = default)
             => entity.ConvertToString().FromBson<T>();
     }
 }

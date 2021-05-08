@@ -14,7 +14,7 @@ namespace Rystem.Text
         private static readonly Type CsvPropertyAttribute = typeof(CsvProperty);
         public string Serialize(object value)
         {
-            if (value == null)
+            if (value == default)
                 return string.Empty;
             StringBuilder stringBuilder = new StringBuilder();
             foreach (PropertyInfo property in value.GetType().FetchProperties(CsvIgnoreAttribute))
@@ -31,7 +31,7 @@ namespace Rystem.Text
 
         public dynamic Deserialize(Type type, string value)
         {
-            if (value == null)
+            if (value == default)
                 return default;
             dynamic startValue = Activator.CreateInstance(type);
             string[] values = value.Split(this.IndexAsChar);
@@ -41,8 +41,8 @@ namespace Rystem.Text
                 string[] propertyAsString = v.Split(this.Header);
                 if (this.HeaderMapping.ContainsKey(propertyAsString[0]))
                 {
-                    PropertyInfo property = propertyInfo.FirstOrDefault(x => (x.GetCustomAttribute(CsvPropertyAttribute) != null ? (x.GetCustomAttribute(CsvPropertyAttribute) as CsvProperty).Name : x.Name) == this.HeaderMapping[propertyAsString[0]]);
-                    if (property != null)
+                    PropertyInfo property = propertyInfo.FirstOrDefault(x => (x.GetCustomAttribute(CsvPropertyAttribute) != default ? (x.GetCustomAttribute(CsvPropertyAttribute) as CsvProperty).Name : x.Name) == this.HeaderMapping[propertyAsString[0]]);
+                    if (property != default)
                         property.SetValue(startValue, this.HelpToDeserialize(property.PropertyType, propertyAsString[1]));
                 }
             }

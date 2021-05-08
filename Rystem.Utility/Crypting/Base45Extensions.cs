@@ -27,7 +27,7 @@ namespace Rystem.Text
             for (int i = 0; i < bytes.Length; i += 2)
             {
                 var values = bytes.Skip(i).Take(2).ToList();
-                int? second = null;
+                int? second = default;
                 if (values.Count > 1)
                     second = values[1];
                 var returnedValue = Calculate(values[0], second);
@@ -35,9 +35,9 @@ namespace Rystem.Text
             }
             return stringBuilder.ToString();
         }
-        private static Tuple<int, int, int?> Calculate(int a, int? b = null)
+        private static Tuple<int, int, int?> Calculate(int a, int? b = default)
         {
-            int? e = null;
+            int? e = default;
             int value = !b.HasValue ? a : a * 256 + b.Value;
             if (b.HasValue)
             {
@@ -64,7 +64,7 @@ namespace Rystem.Text
             }
             for (int i = 0; i < values.Count; i += 3)
             {
-                int? e = null;
+                int? e = default;
                 if (i + 2 < values.Count)
                     e = values[i + 2];
                 var returnedValue = Calculate(values[i], values[i + 1], e);
@@ -72,9 +72,9 @@ namespace Rystem.Text
             }
             return stringBuilder.ToString();
         }
-        private static Tuple<int, int?> Calculate(int c, int d, int? e = null)
+        private static Tuple<int, int?> Calculate(int c, int d, int? e = default)
         {
-            int? b = null;
+            int? b = default;
             int value = c + d * 45 + (e.HasValue ? e.Value * O45X45 : 0);
             if (e.HasValue)
             {

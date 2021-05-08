@@ -11,7 +11,7 @@ namespace Rystem.Text
 
         public dynamic Deserialize(Type type, string value)
         {
-            if (value == null)
+            if (value == default)
                 return default;
             if (type.BaseType != typeof(Enum))
             {

@@ -66,8 +66,7 @@ namespace Rystem.Business
                 throw new NotImplementedException();
             }
         }
-
-        public static AzureBuilder WithAzure()
-            => new ServiceCollection().WithAzure();
+        public static AzureBuilder WithAzure(IServiceCollection serviceCollection = default)
+            => (serviceCollection ?? new ServiceCollection()).WithAzure();
     }
 }

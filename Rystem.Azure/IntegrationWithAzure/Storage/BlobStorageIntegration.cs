@@ -27,10 +27,10 @@ namespace Rystem.Azure.Integration.Storage
             => Configuration = configuration;
         private async Task<BlobContainerClient> GetContextAsync()
         {
-            if (Context == null)
+            if (Context == default)
                 await RaceCondition.RunAsync(async () =>
                 {
-                    if (Context == null)
+                    if (Context == default)
                     {
                         BlobContainerClient blobClient = default;
                         if (!string.IsNullOrWhiteSpace(Options.AccountKey))
@@ -62,7 +62,7 @@ namespace Rystem.Azure.Integration.Storage
             var client = Context ?? await GetContextAsync();
             return await client.GetBlobClient(name).ExistsAsync().NoContext();
         }
-        public async Task<List<string>> SearchAsync(string prefix = null, int? takeCount = null, CancellationToken token = default)
+        public async Task<List<string>> SearchAsync(string prefix = default, int? takeCount = default, CancellationToken token = default)
         {
             var client = Context ?? await GetContextAsync();
             List<string> items = new List<string>();
@@ -71,12 +71,12 @@ namespace Rystem.Azure.Integration.Storage
             {
                 items.Add($"{client.Uri}/{t.Name}");
                 count++;
-                if (takeCount != null && items.Count >= takeCount)
+                if (takeCount != default && items.Count >= takeCount)
                     break;
             }
             return items;
         }
-        public async Task<List<BlobPropertyWrapper>> FetchPropertiesAsync(string prefix = null, int? takeCount = null, CancellationToken token = default)
+        public async Task<List<BlobPropertyWrapper>> FetchPropertiesAsync(string prefix = default, int? takeCount = default, CancellationToken token = default)
         {
             var client = Context ?? await GetContextAsync();
             List<BlobPropertyWrapper> items = new();
@@ -85,7 +85,7 @@ namespace Rystem.Azure.Integration.Storage
             {
                 items.Add(new BlobPropertyWrapper() { Name = blob.Name, ItemProperties = blob.Properties, Tags = blob.Tags });
                 count++;
-                if (takeCount != null && items.Count >= takeCount)
+                if (takeCount != default && items.Count >= takeCount)
                     break;
             }
             return items;
@@ -124,7 +124,7 @@ namespace Rystem.Azure.Integration.Storage
                 Tags = tags
             };
         }
-        public async Task<List<BlobWrapper>> ListAsync(string prefix = null, int? takeCount = null, CancellationToken token = default)
+        public async Task<List<BlobWrapper>> ListAsync(string prefix = default, int? takeCount = default, CancellationToken token = default)
         {
             var client = Context ?? await GetContextAsync();
             List<BlobWrapper> items = new();
@@ -133,7 +133,7 @@ namespace Rystem.Azure.Integration.Storage
             {
                 items.Add(new BlobWrapper() { Name = blob.Name, Content = (await ReadAsync(blob.Name, false).NoContext()).Content, ItemProperties = blob.Properties, Tags = blob.Tags });
                 count++;
-                if (takeCount != null && items.Count >= takeCount)
+                if (takeCount != default && items.Count >= takeCount)
                     break;
             }
             return items;

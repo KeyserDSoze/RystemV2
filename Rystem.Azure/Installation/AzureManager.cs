@@ -35,19 +35,19 @@ namespace Rystem.Azure.Installation
         /// <param name="options">Use only account name if you want to connect through the managed identity.</param>
         /// <param name="serviceKey">A specific key that you will use during your object configuration.</param>
         /// <returns></returns>
-        public AzureBuilder AddStorage(StorageOptions options, string serviceKey = null)
+        public AzureBuilder AddStorage(StorageOptions options, string serviceKey = default)
             => Add(AzureManager.Instance.Storages, options, serviceKey);
-        public AzureBuilder AddMessage(EventHubOptions options, string serviceKey = null)
+        public AzureBuilder AddMessage(EventHubOptions options, string serviceKey = default)
             => Add(AzureManager.Instance.EventHubs, options, serviceKey);
-        public AzureBuilder AddMessage(ServiceBusOptions options, string serviceKey = null)
+        public AzureBuilder AddMessage(ServiceBusOptions options, string serviceKey = default)
             => Add(AzureManager.Instance.ServiceBuses, options, serviceKey);
-        public AzureBuilder AddCache(RedisCacheOptions options, string serviceKey = null)
+        public AzureBuilder AddCache(RedisCacheOptions options, string serviceKey = default)
             => Add(AzureManager.Instance.RedisCaches, options, serviceKey);
-        public AzureBuilder AddKeyVault(KeyVaultOptions options, string serviceKey = null)
+        public AzureBuilder AddKeyVault(KeyVaultOptions options, string serviceKey = default)
             => Add(AzureManager.Instance.KeyVaults, options, serviceKey);
-        private AzureBuilder Add<T>(Dictionary<string, T> dictionary, T options, string serviceKey = null)
+        private AzureBuilder Add<T>(Dictionary<string, T> dictionary, T options, string serviceKey = default)
         {
-            if (serviceKey == null)
+            if (serviceKey == default)
                 serviceKey = string.Empty;
             if (dictionary.ContainsKey(serviceKey))
                 throw new ArgumentException($"Key {serviceKey} already installed for {typeof(T).Name}.");

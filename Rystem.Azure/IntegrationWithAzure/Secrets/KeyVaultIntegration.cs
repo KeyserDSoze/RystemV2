@@ -23,7 +23,7 @@ namespace Rystem.Azure.Integration.Secrets
             CertificateClient = new CertificateClient(vaultUri: new Uri(options.Url), credential: new DefaultAzureCredential(), options: options.CertificateOptions);
             KeyClient = new KeyClient(vaultUri: new Uri(options.Url), credential: new DefaultAzureCredential(), options: options.KeyOptions);
         }
-        public async Task<KeyVaultSecret> GetSecretAsync(string key, string version = null)
+        public async Task<KeyVaultSecret> GetSecretAsync(string key, string version = default)
         {
             return (await SecretClient.GetSecretAsync(key, version)).Value;
         }
@@ -31,7 +31,7 @@ namespace Rystem.Azure.Integration.Secrets
         {
             _ = await SecretClient.SetSecretAsync(key, value);
         }
-        public async Task<KeyVaultKey> GetKeyAsync(string key, string version = null)
+        public async Task<KeyVaultKey> GetKeyAsync(string key, string version = default)
         {
             return (await KeyClient.GetKeyAsync(key, version)).Value;
         }

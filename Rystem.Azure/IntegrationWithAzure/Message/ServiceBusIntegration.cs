@@ -13,7 +13,7 @@ namespace Rystem.Azure.Integration.Message
     /// <summary>
     /// Leave ConnectionString empty if you want to connect through the managed identity
     /// </summary>
-    public sealed record ServiceBusOptions(string FullyQualifiedName, string ConnectionString, ServiceBusProcessorOptions Options = null);
+    public sealed record ServiceBusOptions(string FullyQualifiedName, string ConnectionString, ServiceBusProcessorOptions Options = default);
     public sealed record ServiceBusConfiguration(string QueueName);
 #warning AR - Missing dead lettering and defer
     /// <summary>
@@ -30,14 +30,14 @@ namespace Rystem.Azure.Integration.Message
             {
                 ServiceBusClient client = new(options.ConnectionString);
                 this.Client = client.CreateSender(configuration.QueueName);
-                if (options.Options != null)
+                if (options.Options != default)
                     this.ClientReader = client.CreateProcessor(configuration.QueueName, options.Options);
             }
             else
             {
                 ServiceBusClient client = new(options.FullyQualifiedName, new DefaultAzureCredential());
                 this.Client = client.CreateSender(configuration.QueueName);
-                if (options.Options != null)
+                if (options.Options != default)
                     this.ClientReader = client.CreateProcessor(configuration.QueueName, options.Options);
             }
         }

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace Rystem.Business
 {
-    internal record RystemService(RystemServiceType Type, dynamic Configurations, string ServiceKey);
-    public abstract class RystemServiceProvider<T>
-        where T : RystemServiceProvider<T>
+    internal record ProvidedService(ServiceProviderType Type, dynamic Configurations, string ServiceKey);
+    public abstract class ServiceProvider<T>
+        where T : ServiceProvider<T>
     {
         private const string Name = nameof(T);
-        internal Dictionary<Installation, RystemService> Services { get; } = new();
+        internal Dictionary<Installation, ProvidedService> Services { get; } = new();
         public Type InstanceType { get; private set; }
         internal T AddInstance(Type instanceType)
         {

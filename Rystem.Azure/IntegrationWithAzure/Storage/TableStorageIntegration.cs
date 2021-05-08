@@ -23,10 +23,10 @@ namespace Rystem.Azure.Integration.Storage
             => Configuration = configuration;
         private async Task<CloudTable> GetContextAsync()
         {
-            if (Context == null)
+            if (Context == default)
                 await RaceCondition.RunAsync(async () =>
                 {
-                    if (Context == null)
+                    if (Context == default)
                     {
                         var storageAccount = CloudStorageAccount.Parse(Options.GetConnectionString());
                         var client = storageAccount.CreateCloudTableClient();
@@ -49,10 +49,10 @@ namespace Rystem.Azure.Integration.Storage
             var client = Context ?? await GetContextAsync().NoContext();
             TableOperation operation = TableOperation.Retrieve<DynamicTableEntity>(entity.PartitionKey, entity.RowKey);
             TableResult result = await client.ExecuteAsync(operation).NoContext();
-            return result.Result == null ? default : (DynamicTableEntity)result.Result;
+            return result.Result == default ? default : (DynamicTableEntity)result.Result;
         }
 
-        public async Task<List<DynamicTableEntity>> QueryAsync(string query = null, int? takeCount = null, TableContinuationToken token = null)
+        public async Task<List<DynamicTableEntity>> QueryAsync(string query = default, int? takeCount = default, TableContinuationToken token = default)
         {
             var client = Context ?? await GetContextAsync().NoContext();
             List<DynamicTableEntity> items = new();
@@ -61,9 +61,9 @@ namespace Rystem.Azure.Integration.Storage
                 TableQuerySegment<DynamicTableEntity> seg = await client.ExecuteQuerySegmentedAsync(new TableQuery<DynamicTableEntity>() { FilterString = query, TakeCount = takeCount }, token).NoContext();
                 token = seg.ContinuationToken;
                 items.AddRange(seg);
-                if (takeCount != null && items.Count >= takeCount)
+                if (takeCount != default && items.Count >= takeCount)
                     break;
-            } while (token != null);
+            } while (token != default);
             return items;
         }
         public async Task<bool> UpdateAsync(DynamicTableEntity entity)

@@ -43,7 +43,7 @@ namespace System
         public static async Task<bool> ExistsAsync<TEntity>(this TEntity entity, Installation installation = Installation.Default)
             where TEntity : IDocument
            => await entity.Manager().ExistsAsync(entity, installation).NoContext();
-        public static async Task<IEnumerable<TEntity>> GetAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = null, int? takeCount = null, Installation installation = Installation.Default)
+        public static async Task<IEnumerable<TEntity>> GetAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, int? takeCount = default, Installation installation = Installation.Default)
             where TEntity : IDocument
            => await entity.Manager().GetAsync(entity, installation, expression, takeCount).NoContext();
 
@@ -62,7 +62,7 @@ namespace System
         public static bool Exists<TEntity>(this TEntity entity, Installation installation = Installation.Default)
             where TEntity : IDocument
            => ExistsAsync(entity, installation).ToResult();
-        public static IEnumerable<TEntity> Get<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = null, int? takeCount = null, Installation installation = Installation.Default)
+        public static IEnumerable<TEntity> Get<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, int? takeCount = default, Installation installation = Installation.Default)
             where TEntity : IDocument
            => GetAsync(entity, expression, takeCount, installation).ToResult();
 
@@ -74,16 +74,16 @@ namespace System
 
     public static class NoSqlLinqExtensions
     {
-        public static async Task<TEntity> FirstOrDefaultAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = null, Installation installation = Installation.Default)
+        public static async Task<TEntity> FirstOrDefaultAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
             where TEntity : IDocument
            => (await entity.GetAsync(expression, 1, installation).NoContext()).FirstOrDefault();
-        public static async Task<IEnumerable<TEntity>> ToListAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = null, Installation installation = Installation.Default)
+        public static async Task<IEnumerable<TEntity>> ToListAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
             where TEntity : IDocument
            => (await entity.GetAsync(expression, null, installation).NoContext());
-        public static async Task<IEnumerable<TEntity>> TakeAsync<TEntity>(this TEntity entity, int takeCount, Expression<Func<TEntity, bool>> expression = null, Installation installation = Installation.Default)
+        public static async Task<IEnumerable<TEntity>> TakeAsync<TEntity>(this TEntity entity, int takeCount, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
             where TEntity : IDocument
            => await entity.GetAsync(expression, takeCount, installation).NoContext();
-        public static async Task<int> CountAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = null, Installation installation = Installation.Default)
+        public static async Task<int> CountAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
            where TEntity : IDocument
           => (await entity.GetAsync(expression, null, installation).NoContext()).Count();
     }

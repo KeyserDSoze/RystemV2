@@ -18,7 +18,7 @@ namespace Rystem.Azure.Integration.Message
     /// Leave ConnectionString empty if you want to connect through the managed identity
     /// </summary>
     public sealed record EventHubOptions(string FullyQualifiedName, string ConnectionString, EventProcessorClientOptions ProcessorOptions, StorageOptions StorageOptions);
-    public sealed record EventHubConfiguration(string EventHubName, string ConsumerGroup = null);
+    public sealed record EventHubConfiguration(string EventHubName, string ConsumerGroup = default);
     public sealed class EventHubIntegration
     {
         private readonly EventHubProducerClient Client;
@@ -30,7 +30,7 @@ namespace Rystem.Azure.Integration.Message
             else
                 this.Client = new EventHubProducerClient(options.ConnectionString, configuration.EventHubName);
 
-            if (!string.IsNullOrWhiteSpace(configuration.ConsumerGroup) && options.StorageOptions != null)
+            if (!string.IsNullOrWhiteSpace(configuration.ConsumerGroup) && options.StorageOptions != default)
             {
                 var containerName = $"{configuration.EventHubName.ToLower()}consumergroup";
                 var storageClient = string.IsNullOrWhiteSpace(options.StorageOptions.AccountKey) ? new BlobContainerClient(new Uri(string.Format("https://{0}.blob.core.windows.net/{1}",
@@ -56,9 +56,9 @@ namespace Rystem.Azure.Integration.Message
         public async Task StopReadAsync(CancellationToken cancellationToken = default)
             => await ClientReader.StopProcessingAsync(cancellationToken).NoContext();
 
-        public async Task SendAsync(string message, string partitionKey = null, string partitionId = null, CancellationToken cancellationToken = default)
+        public async Task SendAsync(string message, string partitionKey = default, string partitionId = default, CancellationToken cancellationToken = default)
             => await SendBatchAsync(new string[1] { message }, partitionKey, partitionId, cancellationToken);
-        public async Task SendBatchAsync(IEnumerable<string> messages, string partitionKey = null, string partitionId = null, CancellationToken cancellationToken = default)
+        public async Task SendBatchAsync(IEnumerable<string> messages, string partitionKey = default, string partitionId = default, CancellationToken cancellationToken = default)
         {
             await Client.SendAsync(
                 messages.Select(x => new EventData(new BinaryData(x.ToByteArray()))),

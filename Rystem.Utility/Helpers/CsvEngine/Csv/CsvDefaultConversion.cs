@@ -17,7 +17,7 @@ namespace Rystem.Text
         private readonly Regex SplittingRegex;
         private static readonly Type CsvIgnoreType = typeof(CsvIgnore);
         private static readonly Type CsvPropertyType = typeof(CsvProperty);
-        private static readonly Dictionary<string, PropertyInfo> Properties = typeof(TEntity).GetProperties().Where(x => x.GetCustomAttribute(CsvIgnoreType) == null && StringablePrimitive.Check(x.PropertyType)).ToDictionary(x => x.GetCustomAttribute(CsvPropertyType) == null ? x.Name : ((CsvProperty)x.GetCustomAttribute(CsvPropertyType)).Name, x => x);
+        private static readonly Dictionary<string, PropertyInfo> Properties = typeof(TEntity).GetProperties().Where(x => x.GetCustomAttribute(CsvIgnoreType) == default && StringablePrimitive.Check(x.PropertyType)).ToDictionary(x => x.GetCustomAttribute(CsvPropertyType) == default ? x.Name : ((CsvProperty)x.GetCustomAttribute(CsvPropertyType)).Name, x => x);
         private const string BaseRegex = @"(?<=^|{0})(\""(?:[^\""]|\""\"")*\""|[^{0}]*)";
         public CsvDefaultConversion(char splittingChar = ',')
         {

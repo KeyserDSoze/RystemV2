@@ -19,7 +19,7 @@ namespace Rystem.Reflection
             {
                 MethodBase method = new StackFrame(skipFrames, false).GetMethod();
                 declaringType = method.DeclaringType;
-                if (declaringType == null)
+                if (declaringType == default)
                     return method.Name;
                 skipFrames++;
                 name = full ? declaringType.FullName : declaringType.Name;
@@ -41,7 +41,7 @@ namespace Rystem.Reflection
                             .Where(x =>
                             {
                                 foreach (Type attributeToIgnore in attributesToIgnore)
-                                    if (x.GetCustomAttribute(attributeToIgnore) != null)
+                                    if (x.GetCustomAttribute(attributeToIgnore) != default)
                                         return false;
                                 return true;
                             }).ToArray());

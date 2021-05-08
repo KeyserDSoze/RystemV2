@@ -19,10 +19,10 @@ namespace Rystem.Azure.Integration.Storage
             => Configuration = configuration;
         private async Task<QueueClient> GetContextAsync()
         {
-            if (Context == null)
+            if (Context == default)
                 await RaceCondition.RunAsync(async () =>
                 {
-                    if (Context == null)
+                    if (Context == default)
                     {
                         QueueClient queueClient = default;
                         if (!string.IsNullOrWhiteSpace(Options.AccountKey))

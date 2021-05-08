@@ -34,13 +34,13 @@ namespace Rystem.Business.Document.Implementantion
             this.EntityType = entityType;
             foreach (PropertyInfo pi in this.EntityType.GetProperties())
             {
-                if (pi.GetCustomAttribute(NoDocumentProperty) != null)
+                if (pi.GetCustomAttribute(NoDocumentProperty) != default)
                     continue;
-                if (pi.GetCustomAttribute(PartitionKeyProperty) != null)
+                if (pi.GetCustomAttribute(PartitionKeyProperty) != default)
                     BaseProperties.Add(PartitionKey, pi);
-                else if (pi.GetCustomAttribute(RowKeyProperty) != null)
+                else if (pi.GetCustomAttribute(RowKeyProperty) != default)
                     BaseProperties.Add(RowKey, pi);
-                else if (pi.GetCustomAttribute(TimestampProperty) != null)
+                else if (pi.GetCustomAttribute(TimestampProperty) != default)
                     BaseProperties.Add(Timestamp, pi);
                 else if (pi.PropertyType == typeof(int) || pi.PropertyType == typeof(long) ||
                     pi.PropertyType == typeof(double) || pi.PropertyType == typeof(string) ||
@@ -61,10 +61,10 @@ namespace Rystem.Business.Document.Implementantion
             => Integration.DeleteAsync(GetBase(entity));
         public async Task<bool> ExistsAsync(TEntity entity)
             => await Integration.ExistsAsync(GetBase(entity)).NoContext();
-        public async Task<IEnumerable<TEntity>> GetAsync(TEntity entity, Expression<Func<TEntity, bool>> expression = null, int? takeCount = null)
+        public async Task<IEnumerable<TEntity>> GetAsync(TEntity entity, Expression<Func<TEntity, bool>> expression = default, int? takeCount = default)
         {
             string query = string.Empty;
-            if (expression != null && expression.Body is BinaryExpression) {
+            if (expression != default && expression.Body is BinaryExpression) {
                 var bExpr = expression.Body as BinaryExpression;
                 if (((dynamic)bExpr.Left).Member.Name == BaseProperties[PartitionKey].Name)
                     query = $"{((dynamic)bExpr.Right).Value}/";

@@ -67,7 +67,7 @@ namespace Rystem
     public class CatchResponse
     {
         public Exception Exception { get; }
-        public bool InException => this.Exception != null;
+        public bool InException => this.Exception != default;
         public CatchResponse(Exception exception)
             => this.Exception = exception;
         private CatchResponse() { }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Rystem.Business
 {
-    public class RystemDocumentServiceProvider : RystemServiceProvider<RystemDocumentServiceProvider>
+    public class RystemDocumentServiceProvider : ServiceProvider<RystemDocumentServiceProvider>
     {
         private RystemDocumentServiceProvider() { }
         public static AzureDocumentServiceBuilder WithAzure(Installation installation = Installation.Default)

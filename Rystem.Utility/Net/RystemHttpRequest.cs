@@ -52,14 +52,14 @@ namespace Rystem.Net
             => AddToHeaders("User-Agent", useragent);
         public RystemHttpRequestBuilder WithContentType(string contentType)
             => AddToHeaders("Content-Type", contentType);
-        public RystemHttpRequestBuilder AddBody<T>(T entity, JsonSerializerOptions serializerOptions = null, EncodingType encodingType = EncodingType.UTF8)
-            => ExecuteAction(() => { Body = entity.ToJson(serializerOptions).ToByteArray(encodingType); BodyAsStream = null; });
+        public RystemHttpRequestBuilder AddBody<T>(T entity, JsonSerializerOptions serializerOptions = default, EncodingType encodingType = EncodingType.UTF8)
+            => ExecuteAction(() => { Body = entity.ToJson(serializerOptions).ToByteArray(encodingType); BodyAsStream = default; });
         public RystemHttpRequestBuilder AddBody(string entity, EncodingType encodingType = EncodingType.UTF8)
-            => ExecuteAction(() => { Body = entity.ToByteArray(encodingType); BodyAsStream = null; });
+            => ExecuteAction(() => { Body = entity.ToByteArray(encodingType); BodyAsStream = default; });
         public RystemHttpRequestBuilder AddBody(Stream entity)
-            => ExecuteAction(() => { BodyAsStream = entity; Body = null; });
+            => ExecuteAction(() => { BodyAsStream = entity; Body = default; });
         public RystemHttpRequestBuilder AddBody(byte[] entity)
-           => ExecuteAction(() => { Body = entity; BodyAsStream = null; });
+           => ExecuteAction(() => { Body = entity; BodyAsStream = default; });
         public RystemHttpRequest Build()
             => new(this);
     }
@@ -72,12 +72,12 @@ namespace Rystem.Net
             HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(Builder.Uri);
             httpWebRequest.Timeout = Builder.Timeout;
             httpWebRequest.KeepAlive = Builder.KeepAlive;
-            if (Builder.Method != null)
+            if (Builder.Method != default)
                 httpWebRequest.Method = Builder.Method.ToString();
             foreach (var header in Builder.Headers)
                 httpWebRequest.Headers.Add(header.Key, header.Value);
             Stream body = Builder.Body?.ToStream() ?? Builder.BodyAsStream;
-            if (body != null)
+            if (body != default)
             {
                 using Stream requestStream = await httpWebRequest.GetRequestStreamAsync().NoContext();
                 await body.CopyToAsync(requestStream).NoContext();
@@ -86,7 +86,7 @@ namespace Rystem.Net
             using StreamReader reader = new(httpWebResponse.GetResponseStream());
             return await reader.ReadToEndAsync().NoContext();
         }
-        public async Task<T> InvokeAsync<T>(JsonSerializerOptions options = null)
+        public async Task<T> InvokeAsync<T>(JsonSerializerOptions options = default)
             => (await InvokeAsync().NoContext()).FromJson<T>(options);
     }
 }

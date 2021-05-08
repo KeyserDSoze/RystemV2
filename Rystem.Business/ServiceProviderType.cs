@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Rystem.Business
 {
-    internal enum RystemServiceType
+    internal enum ServiceProviderType
     {
         AzureKeyVault,
         AzureTableStorage,
