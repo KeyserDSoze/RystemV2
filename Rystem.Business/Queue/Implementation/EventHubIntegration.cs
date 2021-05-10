@@ -26,22 +26,22 @@ namespace Rystem.Business.Queue.Implementation
         public string GetName()
            => this.Integration.Configuration.Name;
 
-        public Task<IEnumerable<TEntity>> ReadAsync(int path, int organization)
+        public Task<IEnumerable<TEntity>> ReadAsync(string partitionKey, string rowKey)
             => throw new NotImplementedException("Event hub doesn't allow this operation.");
 
-        public async Task<bool> SendAsync(TEntity message, int path, int organization)
+        public async Task<bool> SendAsync(TEntity message, string partitionKey, string rowKey)
         {
-            await Integration.SendAsync(message.ToJson(), path > 0 ? path.ToString() : null, organization > 0 ? organization.ToString() : null).NoContext();
+            await Integration.SendAsync(message.ToJson(), partitionKey, rowKey).NoContext();
             return true;
         }
-        public async Task<bool> SendBatchAsync(IEnumerable<TEntity> messages, int path, int organization)
+        public async Task<bool> SendBatchAsync(IEnumerable<TEntity> messages, string partitionKey, string rowKey)
         {
-            await Integration.SendBatchAsync(messages.Select(x => x.ToJson()), path > 0 ? path.ToString() : null, organization > 0 ? organization.ToString() : null).NoContext();
+            await Integration.SendBatchAsync(messages.Select(x => x.ToJson()), partitionKey, rowKey).NoContext();
             return true;
         }
-        public Task<long> SendScheduledAsync(TEntity message, int delayInSeconds, int path, int organization)
+        public Task<long> SendScheduledAsync(TEntity message, int delayInSeconds, string partitionKey, string rowKey)
             => throw new NotImplementedException("Event hub doesn't allow this operation.");
-        public Task<IEnumerable<long>> SendScheduledBatchAsync(IEnumerable<TEntity> messages, int delayInSeconds, int path, int organization)
+        public Task<IEnumerable<long>> SendScheduledBatchAsync(IEnumerable<TEntity> messages, int delayInSeconds, string partitionKey, string rowKey)
             => throw new NotImplementedException("Event hub doesn't allow this operation.");
     }
 }

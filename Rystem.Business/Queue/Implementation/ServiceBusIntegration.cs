@@ -27,29 +27,29 @@ namespace Rystem.Business.Queue.Implementation
             return true;
         }
 
-        public Task<IEnumerable<TEntity>> ReadAsync(int path, int organization)
+        public Task<IEnumerable<TEntity>> ReadAsync(string partitionKey, string rowKey)
             => throw new NotImplementedException("ServiceBus doesn't allow this operation.");
 
-        public async Task<bool> SendAsync(TEntity message, int path, int organization)
+        public async Task<bool> SendAsync(TEntity message, string partitionKey, string rowKey)
         {
             await Integration.SendAsync(message.ToJson()).NoContext();
             return true;
         }
 
-        public async Task<bool> SendBatchAsync(IEnumerable<TEntity> messages, int path, int organization)
+        public async Task<bool> SendBatchAsync(IEnumerable<TEntity> messages, string partitionKey, string rowKey)
         {
             await Integration.SendBatchAsync(messages.Select(x => x.ToJson())).NoContext();
             return true;
         }
 
-        public async Task<long> SendScheduledAsync(TEntity message, int delayInSeconds, int path, int organization)
+        public async Task<long> SendScheduledAsync(TEntity message, int delayInSeconds, string partitionKey, string rowKey)
             => await Integration.SendAsync(message.ToJson(), delayInSeconds).NoContext();
 
-        public async Task<IEnumerable<long>> SendScheduledBatchAsync(IEnumerable<TEntity> messages, int delayInSeconds, int path, int organization)
+        public async Task<IEnumerable<long>> SendScheduledBatchAsync(IEnumerable<TEntity> messages, int delayInSeconds, string partitionKey, string rowKey)
         {
             List<Task<long>> sents = new();
             foreach (var message in messages)
-                sents.Add(SendScheduledAsync(message, delayInSeconds, path, organization));
+                sents.Add(SendScheduledAsync(message, delayInSeconds, partitionKey, rowKey));
             await Task.WhenAll(sents).NoContext();
             return sents.Select(x => x.Result);
         }

@@ -16,62 +16,62 @@ namespace System
             where TEntity : IQueue
             => entity.DefaultManager(nameof(DocumentExtensions), GetQueueManager) as QueueManager<TEntity>;
 
-        public static async Task<bool> SendAsync<TEntity>(this TEntity message, int path = 0, int organization = 0, Installation installation = Installation.Default)
+        public static async Task<bool> SendAsync<TEntity>(this TEntity message, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
-            => await message.Manager().SendAsync(message, installation, path, organization).NoContext();
-        public static async Task<long> SendScheduledAsync<TEntity>(this TEntity message, int delayInSeconds, int path = 0, int organization = 0, Installation installation = Installation.Default)
+            => await message.Manager().SendAsync(message, installation, partitionKey, rowKey).NoContext();
+        public static async Task<long> SendScheduledAsync<TEntity>(this TEntity message, int delayInSeconds, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
-           => await message.Manager().SendScheduledAsync(message, delayInSeconds, installation, path, organization).NoContext();
+           => await message.Manager().SendScheduledAsync(message, delayInSeconds, installation, partitionKey, rowKey).NoContext();
 
         public static async Task<bool> DeleteScheduledAsync<TEntity>(this TEntity message, long messageId, Installation installation = Installation.Default)
             where TEntity : IQueue
             => await message.Manager().DeleteScheduledAsync(messageId, installation).NoContext();
-        public static async Task<bool> SendBatchAsync<TEntity>(this IEnumerable<TEntity> messages, int path = 0, int organization = 0, Installation installation = Installation.Default)
+        public static async Task<bool> SendBatchAsync<TEntity>(this IEnumerable<TEntity> messages, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
         {
             bool result = true;
             foreach (var msgs in messages.GroupBy(x => x.GetType().FullName))
-                result &= await msgs.FirstOrDefault().Manager().SendBatchAsync(msgs, installation, path, organization).NoContext();
+                result &= await msgs.FirstOrDefault().Manager().SendBatchAsync(msgs, installation, partitionKey, rowKey).NoContext();
             return result;
         }
 
-        public static async Task<IEnumerable<long>> SendScheduledBatchAsync<TEntity>(this IEnumerable<TEntity> messages, int delayInSeconds, int path = 0, int organization = 0, Installation installation = Installation.Default)
+        public static async Task<IEnumerable<long>> SendScheduledBatchAsync<TEntity>(this IEnumerable<TEntity> messages, int delayInSeconds, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
         {
             List<long> aggregatedResponse = new List<long>();
             foreach (var msgs in messages.GroupBy(x => x.GetType().FullName))
-                aggregatedResponse.AddRange(await msgs.FirstOrDefault().Manager().SendScheduledBatchAsync(msgs, delayInSeconds, installation, path, organization).NoContext());
+                aggregatedResponse.AddRange(await msgs.FirstOrDefault().Manager().SendScheduledBatchAsync(msgs, delayInSeconds, installation, partitionKey, rowKey).NoContext());
             return aggregatedResponse;
         }
 
         [Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-        public static async Task<IEnumerable<TEntity>> ReadAsync<TEntity>(this TEntity message, int path = 0, int organization = 0, Installation installation = Installation.Default)
+        public static async Task<IEnumerable<TEntity>> ReadAsync<TEntity>(this TEntity message, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
-            => await message.Manager().ReadAsync(installation, path, organization).NoContext();
+            => await message.Manager().ReadAsync(installation, partitionKey, rowKey).NoContext();
 
         [Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
         public static async Task<bool> CleanAsync<TEntity>(this TEntity message, Installation installation = Installation.Default)
             where TEntity : IQueue
             => await message.Manager().CleanAsync(installation).NoContext();
 
-        public static bool Send<TEntity>(this TEntity message, int path = 0, int organization = 0, Installation installation = Installation.Default)
+        public static bool Send<TEntity>(this TEntity message, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
-           => message.SendAsync(path, organization, installation).ToResult();
-        public static long SendScheduled<TEntity>(this TEntity message, int delayInSeconds, int path = 0, int organization = 0, Installation installation = Installation.Default)
+           => message.SendAsync(partitionKey, rowKey, installation).ToResult();
+        public static long SendScheduled<TEntity>(this TEntity message, int delayInSeconds, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
-            => message.SendScheduledAsync(delayInSeconds, path, organization, installation).ToResult();
+            => message.SendScheduledAsync(delayInSeconds, partitionKey, rowKey, installation).ToResult();
         public static bool DeleteScheduled<TEntity>(this TEntity message, long messageId, Installation installation = Installation.Default)
             where TEntity : IQueue
             => message.DeleteScheduledAsync(messageId, installation).ToResult();
-        public static bool SendBatch<TEntity>(this IEnumerable<TEntity> messages, int path = 0, int organization = 0, Installation installation = Installation.Default)
+        public static bool SendBatch<TEntity>(this IEnumerable<TEntity> messages, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
-            => messages.SendBatchAsync(path, organization, installation).ToResult();
-        public static IEnumerable<long> SendScheduledBatch<TEntity>(this IEnumerable<TEntity> messages, int delayInSeconds, int path = 0, int organization = 0, Installation installation = Installation.Default)
+            => messages.SendBatchAsync(partitionKey, rowKey, installation).ToResult();
+        public static IEnumerable<long> SendScheduledBatch<TEntity>(this IEnumerable<TEntity> messages, int delayInSeconds, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
-            => messages.SendScheduledBatchAsync(delayInSeconds, path, organization, installation).ToResult();
-        public static IEnumerable<TEntity> Read<TEntity>(this TEntity message, int path = 0, int organization = 0, Installation installation = Installation.Default)
+            => messages.SendScheduledBatchAsync(delayInSeconds, partitionKey, rowKey, installation).ToResult();
+        public static IEnumerable<TEntity> Read<TEntity>(this TEntity message, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
-            => message.ReadAsync(path, organization, installation).ToResult();
+            => message.ReadAsync(partitionKey, rowKey, installation).ToResult();
         public static bool Clean<TEntity>(this TEntity message, Installation installation = Installation.Default)
             where TEntity : IQueue
             => message.CleanAsync(installation).ToResult();

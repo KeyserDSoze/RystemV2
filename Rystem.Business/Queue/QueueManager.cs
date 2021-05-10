@@ -46,18 +46,18 @@ namespace Rystem.Business.Queue
             QueueConfiguration = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
             DefaultEntity = serviceProvider.InstanceType;
         }
-        public async Task<bool> SendAsync(TEntity message, Installation installation, int path, int organization)
-            => await Implementation(installation).SendAsync(message, path, organization).NoContext();
-        public async Task<long> SendScheduledAsync(TEntity message, int delayInSeconds, Installation installation, int path, int organization)
-            => await Implementation(installation).SendScheduledAsync(message, delayInSeconds, path, organization).NoContext();
+        public async Task<bool> SendAsync(TEntity message, Installation installation, string partitionKey, string rowKey)
+            => await Implementation(installation).SendAsync(message, partitionKey, rowKey).NoContext();
+        public async Task<long> SendScheduledAsync(TEntity message, int delayInSeconds, Installation installation, string partitionKey, string rowKey)
+            => await Implementation(installation).SendScheduledAsync(message, delayInSeconds, partitionKey, rowKey).NoContext();
         public async Task<bool> DeleteScheduledAsync(long messageId, Installation installation)
             => await Implementation(installation).DeleteScheduledAsync(messageId).NoContext();
-        public async Task<bool> SendBatchAsync(IEnumerable<TEntity> messages, Installation installation, int path, int organization)
-            => await Implementation(installation).SendBatchAsync(messages.Select(x => x), path, organization).NoContext();
-        public async Task<IEnumerable<long>> SendScheduledBatchAsync(IEnumerable<TEntity> messages, int delayInSeconds, Installation installation, int path, int organization)
-            => await Implementation(installation).SendScheduledBatchAsync(messages.Select(x => x), delayInSeconds, path, organization).NoContext();
-        public async Task<IEnumerable<TEntity>> ReadAsync(Installation installation, int path, int organization)
-           => await Implementation(installation).ReadAsync(path, organization).NoContext();
+        public async Task<bool> SendBatchAsync(IEnumerable<TEntity> messages, Installation installation, string partitionKey, string rowKey)
+            => await Implementation(installation).SendBatchAsync(messages.Select(x => x), partitionKey, rowKey).NoContext();
+        public async Task<IEnumerable<long>> SendScheduledBatchAsync(IEnumerable<TEntity> messages, int delayInSeconds, Installation installation, string partitionKey, string rowKey)
+            => await Implementation(installation).SendScheduledBatchAsync(messages.Select(x => x), delayInSeconds, partitionKey, rowKey).NoContext();
+        public async Task<IEnumerable<TEntity>> ReadAsync(Installation installation, string partitionKey, string rowKey)
+           => await Implementation(installation).ReadAsync(partitionKey, rowKey).NoContext();
         public async Task<bool> CleanAsync(Installation installation)
             => await Implementation(installation).CleanAsync().NoContext();
         public string GetName(Installation installation) => Implementations[installation].GetName();

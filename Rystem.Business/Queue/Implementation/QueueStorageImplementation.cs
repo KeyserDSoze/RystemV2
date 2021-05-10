@@ -26,29 +26,29 @@ namespace Rystem.Business.Queue.Implementation
         public string GetName()
            => this.Integration.Configuration.Name;
 
-        public async Task<IEnumerable<TEntity>> ReadAsync(int path, int organization)
+        public async Task<IEnumerable<TEntity>> ReadAsync(string partitionKey, string rowKey)
             => (await Integration.ReadAsync().NoContext()).Select(x => x.FromJson<TEntity>());
 
-        public async Task<bool> SendAsync(TEntity message, int path, int organization)
+        public async Task<bool> SendAsync(TEntity message, string partitionKey, string rowKey)
             => await Integration.SendAsync(message.ToJson());
 
-        public async Task<bool> SendBatchAsync(IEnumerable<TEntity> messages, int path, int organization)
+        public async Task<bool> SendBatchAsync(IEnumerable<TEntity> messages, string partitionKey, string rowKey)
         {
             List<Task> sents = new();
             foreach (var message in messages)
-                sents.Add(SendAsync(message, path, organization));
+                sents.Add(SendAsync(message, partitionKey, rowKey));
             await Task.WhenAll(sents).NoContext();
             return true;
         }
 
-        public async Task<long> SendScheduledAsync(TEntity message, int delayInSeconds, int path, int organization)
+        public async Task<long> SendScheduledAsync(TEntity message, int delayInSeconds, string partitionKey, string rowKey)
             => await Integration.SendScheduledAsync(message.ToJson(), delayInSeconds);
 
-        public async Task<IEnumerable<long>> SendScheduledBatchAsync(IEnumerable<TEntity> messages, int delayInSeconds, int path, int organization)
+        public async Task<IEnumerable<long>> SendScheduledBatchAsync(IEnumerable<TEntity> messages, int delayInSeconds, string partitionKey, string rowKey)
         {
             List<Task<long>> sents = new();
             foreach (var message in messages)
-                sents.Add(SendScheduledAsync(message, delayInSeconds, path, organization));
+                sents.Add(SendScheduledAsync(message, delayInSeconds, partitionKey, rowKey));
             await Task.WhenAll(sents).NoContext();
             return sents.Select(x => x.Result);
         }
