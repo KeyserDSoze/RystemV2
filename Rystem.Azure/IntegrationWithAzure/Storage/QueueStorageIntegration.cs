@@ -9,13 +9,16 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Storage
 {
-    public sealed record QueueStorageConfiguration (string QueueName);
+    public sealed record QueueStorageConfiguration(string Name) : Configuration(Name)
+    {
+        public QueueStorageConfiguration() : this(string.Empty) { }
+    }
     public sealed class QueueStorageIntegration : BaseStorageClient
     {
         private QueueClient Context;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
-        private readonly QueueStorageConfiguration Configuration;
-        public QueueStorageIntegration(QueueStorageConfiguration configuration, StorageOptions options) : base(options) 
+        public QueueStorageConfiguration Configuration { get; }
+        public QueueStorageIntegration(QueueStorageConfiguration configuration, StorageOptions options) : base(options)
             => Configuration = configuration;
         private async Task<QueueClient> GetContextAsync()
         {
@@ -28,18 +31,18 @@ namespace Rystem.Azure.Integration.Storage
                         if (!string.IsNullOrWhiteSpace(Options.AccountKey))
                         {
                             var client = new QueueServiceClient(Options.GetConnectionString());
-                            queueClient = client.GetQueueClient(Configuration.QueueName);
+                            queueClient = client.GetQueueClient(Configuration.Name.ToLower());
                         }
                         else
                         {
                             queueClient = new QueueClient(new Uri(string.Format("https://{0}.queue.core.windows.net/{1}",
                                                 Options.AccountName,
-                                                Configuration.QueueName)),
+                                                Configuration.Name.ToLower())),
                                                 new DefaultAzureCredential());
                         }
+                        Context = queueClient;
                         if (!await queueClient.ExistsAsync().NoContext())
                             await queueClient.CreateIfNotExistsAsync().NoContext();
-                        Context = queueClient;
                     }
                 }, RaceId).NoContext();
             return Context;

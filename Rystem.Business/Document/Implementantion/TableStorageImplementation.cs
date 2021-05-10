@@ -96,7 +96,7 @@ namespace Rystem.Business.Document.Implementantion
         public Task<bool> DeleteBatchAsync(IEnumerable<TEntity> entities)
             => Integration.DeleteBatchAsync(entities.Select(x => GetBase(x)));
         public string GetName()
-            => this.Integration.Configuration.TableName;
+            => this.Integration.Configuration.Name;
         private DynamicTableEntity WriteEntity(TEntity entity)
         {
             DynamicTableEntity dynamicTableEntity = this.GetBase(entity);

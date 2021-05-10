@@ -18,30 +18,35 @@ namespace Rystem.Azure.Integration.Message
     /// Leave ConnectionString empty if you want to connect through the managed identity
     /// </summary>
     public sealed record EventHubOptions(string FullyQualifiedName, string ConnectionString, EventProcessorClientOptions ProcessorOptions, StorageOptions StorageOptions);
-    public sealed record EventHubConfiguration(string EventHubName, string ConsumerGroup = default);
+    public sealed record EventHubConfiguration(string Name, string ConsumerGroup = default) : Configuration(Name)
+    {
+        public EventHubConfiguration() : this(string.Empty) { }
+    }
     public sealed class EventHubIntegration
     {
         private readonly EventHubProducerClient Client;
         private readonly EventProcessorClient ClientReader;
+        public EventHubConfiguration Configuration { get; }
         public EventHubIntegration(EventHubConfiguration configuration, EventHubOptions options)
         {
+            Configuration = configuration;
             if (string.IsNullOrWhiteSpace(options.ConnectionString))
-                this.Client = new EventHubProducerClient(options.FullyQualifiedName, configuration.EventHubName, new DefaultAzureCredential());
+                this.Client = new EventHubProducerClient(options.FullyQualifiedName, configuration.Name, new DefaultAzureCredential());
             else
-                this.Client = new EventHubProducerClient(options.ConnectionString, configuration.EventHubName);
+                this.Client = new EventHubProducerClient(options.ConnectionString, configuration.Name);
 
             if (!string.IsNullOrWhiteSpace(configuration.ConsumerGroup) && options.StorageOptions != default)
             {
-                var containerName = $"{configuration.EventHubName.ToLower()}consumergroup";
+                var containerName = $"{configuration.Name.ToLower()}consumergroup";
                 var storageClient = string.IsNullOrWhiteSpace(options.StorageOptions.AccountKey) ? new BlobContainerClient(new Uri(string.Format("https://{0}.blob.core.windows.net/{1}",
                                                 options.StorageOptions.AccountName,
                                                 containerName)),
                                                 new DefaultAzureCredential()) :
                                                 new BlobContainerClient(options.StorageOptions.GetConnectionString(), containerName);
                 if (string.IsNullOrWhiteSpace(options.ConnectionString))
-                    ClientReader = new EventProcessorClient(storageClient, configuration.ConsumerGroup, options.FullyQualifiedName, configuration.EventHubName, new DefaultAzureCredential(), options.ProcessorOptions);
+                    ClientReader = new EventProcessorClient(storageClient, configuration.ConsumerGroup, options.FullyQualifiedName, configuration.Name, new DefaultAzureCredential(), options.ProcessorOptions);
                 else
-                    ClientReader = new EventProcessorClient(storageClient, configuration.ConsumerGroup, options.ConnectionString, configuration.EventHubName, options.ProcessorOptions);
+                    ClientReader = new EventProcessorClient(storageClient, configuration.ConsumerGroup, options.ConnectionString, configuration.Name, options.ProcessorOptions);
             }
         }
         public async Task<IEnumerable<string>> ListPartitionAsync()

@@ -14,7 +14,10 @@ namespace Rystem.Azure.Integration.Message
     /// Leave ConnectionString empty if you want to connect through the managed identity
     /// </summary>
     public sealed record ServiceBusOptions(string FullyQualifiedName, string ConnectionString, ServiceBusProcessorOptions Options = default);
-    public sealed record ServiceBusConfiguration(string QueueName);
+    public sealed record ServiceBusConfiguration(string Name) : Configuration(Name)
+    {
+        public ServiceBusConfiguration() : this(string.Empty) { }
+    }
 #warning AR - Missing dead lettering and defer
     /// <summary>
     /// https://github.com/Azure/azure-sdk-for-net/blob/Azure.Messaging.ServiceBus_7.1.2/sdk/servicebus/Azure.Messaging.ServiceBus/README.md
@@ -23,22 +26,24 @@ namespace Rystem.Azure.Integration.Message
     {
         private readonly ServiceBusSender Client;
         private readonly ServiceBusProcessor ClientReader;
+        public ServiceBusConfiguration Configuration { get; }
 
         public ServiceBusIntegration(ServiceBusConfiguration configuration, ServiceBusOptions options)
         {
+            Configuration = configuration;
             if (!string.IsNullOrWhiteSpace(options.ConnectionString))
             {
                 ServiceBusClient client = new(options.ConnectionString);
-                this.Client = client.CreateSender(configuration.QueueName);
+                this.Client = client.CreateSender(configuration.Name);
                 if (options.Options != default)
-                    this.ClientReader = client.CreateProcessor(configuration.QueueName, options.Options);
+                    this.ClientReader = client.CreateProcessor(configuration.Name, options.Options);
             }
             else
             {
                 ServiceBusClient client = new(options.FullyQualifiedName, new DefaultAzureCredential());
-                this.Client = client.CreateSender(configuration.QueueName);
+                this.Client = client.CreateSender(configuration.Name);
                 if (options.Options != default)
-                    this.ClientReader = client.CreateProcessor(configuration.QueueName, options.Options);
+                    this.ClientReader = client.CreateProcessor(configuration.Name, options.Options);
             }
         }
 

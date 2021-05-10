@@ -30,11 +30,14 @@ namespace RystemV2
         static async Task Main(string[] args)
         {
             //(new Sample() as IDocument).Build();
-            await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.UpdateAsync(Installation.Inst00).NoContext();
-            await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd3", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.UpdateAsync(Installation.Inst00).NoContext();
-            var x = (await new Sample().ToListAsync(x => x.Ale1 == "dddd", Installation.Inst00).NoContext()).ToList();
+            //await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.UpdateAsync(Installation.Inst00).NoContext();
+            //await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd3", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.UpdateAsync(Installation.Inst00).NoContext();
+            //var x = (await new Sample().ToListAsync(x => x.Ale1 == "dddd", Installation.Inst00).NoContext()).ToList();
+            await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.SendAsync().NoContext();
+            await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd3", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.SendAsync().NoContext();
+            var x = (await new Sample().ReadAsync().NoContext()).ToList();
         }
-        public class Sample : IDocument
+        public class Sample : IDocument, IQueue
         {
             [NoDocumentProperty]
             public string Ale { get; set; }
@@ -52,6 +55,13 @@ namespace RystemV2
                     .WithTableStorage()
                     .AndWithAzure(Installation.Inst00)
                     .WithBlobStorage();
+            }
+
+            public RystemQueueServiceProvider ConfigureQueue()
+            {
+                return RystemQueueServiceProvider
+                    .WithAzure()
+                    .WithQueueStorage();
             }
         }
     }

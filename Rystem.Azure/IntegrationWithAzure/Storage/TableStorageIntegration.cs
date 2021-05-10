@@ -13,29 +13,32 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Storage
 {
-    public sealed record TableStorageConfiguration(string TableName);
+    public sealed record TableStorageConfiguration(string Name) : Configuration(Name)
+    {
+        public TableStorageConfiguration() : this(string.Empty) { }
+    }
     public sealed class TableStorageIntegration : BaseStorageClient
     {
         private CloudTable Context;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
         public TableStorageConfiguration Configuration { get; }
-        public TableStorageIntegration(TableStorageConfiguration configuration, StorageOptions options) : base(options) 
+        public TableStorageIntegration(TableStorageConfiguration configuration, StorageOptions options) : base(options)
             => Configuration = configuration;
         private async Task<CloudTable> GetContextAsync()
         {
             if (Context == default)
-                await RaceCondition.RunAsync(async () =>
+                await RaceCondition.RunAsync((Func<Task>)(async () =>
                 {
                     if (Context == default)
                     {
                         var storageAccount = CloudStorageAccount.Parse(Options.GetConnectionString());
                         var client = storageAccount.CreateCloudTableClient();
-                        var tableClient = client.GetTableReference(Configuration.TableName);
+                        var tableClient = client.GetTableReference(Configuration.Name);
                         if (!await tableClient.ExistsAsync().NoContext())
                             await tableClient.CreateIfNotExistsAsync().NoContext();
                         Context = tableClient;
                     }
-                }, RaceId).NoContext();
+                }), RaceId).NoContext();
             return Context;
         }
         public async Task<bool> DeleteAsync(DynamicTableEntity entity)

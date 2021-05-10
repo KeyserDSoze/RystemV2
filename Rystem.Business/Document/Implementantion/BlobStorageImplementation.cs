@@ -93,7 +93,7 @@ namespace Rystem.Business.Document.Implementantion
             return true;
         }
         public string GetName()
-            => this.Integration.Configuration.ContainerName;
+            => this.Integration.Configuration.Name;
         private Task<TEntity> ReadEntity(BlobWrapper wrapper)
             => wrapper.Content.FromJsonAsync<TEntity>();
     }

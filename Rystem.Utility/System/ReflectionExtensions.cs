@@ -10,11 +10,11 @@ namespace Rystem.Reflection
 {
     public static class ReflectionHelper
     {
-        public static string NameOfCallingClass(bool full = false)
+        public static string NameOfCallingClass(int deep = 1, bool full = false)
         {
             string name;
             Type declaringType;
-            int skipFrames = 2;
+            int skipFrames = 1 + deep;
             do
             {
                 MethodBase method = new StackFrame(skipFrames, false).GetMethod();

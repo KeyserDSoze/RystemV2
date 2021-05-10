@@ -16,7 +16,10 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Storage
 {
-    public sealed record BlobStorageConfiguration(string ContainerName);
+    public sealed record BlobStorageConfiguration(string Name) : Configuration(Name)
+    {
+        public BlobStorageConfiguration() : this(string.Empty) { }
+    }
     public sealed class BlobStorageIntegration : BaseStorageClient
     {
         private BlobContainerClient Context;
@@ -28,7 +31,7 @@ namespace Rystem.Azure.Integration.Storage
         private async Task<BlobContainerClient> GetContextAsync()
         {
             if (Context == default)
-                await RaceCondition.RunAsync(async () =>
+                await RaceCondition.RunAsync((Func<Task>)(async () =>
                 {
                     if (Context == default)
                     {
@@ -36,20 +39,20 @@ namespace Rystem.Azure.Integration.Storage
                         if (!string.IsNullOrWhiteSpace(Options.AccountKey))
                         {
                             var client = new BlobServiceClient(Options.GetConnectionString());
-                            blobClient = client.GetBlobContainerClient(Configuration.ContainerName.ToLower());
+                            blobClient = client.GetBlobContainerClient(Configuration.Name.ToLower());
                         }
                         else
                         {
                             blobClient = new BlobContainerClient(new Uri(string.Format("https://{0}.blob.core.windows.net/{1}",
                                                 Options.AccountName,
-                                                Configuration.ContainerName.ToLower())),
+                                                Configuration.Name.ToLower())),
                                                 new DefaultAzureCredential());
                         }
                         Context = blobClient;
                         if (!await blobClient.ExistsAsync().NoContext())
                             await blobClient.CreateIfNotExistsAsync().NoContext();
                     }
-                }, RaceId).NoContext();
+                }), RaceId).NoContext();
             return Context;
         }
         public async Task<bool> DeleteAsync(string name)
