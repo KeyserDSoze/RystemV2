@@ -6,7 +6,7 @@ namespace Rystem.Business
     public interface IQueue
     {
         RystemQueueServiceProvider ConfigureQueue();
-        internal RystemQueueServiceProvider BuildDocument()
+        internal RystemQueueServiceProvider BuildQueue()
             => ConfigureQueue().AddInstance(this.GetType());
     }
 }

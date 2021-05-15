@@ -11,7 +11,7 @@ namespace System
     {
         private static dynamic GetQueueManager<TEntity>(TEntity entity)
            where TEntity : IQueue
-           => new QueueManager<TEntity>(entity.BuildDocument());
+           => new QueueManager<TEntity>(entity.BuildQueue());
         private static QueueManager<TEntity> Manager<TEntity>(this TEntity entity)
             where TEntity : IQueue
             => entity.DefaultManager(nameof(DocumentExtensions), GetQueueManager) as QueueManager<TEntity>;

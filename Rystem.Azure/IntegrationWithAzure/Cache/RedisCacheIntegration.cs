@@ -11,6 +11,10 @@ using System.Threading.Tasks;
 namespace Rystem.Azure.Integration.Cache
 {
     public sealed record RedisCacheOptions(string ConnectionString, TimeSpan ExpiringDefault, int NumberOfClients = 1);
+    public sealed record RedisCacheConfiguration(TimeSpan ExpiringDefault, int NumberOfClients = 1) : Configuration(string.Empty)
+    {
+        public RedisCacheConfiguration() : this(default) { }
+    }
     public sealed class RedisCacheIntegration
     {
         private int RoundRobin = -1;
