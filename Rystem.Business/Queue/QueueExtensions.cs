@@ -14,7 +14,7 @@ namespace System
            => new QueueManager<TEntity>(entity.BuildQueue());
         private static QueueManager<TEntity> Manager<TEntity>(this TEntity entity)
             where TEntity : IQueue
-            => entity.DefaultManager(nameof(DocumentExtensions), GetQueueManager) as QueueManager<TEntity>;
+            => entity.DefaultManager(nameof(QueueExtensions), GetQueueManager) as QueueManager<TEntity>;
 
         public static async Task<bool> SendAsync<TEntity>(this TEntity message, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue

@@ -1,4 +1,6 @@
-﻿using Rystem.Azure.Integration.Storage;
+﻿using Microsoft.Azure.Cosmos.Table;
+using Rystem.Azure.Integration.Storage;
+using Rystem.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,75 +10,49 @@ namespace Rystem.Business
 {
     internal class InTableStorage<T> : ICacheImplementation<T>
     {
-        private CloudTable context;
-        private readonly RaceCondition RaceCondition = new RaceCondition();
-        private async Task<CloudTable> GetContextAsync()
+        private readonly TableStorageIntegration Integration;
+        private readonly string Prefix;
+        internal InTableStorage(TableStorageIntegration integration, string prefix)
         {
-            if (context == null)
-                await RaceCondition.ExecuteAsync(async () =>
-                {
-                    if (context == null)
-                    {
-                        CloudStorageAccount storageAccount = CloudStorageAccount.Parse(Configuration.ConnectionString);
-                        CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-                        var preContext = tableClient.GetTableReference(TableName);
-                        if (!await preContext.ExistsAsync().NoContext())
-                            await preContext.CreateIfNotExistsAsync().NoContext();
-                        context = preContext;
-                    }
-                }).NoContext();
-            return context;
+            Integration = integration;
+            Prefix = prefix;
         }
-        private static long ExpireCache = 0;
-        private const string TableName = "RystemCache";
-        private readonly string FullName;
-        private readonly CacheConfiguration Properties;
-        private readonly RystemCacheConfiguration Configuration;
-        internal InTableStorage(TableStorageIntegration configuration)
-        {
-            this.FullName = configuration.CloudProperties.Namespace;
-            Configuration = configuration;
-            Properties = configuration.CloudProperties;
-            ExpireCache = Properties.ExpireTimeSpan.Ticks;
-        }
+
+        private const string ValueColumn = "Value";
+        private const string ExpiringColumn = "Expire";
         public async Task<T> InstanceAsync(string key)
         {
-            var client = context ?? await GetContextAsync();
-            TableOperation operation = TableOperation.Retrieve<RystemCache>(FullName, key);
-            TableResult result = await client.ExecuteAsync(operation).NoContext();
-            return result.Result != default ? ((RystemCache)result.Result).Data.FromDefaultJson<T>() : default;
-        }
-        public async Task<bool> UpdateAsync(string key, T value, TimeSpan expiringTime)
-        {
-            var client = context ?? await GetContextAsync();
-            long expiring = ExpireCache;
-            if (expiringTime != default)
-                expiring = expiringTime.Ticks;
-            RystemCache rystemCache = new RystemCache()
+            var instance = await Integration.GetAsync(new DynamicTableEntity()
             {
-                PartitionKey = FullName,
-                RowKey = key,
-                Data = value.ToDefaultJson(),
-                E = expiring > 0 ? expiring + DateTime.UtcNow.Ticks : DateTime.MaxValue.Ticks
-            };
-            TableOperation operation = TableOperation.InsertOrReplace(rystemCache);
-            TableResult result = await client.ExecuteAsync(operation).NoContext();
-            return result.HttpStatusCode == 204;
+                PartitionKey = Prefix,
+                RowKey = key
+            }).NoContext();
+            if (DateTime.UtcNow > instance.Properties[ExpiringColumn].DateTime)
+                return default;
+            else
+                return instance.Properties[ValueColumn].StringValue.FromJson<T>();
         }
+
+        public async Task<bool> UpdateAsync(string key, T value, TimeSpan expiringTime)
+            => await Integration.UpdateAsync(new DynamicTableEntity
+            {
+                PartitionKey = Prefix,
+                RowKey = key,
+                Properties = new Dictionary<string, EntityProperty>()
+                {
+                    { ValueColumn, new EntityProperty(value.ToJson()) },
+                    { ExpiringColumn, new EntityProperty(expiringTime == default ? DateTime.MaxValue : DateTime.UtcNow.Add(expiringTime)) }
+                }
+            }).NoContext();
         public async Task<bool> DeleteAsync(string key)
         {
-            var client = context ?? await GetContextAsync();
-            RystemCache rystemCache = new RystemCache()
-            {
-                PartitionKey = FullName,
-                RowKey = key,
-                ETag = "*"
-            };
-            TableOperation operation = TableOperation.Delete(rystemCache);
             try
             {
-                TableResult result = await client.ExecuteAsync(operation).NoContext();
-                return result.HttpStatusCode == 204;
+                return await Integration.DeleteAsync(new DynamicTableEntity
+                {
+                    PartitionKey = Prefix,
+                    RowKey = key
+                }).NoContext();
             }
             catch (StorageException er)
             {
@@ -87,43 +63,11 @@ namespace Rystem.Business
         }
         public async Task<CacheStatus<T>> ExistsAsync(string key)
         {
-            var client = context ?? await GetContextAsync();
-            TableOperation operation = TableOperation.Retrieve<RystemCache>(FullName, key);
-            TableResult result = await client.ExecuteAsync(operation).NoContext();
-            if (result.Result == null)
-                return CacheStatus<T>.NotOk();
-            RystemCache cached = (RystemCache)result.Result;
-            if (DateTime.UtcNow.Ticks > cached.E)
-            {
-                await this.DeleteAsync(key).NoContext();
-                return CacheStatus<T>.NotOk();
-            }
-            return CacheStatus<T>.Ok(cached.Data.FromDefaultJson<T>());
+            var instance = await InstanceAsync(key).NoContext();
+            return instance != null ? CacheStatus<T>.Ok(instance) : CacheStatus<T>.NotOk();
         }
+
         public async Task<IEnumerable<string>> ListAsync()
-        {
-            var client = context ?? await GetContextAsync();
-            TableQuery tableQuery = new TableQuery
-            {
-                FilterString = $"PartitionKey eq '{FullName}'"
-            };
-            TableContinuationToken tableContinuationToken = new TableContinuationToken();
-            List<string> keys = new List<string>();
-            do
-            {
-                TableQuerySegment<DynamicTableEntity> tableQuerySegment = await client.ExecuteQuerySegmentedAsync(tableQuery, tableContinuationToken).NoContext();
-                IEnumerable<string> keysFromQuery = tableQuerySegment.Results.Select(x => x.RowKey);
-                tableContinuationToken = tableQuerySegment.ContinuationToken;
-                keys.AddRange(keysFromQuery);
-            } while (tableContinuationToken != null);
-            return keys;
-        }
-        public Task WarmUp()
-            => Task.CompletedTask;
-        private class RystemCache : TableEntity
-        {
-            public string Data { get; set; }
-            public long E { get; set; }
-        }
+            => (await Integration.QueryAsync($"PartitionKey eq '{Prefix}'").NoContext()).Select(x => x.RowKey);
     }
 }

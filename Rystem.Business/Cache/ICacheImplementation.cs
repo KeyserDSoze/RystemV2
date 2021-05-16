@@ -11,6 +11,5 @@ namespace Rystem.Business
         Task<CacheStatus<T>> ExistsAsync(string key);
         Task<bool> DeleteAsync(string key);
         Task<IEnumerable<string>> ListAsync();
-        Task WarmUp();
     }
 }

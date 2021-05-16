@@ -31,7 +31,7 @@ namespace Rystem.Azure.Integration.Storage
         private async Task<BlobContainerClient> GetContextAsync()
         {
             if (Context == default)
-                await RaceCondition.RunAsync((Func<Task>)(async () =>
+                await RaceCondition.RunAsync(async () =>
                 {
                     if (Context == default)
                     {
@@ -52,7 +52,7 @@ namespace Rystem.Azure.Integration.Storage
                         if (!await blobClient.ExistsAsync().NoContext())
                             await blobClient.CreateIfNotExistsAsync().NoContext();
                     }
-                }), RaceId).NoContext();
+                }, RaceId).NoContext();
             return Context;
         }
         public async Task<bool> DeleteAsync(string name)
@@ -67,8 +67,8 @@ namespace Rystem.Azure.Integration.Storage
         }
         public async Task<List<string>> SearchAsync(string prefix = default, int? takeCount = default, CancellationToken token = default)
         {
-            var client = Context ?? await GetContextAsync();
-            List<string> items = new List<string>();
+            var client = Context ?? await GetContextAsync().NoContext();
+            List<string> items = new();
             int count = 0;
             await foreach (var t in client.GetBlobsAsync(BlobTraits.None, BlobStates.None, prefix, token))
             {
@@ -81,7 +81,7 @@ namespace Rystem.Azure.Integration.Storage
         }
         public async Task<List<BlobPropertyWrapper>> FetchPropertiesAsync(string prefix = default, int? takeCount = default, CancellationToken token = default)
         {
-            var client = Context ?? await GetContextAsync();
+            var client = Context ?? await GetContextAsync().NoContext();
             List<BlobPropertyWrapper> items = new();
             int count = 0;
             await foreach (var blob in client.GetBlobsAsync(BlobTraits.All, BlobStates.All, prefix, token))
@@ -95,7 +95,7 @@ namespace Rystem.Azure.Integration.Storage
         }
         public async Task<bool> SetBlobPropertiesAsync(string name, BlobHttpHeaders headers = default, Dictionary<string, string> metadata = default, Dictionary<string, string> tags = default, BlobRequestConditions headersConditions = default, BlobRequestConditions metadataConditions = default, BlobRequestConditions tagConditions = default, CancellationToken token = default)
         {
-            var client = Context ?? await GetContextAsync();
+            var client = Context ?? await GetContextAsync().NoContext();
             var blobClient = client.GetBlobClient(name);
             if (headers != default)
                 await blobClient.SetHttpHeadersAsync(headers, headersConditions, token).NoContext();
@@ -107,7 +107,7 @@ namespace Rystem.Azure.Integration.Storage
         }
         public async Task<BlobWrapper> ReadAsync(string name, bool fetchProperties = false)
         {
-            var client = Context ?? await GetContextAsync();
+            var client = Context ?? await GetContextAsync().NoContext();
             var blobClient = client.GetBlobClient(name);
             var memoryStream = new MemoryStream();
             await blobClient.DownloadToAsync(memoryStream).NoContext();
@@ -126,6 +126,14 @@ namespace Rystem.Azure.Integration.Storage
                 Properties = properties,
                 Tags = tags
             };
+        }
+        public async Task<BlobWrapper> ReadPropertiesAsync(string name)
+        {
+            var client = Context ?? await GetContextAsync();
+            var blobClient = client.GetBlobClient(name);
+            var properties = (await blobClient.GetPropertiesAsync().NoContext()).Value;
+            var tags = (await blobClient.GetTagsAsync().NoContext()).Value.Tags;
+            return new BlobWrapper() { Name = name, Properties = properties, Tags = tags };
         }
         public async Task<List<BlobWrapper>> ListAsync(string prefix = default, int? takeCount = default, CancellationToken token = default)
         {

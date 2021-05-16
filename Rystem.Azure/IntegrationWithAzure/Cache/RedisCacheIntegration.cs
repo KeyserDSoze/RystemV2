@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Rystem.Azure.Integration.Cache
 {
     public sealed record RedisCacheOptions(string ConnectionString, TimeSpan ExpiringDefault, int NumberOfClients = 1);
-    public sealed record RedisCacheConfiguration(TimeSpan ExpiringDefault, int NumberOfClients = 1) : Configuration(string.Empty)
+    public sealed record RedisCacheConfiguration(string Prefix, TimeSpan ExpiringDefault, int NumberOfClients = 1) : Configuration(Prefix)
     {
         public RedisCacheConfiguration() : this(default) { }
     }

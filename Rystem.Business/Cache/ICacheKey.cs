@@ -12,14 +12,15 @@ namespace Rystem.Business
         RystemCacheServiceProvider ConfigureCache();
         internal RystemCacheServiceProvider BuildCache()
             => ConfigureCache().AddInstance(this.GetType());
-        private const char Separator = '╬';
-        private static readonly Type CacheIgnore = typeof(CacheIgnoreAttribute);
+        internal const char Separator = '╬';
+        internal static readonly Type CacheIgnore = typeof(CacheIgnoreAttribute);
         internal string ToKeyString()
         {
             StringBuilder valueBuilder = new();
-            foreach (var property in this.GetType().FetchProperties(CacheIgnore))
-                valueBuilder.Append($"{Separator}{property.GetValue(this)}");
-            return valueBuilder.ToString();
+            var type = GetType();
+            foreach (var property in type.FetchProperties(CacheIgnore))
+                valueBuilder.Append($"{property.GetValue(this)}{Separator}");
+            return valueBuilder.ToString().Trim(Separator);
         }
         Task<TInstance> FetchAsync();
     }
