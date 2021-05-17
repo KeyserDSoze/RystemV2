@@ -39,14 +39,14 @@ namespace RystemV2
         }
         public class Sample : IDocument, IQueue
         {
-            [NoDocumentProperty]
+            [NoDocumentAttribute]
             public string Ale { get; set; }
-            [PartitionKeyProperty]
+            [PartitionKeyAttribute]
             public string Ale1 { get; set; }
-            [RowKeyProperty]
+            [RowKeyAttribute]
             public string Ale2 { get; set; }
             public string Ale3 { get; set; }
-            [TimestampProperty]
+            [TimestampAttribute]
             public DateTime Timestamp { get; set; }
             public RystemDocumentServiceProvider ConfigureDocument()
             {

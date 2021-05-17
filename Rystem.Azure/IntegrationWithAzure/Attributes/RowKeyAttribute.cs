@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration
 {
-    public class RowKeyProperty : Attribute
+    public class RowKeyAttribute : Attribute
     {
     }
 }

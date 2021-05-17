@@ -1,6 +1,9 @@
 ﻿using Rystem.Text;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Rystem
 {
@@ -49,7 +52,7 @@ namespace Rystem
     }
     internal class QueryStrategy
     {
-        internal static string Create(Expression expression)
+        internal static string Create(Expression expression, Dictionary<string, PropertyInfo> baseProperties)
         {
             //if (expression is BinaryExpression)
             //    return null;
@@ -118,7 +121,7 @@ namespace Rystem
             //{
             //    expression = (expression as LambdaExpression).Body;
             //}
-            return expressionFactory.Convert(expression);
+            return expressionFactory.Convert(expression, baseProperties);
         }
         internal static string ValueToString(object value)
         {
@@ -141,17 +144,19 @@ namespace Rystem
     }
     internal interface IExpressionStrategy
     {
-        string Convert(Expression expression);
+        string Convert(Expression expression, Dictionary<string, PropertyInfo> baseProperties);
     }
     internal class BinaryExpressionStrategy : IExpressionStrategy
     {
-        public string Convert(Expression expression)
+        public string Convert(Expression expression, Dictionary<string, PropertyInfo> baseProperties)
         {
             BinaryExpression binaryExpression = (BinaryExpression)expression;
             if (ExpressionTypeExtensions.IsRightASingleValue(binaryExpression.NodeType))
             {
                 dynamic xx = binaryExpression.Left;
                 string name = xx.Member.Name;
+                if (baseProperties.Any(x => x.Value.Name == name))
+                    name = baseProperties.First(x => x.Value.Name == name).Key;
                 object uu = Expression.Lambda(binaryExpression.Right).Compile().DynamicInvoke();
                 return name + ExpressionTypeExtensions.MakeLogic(binaryExpression.NodeType) + QueryStrategy.ValueToString(uu);
             }
@@ -160,7 +165,7 @@ namespace Rystem
     }
     internal class UnaryExpressionStrategy : IExpressionStrategy
     {
-        public string Convert(Expression expression)
+        public string Convert(Expression expression, Dictionary<string, PropertyInfo> baseProperties)
         {
             UnaryExpression unaryExpression = (UnaryExpression)expression;
             dynamic aa = unaryExpression.Operand;
@@ -171,13 +176,15 @@ namespace Rystem
     }
     internal class MethodCallerExpressionStrategy : IExpressionStrategy
     {
-        public string Convert(Expression expression)
+        public string Convert(Expression expression, Dictionary<string, PropertyInfo> baseProperties)
         {
             MethodCallExpression methodCallExpression = (MethodCallExpression)expression;
             if (ExpressionTypeExtensions.IsRightASingleValue(methodCallExpression.NodeType))
             {
                 dynamic xx = methodCallExpression.Arguments[0];
                 string name = xx.Member.Name;
+                if (baseProperties.Any(x => x.Value.Name == name))
+                    name = baseProperties.First(x => x.Value.Name == name).Key;
                 object uu = Expression.Lambda(methodCallExpression.Arguments[1]).Compile().DynamicInvoke();
                 return name + ExpressionTypeExtensions.MakeLogic((ExpressionType)Enum.Parse(typeof(ExpressionType), methodCallExpression.Method.Name)) + QueryStrategy.ValueToString(uu);
             }
@@ -186,7 +193,7 @@ namespace Rystem
     }
     internal class MemberExpressionStrategy : IExpressionStrategy
     {
-        public string Convert(Expression expression)
+        public string Convert(Expression expression, Dictionary<string, PropertyInfo> baseProperties)
         {
             MemberExpression memberExpression = (MemberExpression)expression;
             dynamic property = memberExpression.Member;

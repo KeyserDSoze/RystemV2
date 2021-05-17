@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business.Document
 {
-    public class NoDocumentProperty : Attribute
+    public class NoDocumentAttribute : Attribute
     {
     }
 }

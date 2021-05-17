@@ -15,16 +15,16 @@ namespace Rystem.Business.Document.Implementantion
 {
     internal class TableStorageImplementation<TEntity> : IDocumentImplementation<TEntity>
     {
-        private readonly IDictionary<string, PropertyInfo> BaseProperties = new Dictionary<string, PropertyInfo>();
+        private readonly Dictionary<string, PropertyInfo> BaseProperties = new();
         private readonly List<PropertyInfo> Properties = new();
         private readonly List<PropertyInfo> SpecialProperties = new();
         private const string PartitionKey = "PartitionKey";
         private const string RowKey = "RowKey";
         private const string Timestamp = "Timestamp";
-        private static readonly Type NoDocumentProperty = typeof(NoDocumentProperty);
-        private static readonly Type PartitionKeyProperty = typeof(PartitionKeyProperty);
-        private static readonly Type RowKeyProperty = typeof(RowKeyProperty);
-        private static readonly Type TimestampProperty = typeof(TimestampProperty);
+        private static readonly Type NoDocumentAttribute = typeof(NoDocumentAttribute);
+        private static readonly Type PartitionKeyAttribute = typeof(PartitionKeyAttribute);
+        private static readonly Type RowKeyAttribute = typeof(RowKeyAttribute);
+        private static readonly Type TimestampAttribute = typeof(TimestampAttribute);
         private readonly Type EntityType;
         private readonly TableStorageIntegration Integration;
         internal TableStorageImplementation(TableStorageIntegration integration, Type entityType)
@@ -33,13 +33,13 @@ namespace Rystem.Business.Document.Implementantion
             this.EntityType = entityType;
             foreach (PropertyInfo pi in this.EntityType.GetProperties())
             {
-                if (pi.GetCustomAttribute(NoDocumentProperty) != default)
+                if (pi.GetCustomAttribute(NoDocumentAttribute) != default)
                     continue;
-                if (pi.GetCustomAttribute(PartitionKeyProperty) != default)
+                if (pi.GetCustomAttribute(PartitionKeyAttribute) != default)
                     BaseProperties.Add(PartitionKey, pi);
-                else if (pi.GetCustomAttribute(RowKeyProperty) != default)
+                else if (pi.GetCustomAttribute(RowKeyAttribute) != default)
                     BaseProperties.Add(RowKey, pi);
-                else if (pi.GetCustomAttribute(TimestampProperty) != default)
+                else if (pi.GetCustomAttribute(TimestampAttribute) != default)
                     BaseProperties.Add(Timestamp, pi);
                 else if (pi.PropertyType == typeof(int) || pi.PropertyType == typeof(long) ||
                     pi.PropertyType == typeof(double) || pi.PropertyType == typeof(string) ||
@@ -81,7 +81,7 @@ namespace Rystem.Business.Document.Implementantion
             {
                 if (expressionAsExpression == default)
                     return string.Empty;
-                string result = QueryStrategy.Create(expressionAsExpression);
+                string result = QueryStrategy.Create(expressionAsExpression, BaseProperties);
                 if (!string.IsNullOrWhiteSpace(result))
                     return result;
                 BinaryExpression binaryExpression = (BinaryExpression)expressionAsExpression;
@@ -111,7 +111,7 @@ namespace Rystem.Business.Document.Implementantion
                     pi.GetValue(entity).ToJson()));
             return dynamicTableEntity;
         }
-        private static readonly MethodInfo JsonConvertDeserializeMethod = typeof(JsonSerializer).GetMethods(BindingFlags.Public | BindingFlags.Static).First(x => x.IsGenericMethod && x.Name.Equals("Deserialize"));
+        private static readonly MethodInfo JsonConvertDeserializeMethod = typeof(JsonSerializer).GetMethods(BindingFlags.Public | BindingFlags.Static).First(x => x.IsGenericMethod && x.GetParameters().Any(t => t.ParameterType == typeof(string)));
 
         private TEntity ReadEntity(DynamicTableEntity dynamicTableEntity)
         {
@@ -125,7 +125,7 @@ namespace Rystem.Business.Document.Implementantion
             foreach (PropertyInfo pi in this.SpecialProperties)
                 if (dynamicTableEntity.Properties.ContainsKey(pi.Name))
                 {
-                    dynamic value = JsonConvertDeserializeMethod.MakeGenericMethod(pi.PropertyType).Invoke(null, new object[1] { dynamicTableEntity.Properties[pi.Name].StringValue });
+                    dynamic value = JsonConvertDeserializeMethod.MakeGenericMethod(pi.PropertyType).Invoke(null, new object[2] { dynamicTableEntity.Properties[pi.Name].StringValue, null });
                     pi.SetValue(entity, value);
                 }
             return entity;

@@ -22,10 +22,10 @@ namespace Rystem.Business.Document.Implementantion
         private const string PartitionKey = "PartitionKey";
         private const string RowKey = "RowKey";
         private const string Timestamp = "Timestamp";
-        private static readonly Type NoDocumentProperty = typeof(NoDocumentProperty);
-        private static readonly Type PartitionKeyProperty = typeof(PartitionKeyProperty);
-        private static readonly Type RowKeyProperty = typeof(RowKeyProperty);
-        private static readonly Type TimestampProperty = typeof(TimestampProperty);
+        private static readonly Type NoDocumentProperty = typeof(NoDocumentAttribute);
+        private static readonly Type PartitionKeyProperty = typeof(PartitionKeyAttribute);
+        private static readonly Type RowKeyProperty = typeof(RowKeyAttribute);
+        private static readonly Type TimestampProperty = typeof(TimestampAttribute);
         private readonly Type EntityType;
         private readonly BlobStorageIntegration Integration;
         internal BlobStorageImplementation(BlobStorageIntegration integration, Type entityType)
