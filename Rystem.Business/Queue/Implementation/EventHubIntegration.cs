@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rystem.Business.Queue.Implementation
@@ -25,10 +26,59 @@ namespace Rystem.Business.Queue.Implementation
 
         public string GetName()
            => this.Integration.Configuration.Name;
-
-        public Task<IEnumerable<TEntity>> ReadAsync(string partitionKey, string rowKey)
-            => throw new NotImplementedException("Event hub doesn't allow this operation.");
-
+        private bool IsListening = false;
+        public async Task ListenAsync(Func<TEntity, string, object, Task> callback, Func<Exception, Task> onErrorCallback)
+        {
+            if (!IsListening)
+            {
+                IsListening = true;
+                await Integration.StartReadAsync(
+                async (x) =>
+                {
+                    try
+                    {
+                        await callback(x.Data.EventBody.ToObjectFromJson<TEntity>(), x.Data.PartitionKey, x.Data).NoContext();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (onErrorCallback != default)
+                            await onErrorCallback(ex).NoContext();
+                    }
+                },
+                    async x =>
+                    {
+                        if (onErrorCallback != default)
+                            await onErrorCallback(x.Exception);
+                    }
+                ).NoContext();
+            }
+        }
+        public Task StopListenAsync()
+        {
+            IsListening = false;
+            return Integration.StopReadAsync();
+        }
+        private List<(TEntity Entity, string PartitionKey, object Item)> Entities = new();
+        private readonly object TrafficLight = new();
+        private Task Add(TEntity entity, string partitionKey, object item)
+        {
+            Entities.Add((entity, partitionKey, item));
+            return Task.CompletedTask;
+        }
+        public async Task<IEnumerable<TEntity>> ReadAsync(string partitionKey, string rowKey)
+        {
+            if (!IsListening)
+                await ListenAsync(Add, default).NoContext();
+            lock (TrafficLight)
+            {
+                var entities = partitionKey == null ? Entities : Entities.Where(x => x.PartitionKey == partitionKey);
+                if (partitionKey == null)
+                    Entities = new();
+                else
+                    Entities = Entities.Where(x => x.PartitionKey != partitionKey).ToList();
+                return entities.Select(x => x.Entity);
+            }
+        }
         public async Task<bool> SendAsync(TEntity message, string partitionKey, string rowKey)
         {
             await Integration.SendAsync(message.ToJson(), partitionKey, rowKey).NoContext();

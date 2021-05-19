@@ -47,15 +47,15 @@ namespace Rystem.Azure.Integration.Storage
                 }, RaceId).NoContext();
             return Context;
         }
-        public async Task<List<string>> ReadAsync(int max = 10)
+        public async Task<List<(string Message, object Raw)>> ReadAsync(int max = 10)
         {
             var client = Context ?? await GetContextAsync();
             var messages = (await client.ReceiveMessagesAsync(max).NoContext()).Value;
-            List<string> entities = new();
+            List<(string, object)> entities = new();
             foreach (var message in messages)
             {
                 await client.DeleteMessageAsync(message.MessageId, message.PopReceipt).NoContext();
-                entities.Add(message.MessageText);
+                entities.Add((message.MessageText, message));
             }
             return entities;
         }

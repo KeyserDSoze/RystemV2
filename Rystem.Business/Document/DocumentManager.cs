@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Rystem.Business.Document
 {
     internal class DocumentManager<TEntity>
-        where TEntity : IDocument
+        where TEntity : IDocument, new()
     {
         private readonly IDictionary<Installation, IDocumentImplementation<TEntity>> Implementations = new Dictionary<Installation, IDocumentImplementation<TEntity>>();
         private readonly IDictionary<Installation, ProvidedService> DocumentConfiguration;
@@ -29,7 +29,7 @@ namespace Rystem.Business.Document
                                 Implementations.Add(installation, new TableStorageImplementation<TEntity>(new TableStorageIntegration(configuration.Configurations, AzureManager.Instance.Storages[configuration.ServiceKey]), DefaultEntity));
                                 break;
                             case ServiceProviderType.AzureBlobStorage:
-                                Implementations.Add(installation, new BlobStorageImplementation<TEntity>(new BlobStorageIntegration(configuration.Configurations, AzureManager.Instance.Storages[configuration.ServiceKey]), this.DefaultEntity));
+                                Implementations.Add(installation, new BlobStorageImplementation<TEntity>(new BlobStorageIntegration(configuration.Configurations, AzureManager.Instance.Storages[configuration.ServiceKey]), DefaultEntity));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
@@ -43,6 +43,15 @@ namespace Rystem.Business.Document
             DocumentConfiguration = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
             DefaultEntity = serviceProvider.InstanceType;
         }
+        private const string DateTimeStringForPrimaryKey = "yyyyMMdd";
+        private static TEntity Normalize(TEntity entity)
+        {
+            if (entity.PrimaryKey == null)
+                entity.PrimaryKey = DateTime.UtcNow.ToString(DateTimeStringForPrimaryKey);
+            if (entity.SecondaryKey == null)
+                entity.SecondaryKey = Alea.GetTimedKey();
+            return entity;
+        }
         public async Task<bool> DeleteAsync(TEntity entity, Installation installation)
             => await Implementation(installation).DeleteAsync(entity).NoContext();
         public async Task<bool> DeleteBatchAsync(IEnumerable<TEntity> entity, Installation installation)
@@ -52,9 +61,9 @@ namespace Rystem.Business.Document
         public async Task<IEnumerable<TEntity>> GetAsync(TEntity entity, Installation installation, Expression<Func<TEntity, bool>> expression = default, int? takeCount = default)
             => await Implementation(installation).GetAsync(entity, expression, takeCount).NoContext();
         public async Task<bool> UpdateAsync(TEntity entity, Installation installation)
-            => await Implementation(installation).UpdateAsync(entity).NoContext();
+            => await Implementation(installation).UpdateAsync(Normalize(entity)).NoContext();
         public async Task<bool> UpdateBatchAsync(IEnumerable<TEntity> entity, Installation installation)
-            => await Implementation(installation).UpdateBatchAsync(entity).NoContext();
+            => await Implementation(installation).UpdateBatchAsync(entity.Select(x => Normalize(x))).NoContext();
         public string GetName(Installation installation = Installation.Default)
             => Implementation(installation).GetName();
     }

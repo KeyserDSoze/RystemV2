@@ -14,33 +14,24 @@ using System.Threading.Tasks;
 namespace Rystem.Business.Document.Implementantion
 {
     internal class TableStorageImplementation<TEntity> : IDocumentImplementation<TEntity>
+        where TEntity : IDocument, new()
     {
         private readonly Dictionary<string, PropertyInfo> BaseProperties = new();
         private readonly List<PropertyInfo> Properties = new();
         private readonly List<PropertyInfo> SpecialProperties = new();
-        private const string PartitionKey = "PartitionKey";
-        private const string RowKey = "RowKey";
-        private const string Timestamp = "Timestamp";
+
         private static readonly Type NoDocumentAttribute = typeof(NoDocumentAttribute);
-        private static readonly Type PartitionKeyAttribute = typeof(PartitionKeyAttribute);
-        private static readonly Type RowKeyAttribute = typeof(RowKeyAttribute);
-        private static readonly Type TimestampAttribute = typeof(TimestampAttribute);
         private readonly Type EntityType;
         private readonly TableStorageIntegration Integration;
+
         internal TableStorageImplementation(TableStorageIntegration integration, Type entityType)
         {
             Integration = integration;
             this.EntityType = entityType;
             foreach (PropertyInfo pi in this.EntityType.GetProperties())
             {
-                if (pi.GetCustomAttribute(NoDocumentAttribute) != default)
+                if (pi.GetCustomAttribute(NoDocumentAttribute) != default || pi.Name == DocumentImplementationConst.PrimaryKey || pi.Name == DocumentImplementationConst.SecondaryKey || pi.Name == DocumentImplementationConst.Timestamp)
                     continue;
-                if (pi.GetCustomAttribute(PartitionKeyAttribute) != default)
-                    BaseProperties.Add(PartitionKey, pi);
-                else if (pi.GetCustomAttribute(RowKeyAttribute) != default)
-                    BaseProperties.Add(RowKey, pi);
-                else if (pi.GetCustomAttribute(TimestampAttribute) != default)
-                    BaseProperties.Add(Timestamp, pi);
                 else if (pi.PropertyType == typeof(int) || pi.PropertyType == typeof(long) ||
                     pi.PropertyType == typeof(double) || pi.PropertyType == typeof(string) ||
                     pi.PropertyType == typeof(Guid) || pi.PropertyType == typeof(bool) ||
@@ -51,17 +42,13 @@ namespace Rystem.Business.Document.Implementantion
             }
         }
         private const string Asterisk = "*";
-        private DynamicTableEntity GetBase(TEntity entity)
-        {
-            object partitionKey = BaseProperties[PartitionKey].GetValue(entity);
-            object rowKey = BaseProperties[RowKey].GetValue(entity);
-            return new DynamicTableEntity()
+        private static DynamicTableEntity GetBase(TEntity entity)
+            => new()
             {
-                PartitionKey = (partitionKey ?? DateTime.UtcNow.ToString("yyyyMMdd")).ToString(),
-                RowKey = (rowKey ?? Alea.GetTimedKey()).ToString(),
+                PartitionKey = entity.PrimaryKey,
+                RowKey = entity.SecondaryKey,
                 ETag = Asterisk,
             };
-        }
         public Task<bool> DeleteAsync(TEntity entity)
             => Integration.DeleteAsync(GetBase(entity));
 
@@ -81,11 +68,11 @@ namespace Rystem.Business.Document.Implementantion
             {
                 if (expressionAsExpression == default)
                     return string.Empty;
-                string result = QueryStrategy.Create(expressionAsExpression, BaseProperties);
+                string result = QueryStrategy.Create(expressionAsExpression);
                 if (!string.IsNullOrWhiteSpace(result))
                     return result;
                 BinaryExpression binaryExpression = (BinaryExpression)expressionAsExpression;
-                return ToQuery(binaryExpression.Left) + ExpressionTypeExtensions.MakeLogic(binaryExpression.NodeType) + ToQuery(binaryExpression.Right);
+                return ToQuery(binaryExpression.Left) + binaryExpression.NodeType.MakeLogic() + ToQuery(binaryExpression.Right);
             }
         }
 
@@ -99,7 +86,7 @@ namespace Rystem.Business.Document.Implementantion
             => this.Integration.Configuration.Name;
         private DynamicTableEntity WriteEntity(TEntity entity)
         {
-            DynamicTableEntity dynamicTableEntity = this.GetBase(entity);
+            DynamicTableEntity dynamicTableEntity = GetBase(entity);
             foreach (PropertyInfo pi in this.Properties)
             {
                 dynamic value = pi.GetValue(entity);
@@ -115,10 +102,12 @@ namespace Rystem.Business.Document.Implementantion
 
         private TEntity ReadEntity(DynamicTableEntity dynamicTableEntity)
         {
-            TEntity entity = (TEntity)Activator.CreateInstance(this.EntityType);
-            this.BaseProperties[PartitionKey].SetValue(entity, dynamicTableEntity.PartitionKey);
-            this.BaseProperties[RowKey].SetValue(entity, dynamicTableEntity.RowKey);
-            this.BaseProperties[Timestamp].SetValue(entity, dynamicTableEntity.Timestamp.DateTime.ToUniversalTime());
+            TEntity entity = new()
+            {
+                PrimaryKey = dynamicTableEntity.PartitionKey,
+                SecondaryKey = dynamicTableEntity.RowKey,
+                Timestamp = dynamicTableEntity.Timestamp.DateTime.ToUniversalTime()
+            };
             foreach (PropertyInfo pi in this.Properties)
                 if (dynamicTableEntity.Properties.ContainsKey(pi.Name))
                     SetValue(dynamicTableEntity.Properties[pi.Name], pi);

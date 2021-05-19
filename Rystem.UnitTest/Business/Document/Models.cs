@@ -12,15 +12,12 @@ namespace Rystem.UnitTest.Business.Document
 {
     public class Sample : IDocument
     {
-        [NoDocumentAttribute]
+        [NoDocument]
         public string Ale { get; set; }
-        [PartitionKey]
-        public string Ale1 { get; set; }
-        [RowKey]
-        public string Ale2 { get; set; }
+        public string PrimaryKey { get; set; }
+        public string SecondaryKey { get; set; }
         public string Ale3 { get; set; }
         public MiniSample Mini { get; set; }
-        [Timestamp]
         public DateTime Timestamp { get; set; }
         public RystemDocumentServiceProvider ConfigureDocument()
         {
@@ -32,16 +29,33 @@ namespace Rystem.UnitTest.Business.Document
         }
         public static async Task Run(Installation installation)
         {
-            await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd", Ale3 = "dddddddddddddddddd", Mini = new MiniSample { X = 3, Ale3 = "" }, Timestamp = DateTime.UtcNow }.UpdateAsync(installation).NoContext();
-            await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd3", Ale3 = "dddddddddddddddddd", Mini = new MiniSample { X = 4, Ale3 = "ddd" }, Timestamp = DateTime.UtcNow }.UpdateAsync(installation).NoContext();
-            var elements = (await new Sample().ToListAsync(x => x.Ale1 == "dddd", installation).NoContext()).ToList();
+            var elements = (await new Sample().ToListAsync(installation: installation).NoContext()).ToList();
+            await elements.DeleteBatchAsync(installation).NoContext();
+            await CreateNewSample(1).UpdateAsync(installation).NoContext();
+            await CreateNewSample(1).UpdateAsync(installation).NoContext();
+            elements = (await new Sample().ToListAsync(x => x.PrimaryKey == "1", installation).NoContext()).ToList();
             Assert.Equal(2, elements.Count);
             foreach (var x in elements)
                 if (await x.ExistsAsync(installation).NoContext())
                     await x.DeleteAsync(installation).NoContext();
-            elements = (await new Sample().ToListAsync(x => x.Ale1 == "dddd", installation).NoContext()).ToList();
+            elements = (await new Sample().ToListAsync(x => x.PrimaryKey == 1.ToString(), installation).NoContext()).ToList();
+            Assert.Empty(elements);
+            List<Sample> samples = new();
+            for (int i = 0; i < 10; i++)
+                samples.Add(CreateNewSample(i));
+            await samples.UpdateBatchAsync(installation).NoContext();
+            elements = (await new Sample().ToListAsync(x => x.PrimaryKey == 1.ToString(), installation).NoContext()).ToList();
+            Assert.Single(elements);
+            elements = (await new Sample().ToListAsync(installation: installation).NoContext()).ToList();
+            Assert.Equal(10, elements.Count);
+            foreach (var x in elements)
+                if (await x.ExistsAsync(installation).NoContext())
+                    await x.DeleteAsync(installation).NoContext();
+            elements = (await new Sample().ToListAsync(x => x.PrimaryKey == 1.ToString(), installation).NoContext()).ToList();
             Assert.Empty(elements);
         }
+        private static Sample CreateNewSample(int x)
+            => new() { Ale = x.ToString(), PrimaryKey = x.ToString(), SecondaryKey = null, Ale3 = x.ToString(), Timestamp = DateTime.UtcNow, Mini = new MiniSample { X = x, Ale3 = x.ToString() } };
     }
     public class MiniSample
     {

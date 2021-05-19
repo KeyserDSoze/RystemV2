@@ -1,4 +1,5 @@
 ﻿using Rystem.Azure.Integration.Storage;
+using Rystem.BackgroundWork;
 using Rystem.Text;
 using System;
 using System.Collections.Generic;
@@ -18,16 +19,51 @@ namespace Rystem.Business.Queue.Implementation
         }
 
         public Task<bool> CleanAsync()
-        => throw new NotImplementedException("Queue storage doesn't allow this operation.");
+            => throw new NotImplementedException("Queue storage doesn't allow this operation.");
 
         public Task<bool> DeleteScheduledAsync(long messageId)
             => throw new NotImplementedException("Queue storage doesn't allow this operation.");
 
         public string GetName()
            => this.Integration.Configuration.Name;
-
+        private readonly string ListenerId = $"{nameof(QueueStorageImplementation<TEntity>)}{Guid.NewGuid():N}";
+        private bool IsListening = false;
+        public Task ListenAsync(Func<TEntity, string, object, Task> callback, Func<Exception, Task> onErrorCallback)
+        {
+            if (!IsListening)
+            {
+                IsListening = true;
+                Ghost.Run(async () =>
+                {
+                    try
+                    {
+                        var elements = await Integration.ReadAsync().NoContext();
+                        List<Task> events = new();
+                        foreach (var (Message, Raw) in elements)
+                            events.Add(callback(Message.FromJson<TEntity>(), string.Empty, Raw));
+                        await Task.WhenAll(events).NoContext();
+                        if (onErrorCallback != default)
+                            foreach (var task in events)
+                                if (task.IsFaulted)
+                                    await onErrorCallback(task.Exception).NoContext();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (onErrorCallback != default)
+                            await onErrorCallback(ex).NoContext();
+                    }
+                }, ListenerId, 120 * 10);
+            }
+            return Task.CompletedTask;
+        }
+        public Task StopListenAsync()
+        {
+            IsListening = false;
+            Ghost.Stop(ListenerId);
+            return Task.CompletedTask;
+        }
         public async Task<IEnumerable<TEntity>> ReadAsync(string partitionKey, string rowKey)
-            => (await Integration.ReadAsync().NoContext()).Select(x => x.FromJson<TEntity>());
+            => (await Integration.ReadAsync().NoContext()).Select(x => x.Message.FromJson<TEntity>());
 
         public async Task<bool> SendAsync(TEntity message, string partitionKey, string rowKey)
             => await Integration.SendAsync(message.ToJson());

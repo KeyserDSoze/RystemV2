@@ -43,16 +43,18 @@ namespace System
                 aggregatedResponse.AddRange(await msgs.FirstOrDefault().Manager().SendScheduledBatchAsync(msgs, delayInSeconds, installation, partitionKey, rowKey).NoContext());
             return aggregatedResponse;
         }
-
-        [Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
         public static async Task<IEnumerable<TEntity>> ReadAsync<TEntity>(this TEntity message, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
             => await message.Manager().ReadAsync(installation, partitionKey, rowKey).NoContext();
-
-        [Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
         public static async Task<bool> CleanAsync<TEntity>(this TEntity message, Installation installation = Installation.Default)
             where TEntity : IQueue
             => await message.Manager().CleanAsync(installation).NoContext();
+        public static async Task ListenAsync<TEntity>(this TEntity message, Func<TEntity, string, object, Task> callback, Func<Exception, Task> onErrorCallback = default, Installation installation = Installation.Default)
+            where TEntity : IQueue
+            => await message.Manager().ListenAsync(callback, onErrorCallback, installation).NoContext();
+        public static async Task StopAsync<TEntity>(this TEntity message, Installation installation = Installation.Default)
+            where TEntity : IQueue
+            => await message.Manager().StopListenAsync(installation).NoContext();
 
         public static bool Send<TEntity>(this TEntity message, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
@@ -75,8 +77,12 @@ namespace System
         public static bool Clean<TEntity>(this TEntity message, Installation installation = Installation.Default)
             where TEntity : IQueue
             => message.CleanAsync(installation).ToResult();
-
-        [Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
+        public static void Listen<TEntity>(this TEntity message, Func<TEntity, string, object, Task> callback, Func<Exception, Task> onErrorCallback = default, Installation installation = Installation.Default)
+           where TEntity : IQueue
+           => message.ListenAsync(callback, onErrorCallback, installation).ToResult();
+        public static void Stop<TEntity>(this TEntity message, Installation installation = Installation.Default)
+            where TEntity : IQueue
+            => message.StopAsync(installation).ToResult();
         public static string GetName<TEntity>(this TEntity message, Installation installation = Installation.Default)
             where TEntity : IQueue
             => message.Manager().GetName(installation);

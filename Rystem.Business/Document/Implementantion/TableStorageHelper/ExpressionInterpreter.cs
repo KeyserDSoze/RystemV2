@@ -5,105 +5,35 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Rystem
+namespace Rystem.Business.Document.Implementantion
 {
     internal static class ExpressionTypeExtensions
     {
-        internal static string MakeLogic(ExpressionType type)
-        {
-            switch (type)
+        internal static string MakeLogic(this ExpressionType type)
+            => type switch
             {
-                default:
-                case ExpressionType.AndAlso:
-                    return " and ";
-                case ExpressionType.And:
-                    return " and ";
-                case ExpressionType.Or:
-                    return " or ";
-                case ExpressionType.OrElse:
-                    return " or ";
-                case ExpressionType.LessThan:
-                    return " lt ";
-                case ExpressionType.LessThanOrEqual:
-                    return " le ";
-                case ExpressionType.GreaterThan:
-                    return " gt ";
-                case ExpressionType.GreaterThanOrEqual:
-                    return " ge ";
-                case ExpressionType.Equal:
-                    return " eq ";
-                case ExpressionType.NotEqual:
-                    return " ne ";
-            }
-        }
-        internal static bool IsRightASingleValue(ExpressionType type)
-        {
-            switch (type)
+                ExpressionType.And => " and ",
+                ExpressionType.Or => " or ",
+                ExpressionType.OrElse => " or ",
+                ExpressionType.LessThan => " lt ",
+                ExpressionType.LessThanOrEqual => " le ",
+                ExpressionType.GreaterThan => " gt ",
+                ExpressionType.GreaterThanOrEqual => " ge ",
+                ExpressionType.Equal => " eq ",
+                ExpressionType.NotEqual => " ne ",
+                _ => " and ",
+            };
+        internal static bool IsRightASingleValue(this ExpressionType type)
+            => type switch
             {
-                case ExpressionType.AndAlso:
-                case ExpressionType.And:
-                case ExpressionType.Or:
-                case ExpressionType.OrElse:
-                    return false;
-                default:
-                    return true;
-            }
-        }
+                ExpressionType.AndAlso or ExpressionType.And or ExpressionType.Or or ExpressionType.OrElse => false,
+                _ => true,
+            };
     }
     internal class QueryStrategy
     {
-        internal static string Create(Expression expression, Dictionary<string, PropertyInfo> baseProperties)
+        internal static string Create(Expression expression)
         {
-            //if (expression is BinaryExpression)
-            //    return null;
-            //else if (expression is BlockExpression)
-            //    return null;
-            //else if (expression is ConditionalExpression)
-            //    return null;
-            //else if (expression is ConstantExpression)
-            //    return null;
-            //else if (expression is DebugInfoExpression)
-            //    return null;
-            //else if (expression is DefaultExpression)
-            //    return null;
-            //else if (expression is DynamicExpression)
-            //    return null;
-            //else if (expression is GotoExpression)
-            //    return null;
-            //else if (expression is IndexExpression)
-            //    return null;
-            //else if (expression is InvocationExpression)
-            //    return null;
-            //else if (expression is LabelExpression)
-            //    return null;
-            //else if (expression is LambdaExpression)
-            //    return (expression as LambdaExpression).Compile().DynamicInvoke();
-            //else if (expression is ListInitExpression)
-            //    return null;
-            //else if (expression is LoopExpression)
-            //    return null;
-            //else if (expression is MemberExpression)
-            //    return null;
-            //else if (expression is MemberInitExpression)
-            //    return null;
-            //else if (expression is MethodCallExpression)
-            //    return null;
-            //else if (expression is NewArrayExpression)
-            //    return null;
-            //else if (expression is NewExpression)
-            //    return null;
-            //else if (expression is ParameterExpression)
-            //    return null;
-            //else if (expression is RuntimeVariablesExpression)
-            //    return null;
-            //else if (expression is SwitchExpression)
-            //    return null;
-            //else if (expression is TryExpression)
-            //    return null;
-            //else if (expression is TypeBinaryExpression)
-            //    return null;
-            //else if (expression is UnaryExpression)
-            //    return null;
             IExpressionStrategy expressionFactory = new BinaryExpressionStrategy();
             if (expression is MethodCallExpression)
             {
@@ -117,83 +47,85 @@ namespace Rystem
             {
                 expressionFactory = new MemberExpressionStrategy();
             }
-            //else if (expression is LambdaExpression)
-            //{
-            //    expression = (expression as LambdaExpression).Body;
-            //}
-            return expressionFactory.Convert(expression, baseProperties);
+            return expressionFactory.Convert(expression);
         }
         internal static string ValueToString(object value)
         {
             if (value is string)
                 return $"'{value}'";
-            if (value is DateTime)
-                return $"datetime'{(DateTime)value:yyyy-MM-dd}T{(DateTime)value:HH:mm:ss}Z'";
-            if (value is DateTimeOffset)
-                return $"datetime'{(DateTimeOffset)value:yyyy-MM-dd}T{(DateTimeOffset)value:HH:mm:ss}Z'";
+            if (value is DateTime time)
+                return $"datetime'{time:yyyy-MM-dd}T{time:HH:mm:ss}Z'";
+            if (value is DateTimeOffset offset)
+                return $"datetime'{offset:yyyy-MM-dd}T{offset:HH:mm:ss}Z'";
             if (value is Guid)
                 return $"guid'{value}'";
-            if (value is double)
-                return ((double)value).ToString(new System.Globalization.CultureInfo("en"));
-            if (value is float)
-                return ((float)value).ToString(new System.Globalization.CultureInfo("en"));
-            if (value is decimal)
-                return ((decimal)value).ToString(new System.Globalization.CultureInfo("en"));
+            if (value is double @double)
+                return @double.ToString(new System.Globalization.CultureInfo("en"));
+            if (value is float single)
+                return single.ToString(new System.Globalization.CultureInfo("en"));
+            if (value is decimal @decimal)
+                return @decimal.ToString(new System.Globalization.CultureInfo("en"));
             return $"'{value.ToJson()}'";
         }
     }
     internal interface IExpressionStrategy
     {
-        string Convert(Expression expression, Dictionary<string, PropertyInfo> baseProperties);
+        string Convert(Expression expression);
+        public const string PartitionKey = "PartitionKey";
+        public const string RowKey = "RowKey";
     }
     internal class BinaryExpressionStrategy : IExpressionStrategy
     {
-        public string Convert(Expression expression, Dictionary<string, PropertyInfo> baseProperties)
+        public string Convert(Expression expression)
         {
             BinaryExpression binaryExpression = (BinaryExpression)expression;
-            if (ExpressionTypeExtensions.IsRightASingleValue(binaryExpression.NodeType))
+            if (binaryExpression.NodeType.IsRightASingleValue())
             {
-                dynamic xx = binaryExpression.Left;
-                string name = xx.Member.Name;
-                if (baseProperties.Any(x => x.Value.Name == name))
-                    name = baseProperties.First(x => x.Value.Name == name).Key;
-                object uu = Expression.Lambda(binaryExpression.Right).Compile().DynamicInvoke();
-                return name + ExpressionTypeExtensions.MakeLogic(binaryExpression.NodeType) + QueryStrategy.ValueToString(uu);
+                dynamic leftPart = binaryExpression.Left;
+                string name = leftPart.Member.Name;
+                if (name == DocumentImplementationConst.PrimaryKey)
+                    name = IExpressionStrategy.PartitionKey;
+                else if (name == DocumentImplementationConst.SecondaryKey)
+                    name = IExpressionStrategy.RowKey;
+                object rightPart = Expression.Lambda(binaryExpression.Right).Compile().DynamicInvoke();
+                return name + binaryExpression.NodeType.MakeLogic() + QueryStrategy.ValueToString(rightPart);
             }
             return null;
         }
     }
     internal class UnaryExpressionStrategy : IExpressionStrategy
     {
-        public string Convert(Expression expression, Dictionary<string, PropertyInfo> baseProperties)
+        public string Convert(Expression expression)
         {
             UnaryExpression unaryExpression = (UnaryExpression)expression;
-            dynamic aa = unaryExpression.Operand;
-            if (aa.Member.PropertyType == typeof(bool))
-                return $"{aa.Member.Name} eq false";
+            dynamic operand = unaryExpression.Operand;
+            if (operand.Member.PropertyType == typeof(bool))
+                return $"{operand.Member.Name} eq false";
             return null;
         }
     }
     internal class MethodCallerExpressionStrategy : IExpressionStrategy
     {
-        public string Convert(Expression expression, Dictionary<string, PropertyInfo> baseProperties)
+        public string Convert(Expression expression)
         {
             MethodCallExpression methodCallExpression = (MethodCallExpression)expression;
-            if (ExpressionTypeExtensions.IsRightASingleValue(methodCallExpression.NodeType))
+            if (methodCallExpression.NodeType.IsRightASingleValue())
             {
-                dynamic xx = methodCallExpression.Arguments[0];
-                string name = xx.Member.Name;
-                if (baseProperties.Any(x => x.Value.Name == name))
-                    name = baseProperties.First(x => x.Value.Name == name).Key;
-                object uu = Expression.Lambda(methodCallExpression.Arguments[1]).Compile().DynamicInvoke();
-                return name + ExpressionTypeExtensions.MakeLogic((ExpressionType)Enum.Parse(typeof(ExpressionType), methodCallExpression.Method.Name)) + QueryStrategy.ValueToString(uu);
+                dynamic argument = methodCallExpression.Arguments[0];
+                string name = argument.Member.Name;
+                if (name == DocumentImplementationConst.PrimaryKey)
+                    name = IExpressionStrategy.PartitionKey;
+                else if (name == DocumentImplementationConst.SecondaryKey)
+                    name = IExpressionStrategy.RowKey;
+                object value = Expression.Lambda(methodCallExpression.Arguments[1]).Compile().DynamicInvoke();
+                return name + ((ExpressionType)Enum.Parse(typeof(ExpressionType), methodCallExpression.Method.Name)).MakeLogic() + QueryStrategy.ValueToString(value);
             }
             return null;
         }
     }
     internal class MemberExpressionStrategy : IExpressionStrategy
     {
-        public string Convert(Expression expression, Dictionary<string, PropertyInfo> baseProperties)
+        public string Convert(Expression expression)
         {
             MemberExpression memberExpression = (MemberExpression)expression;
             dynamic property = memberExpression.Member;

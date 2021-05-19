@@ -37,26 +37,14 @@ namespace RystemV2
             await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd3", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.SendAsync().NoContext();
             var x = (await new Sample().ReadAsync().NoContext()).ToList();
         }
-        public class Sample : IDocument, IQueue
+        public class Sample : IQueue
         {
-            [NoDocumentAttribute]
+            [NoDocument]
             public string Ale { get; set; }
-            [PartitionKeyAttribute]
             public string Ale1 { get; set; }
-            [RowKeyAttribute]
             public string Ale2 { get; set; }
             public string Ale3 { get; set; }
-            [TimestampAttribute]
             public DateTime Timestamp { get; set; }
-            public RystemDocumentServiceProvider ConfigureDocument()
-            {
-                return RystemDocumentServiceProvider
-                    .WithAzure()
-                    .WithTableStorage()
-                    .AndWithAzure(Installation.Inst00)
-                    .WithBlobStorage();
-            }
-
             public RystemQueueServiceProvider ConfigureQueue()
             {
                 return RystemQueueServiceProvider

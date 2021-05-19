@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business.Queue
 {
-    internal class QueueManager<TEntity>
+    internal sealed class QueueManager<TEntity>
         where TEntity : IQueue
     {
         private readonly IDictionary<Installation, IQueueImplementation<TEntity>> Implementations = new Dictionary<Installation, IQueueImplementation<TEntity>>();
@@ -58,6 +58,10 @@ namespace Rystem.Business.Queue
             => await Implementation(installation).SendScheduledBatchAsync(messages.Select(x => x), delayInSeconds, partitionKey, rowKey).NoContext();
         public async Task<IEnumerable<TEntity>> ReadAsync(Installation installation, string partitionKey, string rowKey)
            => await Implementation(installation).ReadAsync(partitionKey, rowKey).NoContext();
+        public async Task ListenAsync(Func<TEntity, string, object, Task> callback, Func<Exception, Task> onErrorCallback, Installation installation)
+            => await Implementation(installation).ListenAsync(callback, onErrorCallback).NoContext();
+        public async Task StopListenAsync(Installation installation)
+            => await Implementation(installation).StopListenAsync().NoContext();
         public async Task<bool> CleanAsync(Installation installation)
             => await Implementation(installation).CleanAsync().NoContext();
         public string GetName(Installation installation) => Implementations[installation].GetName();
