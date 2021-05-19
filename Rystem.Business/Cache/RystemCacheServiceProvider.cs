@@ -7,15 +7,15 @@ namespace Rystem.Business
     public sealed class RystemCacheServiceProvider : ServiceProvider<RystemCacheServiceProvider>
     {
         private RystemCacheServiceProvider() { }
-        public static AzureCacheServiceBuilder WithAzure()
-          => new RystemCacheServiceProvider().AndWithAzure();
-        public AzureCacheServiceBuilder AndWithAzure()
-          => new(Installation.Inst00, this);
+        public static AzureCacheServiceBuilder WithAzure(Installation installation = Installation.Default)
+          => new RystemCacheServiceProvider().AndWithAzure(installation);
+        public AzureCacheServiceBuilder AndWithAzure(Installation installation = Installation.Default)
+          => new(installation, this);
         public static RystemCacheServiceProvider WithMemory(InMemoryCacheConfiguration configuration)
           => new RystemCacheServiceProvider().AndMemory(configuration);
         public RystemCacheServiceProvider AndMemory(InMemoryCacheConfiguration configuration)
         {
-            Services.Add(Installation.Default, new ProvidedService(ServiceProviderType.InMemory, configuration, string.Empty));
+            Services.Add(Installation.Inst50, new ProvidedService(ServiceProviderType.InMemory, configuration, string.Empty));
             return this;
         }
     }

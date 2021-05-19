@@ -15,77 +15,77 @@ namespace Rystem.Business
         where TCacheKey : ICacheKey<TCache>
         where TCache : new()
     {
-        private readonly IDictionary<Installation, ProvidedService> CacheConfiguration;
+        private readonly Dictionary<Installation, ICacheImplementation<TCache>> Implementations = new();
+        private readonly Dictionary<Installation, ProvidedService> CacheConfiguration;
         private bool MemoryIsActive { get; }
-        private bool CloudIsActive { get; }
-        private ICacheImplementation<TCache> CloudImplementation;
         private static readonly object TrafficLight = new();
-        private ICacheImplementation<TCache> Implementation()
+        private ICacheImplementation<TCache> Implementation(Installation installation)
         {
-            if (CloudImplementation == default)
+            if (!Implementations.ContainsKey(installation))
                 lock (TrafficLight)
-                    if (CloudImplementation == default)
+                    if (!Implementations.ContainsKey(installation))
                     {
                         ProvidedService configuration = CacheConfiguration[Installation.Inst00];
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlobStorage:
-                                CloudImplementation = new InBlobStorage<TCache>(new BlobStorageIntegration(configuration.Configurations, AzureManager.Instance.Storages[configuration.ServiceKey]), configuration.Configurations.Name ?? "Cache");
+                                Implementations.Add(installation, new InBlobStorage<TCache>(new BlobStorageIntegration(configuration.Configurations, AzureManager.Instance.Storages[configuration.ServiceKey]), configuration.Configurations.Name ?? "Cache"));
                                 break;
                             case ServiceProviderType.AzureTableStorage:
-                                CloudImplementation = new InTableStorage<TCache>(new TableStorageIntegration(configuration.Configurations, AzureManager.Instance.Storages[configuration.ServiceKey]), configuration.Configurations.Name ?? "Cache");
+                                Implementations.Add(installation, new InTableStorage<TCache>(new TableStorageIntegration(configuration.Configurations, AzureManager.Instance.Storages[configuration.ServiceKey]), configuration.Configurations.Name ?? "Cache"));
                                 break;
                             case ServiceProviderType.AzureRedisCache:
-                                CloudImplementation = new InRedisCache<TCache>(new RedisCacheIntegration(AzureManager.Instance.RedisCaches[configuration.ServiceKey]), configuration.Configurations.Name ?? "Cache");
+                                Implementations.Add(installation, new InRedisCache<TCache>(new RedisCacheIntegration(AzureManager.Instance.RedisCaches[configuration.ServiceKey]), configuration.Configurations.Name ?? "Cache"));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
                         }
                     }
-            return CloudImplementation;
+            return Implementations[installation];
         }
         public CacheManager(RystemCacheServiceProvider serviceProvider)
         {
-            MemoryIsActive = serviceProvider.Services.ContainsKey(Installation.Default);
-            CloudIsActive = serviceProvider.Services.ContainsKey(Installation.Inst00);
+            MemoryIsActive = serviceProvider.Services.ContainsKey(Installation.Inst50);
             CacheConfiguration = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
         }
-        private async Task<TCache> InstanceWithoutConsistencyAsync(TCacheKey key, string keyString)
+        private bool GetCloudIsActive(Installation installation)
+            => Implementations.ContainsKey(installation);
+        private async Task<TCache> InstanceWithoutConsistencyAsync(TCacheKey key, string keyString, Installation installation)
         {
             TCache cache = await key.FetchAsync().NoContext();
             if (MemoryIsActive)
                 new Key(keyString).Update(cache, default);
-            if (CloudIsActive)
-                await Implementation().UpdateAsync(keyString, cache, default).NoContext();
+            if (GetCloudIsActive(installation))
+                await Implementation(installation).UpdateAsync(keyString, cache, default).NoContext();
             return cache;
         }
-        public async Task<TCache> InstanceAsync(TCacheKey key, bool withConsistency)
+        public async Task<TCache> InstanceAsync(TCacheKey key, bool withConsistency, Installation installation)
         {
             string keyString = key.ToKeyString();
             if (MemoryIsActive)
                 if (new Key(keyString).Exists<TCache>())
                     return new Key(keyString).Instance<TCache>();
-            if (CloudIsActive)
+            if (GetCloudIsActive(installation))
             {
-                CacheStatus<TCache> responseFromCloud = await Implementation().ExistsAsync(keyString).NoContext();
+                CacheStatus<TCache> responseFromCloud = await Implementation(installation).ExistsAsync(keyString).NoContext();
                 if (responseFromCloud.IsOk)
                 {
-                    TCache cache = responseFromCloud.Cache != null ? responseFromCloud.Cache : await Implementation().InstanceAsync(keyString).NoContext();
+                    TCache cache = responseFromCloud.Cache != null ? responseFromCloud.Cache : await Implementation(installation).InstanceAsync(keyString).NoContext();
                     if (MemoryIsActive)
                         new Key(keyString).Update(cache, default);
                     return cache;
                 }
             }
             if (!withConsistency)
-                return await InstanceWithoutConsistencyAsync(key, keyString).NoContext();
+                return await InstanceWithoutConsistencyAsync(key, keyString, installation).NoContext();
             else
             {
                 TCache cache = default;
-                await RaceCondition.RunAsync(async () => cache = await InstanceWithoutConsistencyAsync(key, keyString).NoContext(), keyString).NoContext();
+                await RaceCondition.RunAsync(async () => cache = await InstanceWithoutConsistencyAsync(key, keyString, installation).NoContext(), keyString).NoContext();
                 return cache;
             }
         }
-        public async Task<bool> UpdateAsync(TCacheKey key, TCache value, TimeSpan expiringTime)
+        public async Task<bool> UpdateAsync(TCacheKey key, TCache value, TimeSpan expiringTime, Installation installation)
         {
             string keyString = key.ToKeyString();
             if (value == null)
@@ -96,33 +96,33 @@ namespace Rystem.Business
                 new Key(keyString).Update(value, expiringTime);
                 result = true;
             }
-            if (CloudIsActive)
-                result |= await Implementation().UpdateAsync(keyString, value, expiringTime).NoContext();
+            if (GetCloudIsActive(installation))
+                result |= await Implementation(installation).UpdateAsync(keyString, value, expiringTime).NoContext();
             return result;
         }
-        public async Task<bool> ExistsAsync(TCacheKey key)
+        public async Task<bool> ExistsAsync(TCacheKey key, Installation installation)
         {
             string keyString = key.ToKeyString();
             if (MemoryIsActive)
                 return new Key(keyString).Exists<TCache>();
-            else if (CloudIsActive)
-                return (await Implementation().ExistsAsync(keyString).NoContext()).IsOk;
+            else if (GetCloudIsActive(installation))
+                return (await Implementation(installation).ExistsAsync(keyString).NoContext()).IsOk;
             return false;
         }
-        public async Task<bool> DeleteAsync(TCacheKey key)
+        public async Task<bool> DeleteAsync(TCacheKey key, Installation installation)
         {
             string keyString = key.ToKeyString();
             bool result = false;
             if (MemoryIsActive)
                 result |= new Key(keyString).Remove<TCache>() != null;
-            if (CloudIsActive)
-                result |= await Implementation().DeleteAsync(keyString).NoContext();
+            if (GetCloudIsActive(installation))
+                result |= await Implementation(installation).DeleteAsync(keyString).NoContext();
             return result;
         }
-        public async Task<IEnumerable<string>> ListAsync()
+        public async Task<IEnumerable<string>> ListAsync(Installation installation)
         {
-            if (CloudIsActive)
-                return await Implementation().ListAsync().NoContext();
+            if (GetCloudIsActive(installation))
+                return await Implementation(installation).ListAsync().NoContext();
             if (MemoryIsActive)
                 return new Key(string.Empty).List<TCache>();
             return null;

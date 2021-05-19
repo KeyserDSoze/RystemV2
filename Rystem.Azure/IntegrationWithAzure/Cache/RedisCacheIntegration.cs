@@ -13,7 +13,7 @@ namespace Rystem.Azure.Integration.Cache
     public sealed record RedisCacheOptions(string ConnectionString, TimeSpan ExpiringDefault, int NumberOfClients = 1);
     public sealed record RedisCacheConfiguration(string Prefix, TimeSpan ExpiringDefault, int NumberOfClients = 1) : Configuration(Prefix)
     {
-        public RedisCacheConfiguration() : this(default) { }
+        public RedisCacheConfiguration() : this(string.Empty, default) { }
     }
     public sealed class RedisCacheIntegration
     {
