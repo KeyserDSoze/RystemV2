@@ -13,7 +13,10 @@ namespace Rystem.Azure.Integration.Message
     /// <summary>
     /// Leave ConnectionString empty if you want to connect through the managed identity
     /// </summary>
-    public sealed record ServiceBusOptions(string FullyQualifiedName, string ConnectionString, ServiceBusProcessorOptions Options = default);
+    public sealed record ServiceBusOptions(string FullyQualifiedName, string AccessKey, ServiceBusProcessorOptions Options = default)
+    {
+        public string ConnectionString => $"Endpoint=sb://{FullyQualifiedName}.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey={AccessKey}";
+    }
     public sealed record ServiceBusConfiguration(string Name) : Configuration(Name)
     {
         public ServiceBusConfiguration() : this(string.Empty) { }
@@ -31,30 +34,36 @@ namespace Rystem.Azure.Integration.Message
         public ServiceBusIntegration(ServiceBusConfiguration configuration, ServiceBusOptions options)
         {
             Configuration = configuration;
-            if (!string.IsNullOrWhiteSpace(options.ConnectionString))
+            if (!string.IsNullOrWhiteSpace(options.AccessKey))
             {
                 ServiceBusClient client = new(options.ConnectionString);
                 this.Client = client.CreateSender(configuration.Name);
-                if (options.Options != default)
-                    this.ClientReader = client.CreateProcessor(configuration.Name, options.Options);
+                this.ClientReader = client.CreateProcessor(configuration.Name, options.Options);
             }
             else
             {
                 ServiceBusClient client = new(options.FullyQualifiedName, new DefaultAzureCredential());
                 this.Client = client.CreateSender(configuration.Name);
-                if (options.Options != default)
-                    this.ClientReader = client.CreateProcessor(configuration.Name, options.Options);
+                this.ClientReader = client.CreateProcessor(configuration.Name, options.Options);
             }
         }
 
+        private Func<ProcessMessageEventArgs, Task> OnMessage;
+        private Func<ProcessErrorEventArgs, Task> OnError;
         public async Task StartReadAsync(Func<ProcessMessageEventArgs, Task> onMessage, Func<ProcessErrorEventArgs, Task> onError, CancellationToken cancellationToken = default)
         {
-            ClientReader.ProcessMessageAsync += onMessage;
-            ClientReader.ProcessErrorAsync += onError;
+            OnMessage = onMessage;
+            OnError = onError;
+            ClientReader.ProcessMessageAsync += OnMessage;
+            ClientReader.ProcessErrorAsync += OnError;
             await ClientReader.StartProcessingAsync(cancellationToken).NoContext();
         }
         public async Task StopReadAsync(CancellationToken cancellationToken = default)
-            => await ClientReader.StopProcessingAsync(cancellationToken).NoContext();
+        {
+            await ClientReader.StopProcessingAsync(cancellationToken).NoContext();
+            ClientReader.ProcessMessageAsync -= OnMessage;
+            ClientReader.ProcessErrorAsync -= OnError;
+        }
 
         public async Task<long> SendAsync(string message, int delayInMilliseconds = 0, CancellationToken cancellationToken = default)
         {

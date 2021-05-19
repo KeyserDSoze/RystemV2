@@ -33,18 +33,18 @@ namespace Rystem.Business.Queue.Implementation
             {
                 IsListening = true;
                 await Integration.StartReadAsync(
-                async (x) =>
-                {
-                    try
+                    async (x) =>
                     {
-                        await callback(x.Data.EventBody.ToObjectFromJson<TEntity>(), x.Data.PartitionKey, x.Data).NoContext();
-                    }
-                    catch (Exception ex)
-                    {
-                        if (onErrorCallback != default)
-                            await onErrorCallback(ex).NoContext();
-                    }
-                },
+                        try
+                        {
+                            await callback(x.Data.EventBody.ToObjectFromJson<TEntity>(), x.Data.PartitionKey, x.Data).NoContext();
+                        }
+                        catch (Exception ex)
+                        {
+                            if (onErrorCallback != default)
+                                await onErrorCallback(ex).NoContext();
+                        }
+                    },
                     async x =>
                     {
                         if (onErrorCallback != default)

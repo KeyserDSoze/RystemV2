@@ -22,5 +22,15 @@ namespace Rystem.UnitTest.Business.Queue
         {
             await Sample.Run(Installation.Default).NoContext();
         }
+        [Fact]
+        public async Task EventHub()
+        {
+            await Sample.Run(Installation.Inst00).NoContext();
+        }
+        [Fact]
+        public async Task ServiceBus()
+        {
+            await Sample.Run(Installation.Inst01).NoContext();
+        }
     }
 }
