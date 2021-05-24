@@ -13,8 +13,9 @@ namespace Rystem.Concurrency
         /// </summary>
         /// <param name="task">Action to perform</param>
         /// <param name="raceId">Concurrency key, task with different id doesn't partecipate at the same race.</param>
+        /// <param name="distributedImplementation">A implementation that overrides the internal lock check function.</param>
         /// <returns></returns>
-        public static async Task<RaceConditionResponse> RunAsync(Func<Task> task, string raceId = "")
-            => await task.RunUnderRaceConditionAsync(raceId).NoContext();
+        public static async Task<RaceConditionResponse> RunAsync(Func<Task> task, string raceId = "", IDistributedImplementation distributedImplementation = default)
+            => await task.RunUnderRaceConditionAsync(raceId, distributedImplementation).NoContext();
     }
 }

@@ -8,24 +8,23 @@ namespace Rystem.Concurrency
 {
     internal sealed class RaceConditionExecutor
     {
-        private readonly object Semaphore = new();
         private DateTime LastExecutionPlusExpirationTime;
         internal bool IsExpired => DateTime.UtcNow > LastExecutionPlusExpirationTime;
-        private bool IsLocked { get; set; }
-        public async Task<RaceConditionResponse> ExecuteAsync(Func<Task> action)
+        private readonly string Key;
+        public RaceConditionExecutor(string id)
+            => Key = id;
+        private readonly MemoryImplementation Memory = new();
+        public async Task<RaceConditionResponse> ExecuteAsync(Func<Task> action, IDistributedImplementation implementation)
         {
+            implementation ??= Memory;
             LastExecutionPlusExpirationTime = DateTime.UtcNow.AddDays(1);
             var isTheFirst = false;
             var isWaiting = false;
             await WaitAsync().NoContext();
             if (!isWaiting)
             {
-                lock (Semaphore)
-                    if (!IsLocked)
-                    {
-                        IsLocked = true;
-                        isTheFirst = true;
-                    }
+                if (await implementation.AcquireAsync(Key).NoContext())
+                    isTheFirst = true;
                 if (!isTheFirst)
                     await WaitAsync().NoContext();
             }
@@ -35,13 +34,13 @@ namespace Rystem.Concurrency
                 var result = await Try.Execute(action).InvokeAsync().NoContext();
                 if (result.InException)
                     exception = result.Exception;
-                this.IsLocked = false;
+                await implementation.ReleaseAsync(Key).NoContext();
             }
             return new RaceConditionResponse(isTheFirst && !isWaiting, exception != default ? new List<Exception>() { exception } : null);
 
             async Task WaitAsync()
             {
-                while (IsLocked)
+                while (await implementation.IsAcquiredAsync(Key).NoContext())
                 {
                     isWaiting = true;
                     await Task.Delay(4).NoContext();

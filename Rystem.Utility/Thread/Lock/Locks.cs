@@ -28,13 +28,13 @@ namespace Rystem.Concurrency
         }
         public static Locks Instance { get; } = new();
         private static readonly object Semaphore = new();
-        public async Task<LockResponse> RunAsync(Func<Task> action, string id)
+        public async Task<LockResponse> RunAsync(Func<Task> action, string id, IDistributedImplementation implementation)
         {
             if (!LockConditions.ContainsKey(id))
                 lock (Semaphore)
                     if (!LockConditions.ContainsKey(id))
-                        LockConditions.Add(id, new LockExecutor());
-            return await LockConditions[id].ExecuteAsync(action).NoContext();
+                        LockConditions.Add(id, new LockExecutor(id));
+            return await LockConditions[id].ExecuteAsync(action, implementation).NoContext();
         }
     }
 }

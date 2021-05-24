@@ -13,8 +13,9 @@ namespace Rystem.Concurrency
         /// </summary>
         /// <param name="task">Action to perform</param>
         /// <param name="lockId">Lock key, task with different id doesn't partecipate at the same lock chain.</param>
+        /// <param name="distributedImplementation">A implementation that overrides the internal lock check function.</param>
         /// <returns></returns>
-        public static async Task<LockResponse> RunAsync(this Func<Task> task, string lockId = "")
-            => await Locks.Instance.RunAsync(task, lockId).NoContext();
+        public static async Task<LockResponse> RunAsync(this Func<Task> task, string lockId = "", IDistributedImplementation distributedImplementation = default)
+            => await Locks.Instance.RunAsync(task, lockId, distributedImplementation).NoContext();
     }
 }

@@ -8,34 +8,29 @@ namespace Rystem.Concurrency
 {
     internal sealed class LockExecutor
     {
-        private readonly object Semaphore = new();
         private DateTime LastExecutionPlusExpirationTime;
         internal bool IsExpired => DateTime.UtcNow > LastExecutionPlusExpirationTime;
-        private bool IsLocked { get; set; }
-        public async Task<LockResponse> ExecuteAsync(Func<Task> action)
+        private readonly MemoryImplementation Memory = new();
+        private readonly string Key;
+        public LockExecutor(string key)
+            => Key = key;
+        public async Task<LockResponse> ExecuteAsync(Func<Task> action, IDistributedImplementation implementation)
         {
+            implementation ??= Memory;
             DateTime start = DateTime.UtcNow;
             LastExecutionPlusExpirationTime = start.AddDays(1);
-            while (!Lock())
+            while (true)
+            {
+                if (await implementation.AcquireAsync(Key).NoContext())
+                    break;
                 await Task.Delay(2).NoContext();
+            }
             Exception exception = default;
             var result = await Try.Execute(action).InvokeAsync().NoContext();
             if (result.InException)
                 exception = result.Exception;
-            this.IsLocked = false;
+            await implementation.ReleaseAsync(Key).NoContext();
             return new LockResponse(DateTime.UtcNow.Subtract(start), exception != default ? new List<Exception>() { exception } : null);
-
-            bool Lock()
-            {
-                if (!IsLocked)
-                    lock (Semaphore)
-                        if (!IsLocked)
-                        {
-                            IsLocked = true;
-                            return true;
-                        }
-                return false;
-            }
         }
     }
 }

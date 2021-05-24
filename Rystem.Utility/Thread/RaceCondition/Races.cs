@@ -28,13 +28,13 @@ namespace Rystem.Concurrency
         }
         public static Races Instance { get; } = new();
         private static readonly object Semaphore = new();
-        public async Task<RaceConditionResponse> RunAsync(Func<Task> action, string id)
+        public async Task<RaceConditionResponse> RunAsync(Func<Task> action, string id, IDistributedImplementation distributedImplementation)
         {
             if (!RaceConditions.ContainsKey(id))
                 lock (Semaphore)
                     if (!RaceConditions.ContainsKey(id))
-                        RaceConditions.Add(id, new RaceConditionExecutor());
-            return await RaceConditions[id].ExecuteAsync(action).NoContext();
+                        RaceConditions.Add(id, new RaceConditionExecutor(id));
+            return await RaceConditions[id].ExecuteAsync(action, distributedImplementation).NoContext();
         }
     }
 }
