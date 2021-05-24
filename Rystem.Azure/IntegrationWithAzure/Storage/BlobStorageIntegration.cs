@@ -230,12 +230,12 @@ namespace Rystem.Azure.Integration.Storage
                         var preBlob = client.GetBlobClient(officialName);
                         if (!await preBlob.ExistsAsync().NoContext())
                             await preBlob.UploadAsync(EmptyStream).NoContext();
-                        BlobLockClients.Add(officialName, new BlobLockWrapper
+                        BlobLockClients.Add(name, new BlobLockWrapper
                         {
                             Client = preBlob
                         });
                     }
-                }, LockRaceId).NoContext();
+                }, $"{LockRaceId}{name}").NoContext();
             }
             return BlobLockClients[name];
         }

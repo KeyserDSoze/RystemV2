@@ -15,7 +15,7 @@ namespace Rystem.Concurrency
         where TKey : IDistributedConcurrencyKey
     {
         private readonly Dictionary<Installation, IDistributedImplementation> Implementations = new();
-        private readonly Dictionary<Installation, ProvidedService> CacheConfiguration;
+        private readonly Dictionary<Installation, ProvidedService> DistributedConfiguration;
         private bool MemoryIsActive { get; }
         private static readonly object TrafficLight = new();
         public IDistributedImplementation Implementation(Installation installation)
@@ -24,7 +24,7 @@ namespace Rystem.Concurrency
                 lock (TrafficLight)
                     if (!Implementations.ContainsKey(installation))
                     {
-                        ProvidedService configuration = CacheConfiguration[Installation.Inst00];
+                        ProvidedService configuration = DistributedConfiguration[installation];
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlobStorage:
@@ -40,6 +40,6 @@ namespace Rystem.Concurrency
             return Implementations[installation];
         }
         public DistributedManager(RystemDistributedServiceProvider serviceProvider)
-            => CacheConfiguration = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
+            => DistributedConfiguration = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
     }
 }

@@ -6,6 +6,7 @@ namespace Rystem.Business
     internal enum ServiceProviderType
     {
         InMemory,
+        InMemory2,
         AzureKeyVault,
         AzureTableStorage,
         AzureBlobStorage,

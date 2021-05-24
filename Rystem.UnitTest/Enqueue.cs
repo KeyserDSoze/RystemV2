@@ -23,7 +23,7 @@ namespace Rystem.UnitTest
         [Fact]
         public async Task QueueSomething()
         {
-            Sequence.Create<IFalseNueve>(500, TimeSpan.FromSeconds(2), Evaluate, QueueName, QueueType.FirstInFirstOut);
+            Sequence.Create<IFalseNueve>(new SequenceProperty<IFalseNueve>(QueueName, 500, TimeSpan.FromSeconds(2), Evaluate), QueueType.FirstInFirstOut);
             for (int i = 0; i < 510; i++)
             {
                 var falseNueve = new FalseNueve()

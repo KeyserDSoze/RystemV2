@@ -17,8 +17,8 @@ namespace Rystem.BackgroundWork
         /// <param name="action">Batch operation</param>
         /// <param name="id">Queue id</param>
         /// <param name="type">Type of queue</param>
-        public static void Create<T>(int maximumBuffer, TimeSpan maximumRetention, Func<IEnumerable<T>, Task> action, string id = "", QueueType type = QueueType.FirstInFirstOut)
-            => Sequences.Instance.Create(id, maximumBuffer, maximumRetention, action, type);
+        public static void Create<T>(SequenceProperty<T> sequenceProperty, QueueType type = QueueType.FirstInFirstOut)
+            => Sequences.Instance.Create<T>(sequenceProperty, type);
         /// <summary>
         /// Check if batch operation has to start. With force parameter as true you don't have to wait the maximum buffer or maximum retention to perform the batch operation.
         /// </summary>

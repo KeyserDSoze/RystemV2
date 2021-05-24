@@ -74,7 +74,7 @@ namespace Rystem.Azure.Integration.Cache
                 if (redisKey.Contains(prefix))
                     yield return redisKey.Replace(prefix, string.Empty);
         }
-        private readonly ConcurrentDictionary<string, string> TokenAcquireds = new();
+        private const string FixedValue = "A";
         public async Task<bool> AcquireLockAsync(string key, TimeSpan expiringTime = default)
         {
             try
@@ -83,7 +83,7 @@ namespace Rystem.Azure.Integration.Cache
                     expiringTime = TimeSpan.FromSeconds(10);
                 RaceConditionResponse response = await RaceCondition.RunAsync(async () =>
                 {
-                    await Cache.LockTakeAsync(new RedisKey(key), new RedisValue(string.Empty), expiringTime);
+                    await Cache.LockTakeAsync(new RedisKey(key), new RedisValue(FixedValue), expiringTime);
                 }, key).NoContext();
                 return response.IsExecuted && !response.InException;
             }
@@ -94,14 +94,14 @@ namespace Rystem.Azure.Integration.Cache
         }
         public async Task<bool> LockIsAcquiredAsync(string key)
         {
-#warning AR - To check how it really works
-            return (await Cache.LockQueryAsync(new RedisKey(key))).HasValue;
+            var value = await Cache.LockQueryAsync(new RedisKey(key));
+            return value.HasValue;
         }
         public async Task<bool> ReleaseLockAsync(string key)
         {
             await RaceCondition.RunAsync(async () =>
             {
-                await Cache.LockReleaseAsync(new RedisKey(key), new RedisValue(string.Empty));
+                await Cache.LockReleaseAsync(new RedisKey(key), new RedisValue(FixedValue));
             }, key).NoContext();
             return true;
         }

@@ -37,7 +37,7 @@ namespace Rystem.UnitTest.Business.DistributedConcurrency
         private async Task SumAsync(int v, string key, int c, Installation installation)
         {
             Func<Task> action = async () => await CountAsync(v, c);
-            List<Task> tasks = new List<Task>();
+            List<Task> tasks = new();
             for (int i = 0; i < 20; i++)
             {
                 MaxiCounter += v;
@@ -54,7 +54,7 @@ namespace Rystem.UnitTest.Business.DistributedConcurrency
         private async Task SumAsync2(int v, string key, int c, Installation installation)
         {
             Func<Task> action = async () => await CountAsync(v, c);
-            List<Task> tasks = new List<Task>();
+            List<Task> tasks = new();
             for (int i = 0; i < 20; i++)
             {
                 tasks.Add(Execute());

@@ -25,7 +25,7 @@ namespace Rystem.Business
                 lock (TrafficLight)
                     if (!Implementations.ContainsKey(installation))
                     {
-                        ProvidedService configuration = CacheConfiguration[Installation.Inst00];
+                        ProvidedService configuration = CacheConfiguration[installation];
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlobStorage:

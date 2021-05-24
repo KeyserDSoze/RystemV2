@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Rystem.BackgroundWork
 {
+    public record SequenceProperty<T>(string Name = "", int MaximumBuffer = 5000, TimeSpan MaximumRetention = default, params Func<IEnumerable<T>, Task>[] Actions) : Configuration(Name)
+    {
+        public SequenceProperty() : this(default) { }
+    }
     internal sealed class Sequences
     {
         private readonly Dictionary<string, IQueueContainer> Queues = new();
@@ -27,19 +31,19 @@ namespace Rystem.BackgroundWork
         }
         public static Sequences Instance { get; } = new();
         private static readonly object Semaphore = new();
-        public void Create<T>(string id, int maximumBuffer, TimeSpan maximumRetention, Func<IEnumerable<T>, Task> action, QueueType type)
+        public void Create<T>(SequenceProperty<T> property, QueueType type)
         {
-            if (!Queues.ContainsKey(id))
+            if (!Queues.ContainsKey(property.Name))
                 lock (Semaphore)
-                    if (!Queues.ContainsKey(id))
+                    if (!Queues.ContainsKey(property.Name))
                         switch (type)
                         {
                             default:
                             case QueueType.FirstInFirstOut:
-                                Queues.Add(id, new QueueContainer<T>(maximumBuffer, maximumRetention, action, new BackgroundQueue<T>()));
+                                Queues.Add(property.Name, new QueueContainer<T>(property, new BackgroundQueue<T>()));
                                 break;
                             case QueueType.LastInFirstOut:
-                                Queues.Add(id, new QueueContainer<T>(maximumBuffer, maximumRetention, action, new BackgroundStack<T>()));
+                                Queues.Add(property.Name, new QueueContainer<T>(property, new BackgroundStack<T>()));
                                 break;
                         }
         }
@@ -79,30 +83,28 @@ namespace Rystem.BackgroundWork
         private class QueueContainer<T> : IQueueContainer
         {
             public IBackgroundQueue<T> Queue { get; }
-            private readonly int MaximumBuffer;
-            private readonly TimeSpan MaximumRetention;
+            private readonly SequenceProperty<T> Property;
             private DateTime ExpiringTime;
-            public Func<IEnumerable<T>, Task> Action { get; }
             public bool IsExpired => DateTime.UtcNow >= ExpiringTime;
-            public QueueContainer(int maximumBuffer, TimeSpan maximumRetention, Func<IEnumerable<T>, Task> action, IBackgroundQueue<T> queue)
+            public QueueContainer(SequenceProperty<T> property, IBackgroundQueue<T> queue)
             {
-                MaximumBuffer = maximumBuffer;
-                MaximumRetention = maximumRetention;
-                Action = action;
+                Property = property;
                 Queue = queue;
-                ExpiringTime = DateTime.UtcNow.Add(MaximumRetention);
+                ExpiringTime = DateTime.UtcNow.Add(Property.MaximumRetention);
             }
             public bool Add(object entity)
             {
                 Queue.AddElement((T)entity);
-                return Queue.Count() >= MaximumBuffer || IsExpired;
+                return Queue.Count() >= Property.MaximumBuffer || IsExpired;
             }
             public void Invoke()
             {
-                ExpiringTime = DateTime.UtcNow.Add(MaximumRetention);
+                ExpiringTime = DateTime.UtcNow.Add(Property.MaximumRetention);
                 System.Threading.ThreadPool.QueueUserWorkItem(async (x) =>
                 {
-                    await Action.Invoke(Queue.DequeueFirstMaxElement());
+                    if (Property.Actions != default)
+                        foreach (var action in Property.Actions)
+                            await action.Invoke(Queue.DequeueFirstMaxElement()).NoContext();
                 });
             }
         }
