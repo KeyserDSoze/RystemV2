@@ -96,8 +96,8 @@ namespace System
         /// <returns>Get "takeCount" items with its Name and T object.</returns>
         public static async IAsyncEnumerable<(string Name, T Content)> ListAsync<T>(this IData data, int? takeCount = null, Installation installation = Installation.Default)
         {
-            foreach (var element in await data.Manager().ListAsync(data, takeCount ?? int.MaxValue, installation).NoContext())
-                yield return (element.Name, await element.Value.FromJsonAsync<T>().NoContext());
+            foreach (var (Name, Value) in await data.Manager().ListAsync(data, takeCount ?? int.MaxValue, installation).NoContext())
+                yield return (Name, await Value.FromJsonAsync<T>().NoContext());
         }
         /// <summary>
         /// Get all items (till the first takeCount parameter) and retrieve the name and a list of T from json object, use your parameter Name in your IData to create the searchable string.
@@ -111,11 +111,11 @@ namespace System
         /// <returns>Get "takeCount" items with its Name and a list T objects.</returns>
         public static async IAsyncEnumerable<(string Name, List<T> Content)> ListAsync<T>(this IData data, int? takeCount = null, bool breakLine = false, Installation installation = Installation.Default)
         {
-            foreach (var element in await data.Manager().ListAsync(data, takeCount ?? int.MaxValue, installation).NoContext())
+            foreach (var (Name, Value) in await data.Manager().ListAsync(data, takeCount ?? int.MaxValue, installation).NoContext())
                 if (!breakLine)
-                    yield return (element.Name, await element.Value.FromJsonAsync<List<T>>().NoContext());
+                    yield return (Name, await Value.FromJsonAsync<List<T>>().NoContext());
                 else
-                    yield return (element.Name, (await element.Value.ConvertToStringAsync().NoContext()).Split('\n').Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.FromJson<T>()).ToList());
+                    yield return (Name, (await Value.ConvertToStringAsync().NoContext()).Split('\n').Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.FromJson<T>()).ToList());
         }
         /// <summary>
         /// Get all items (till the first takeCount parameter) and retrieve the name and the Stream, use your parameter Name in your IData to create the searchable string.
