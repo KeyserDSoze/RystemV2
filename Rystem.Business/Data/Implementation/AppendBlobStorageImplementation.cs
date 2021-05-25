@@ -1,6 +1,8 @@
 ﻿using Rystem.Azure.Integration.Storage;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Rystem.Business.Data.Implementantion
@@ -24,6 +26,8 @@ namespace Rystem.Business.Data.Implementantion
             var value = await Integration.ReadAsync(entity.Name, false).NoContext();
             return value.Content;
         }
+        public async Task<IEnumerable<(string Name, Stream Value)>> ListAsync(string filter, int takeCount)
+            => (await Integration.ListAsync(filter, takeCount).NoContext()).Select(x => (x.Name, x.Content));
         public Task<bool> SetPropertiesAsync(TEntity entity, dynamic properties)
             => Integration.SetBlobPropertiesAsync(entity.Name, properties);
         public Task<bool> WriteAsync(TEntity entity, Stream stream, dynamic _)

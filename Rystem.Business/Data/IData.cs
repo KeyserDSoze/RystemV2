@@ -2,7 +2,7 @@
 {
     public interface IData
     {
-        string Name { get; }
+        string Name { get; set; }
         RystemDataServiceProvider ConfigureData();
         internal RystemDataServiceProvider BuildData()
             => ConfigureData().AddInstance(this.GetType());

@@ -13,7 +13,7 @@ namespace Rystem.UnitTest.Business.Data
 {
     public class Sample : IData
     {
-        public string Name { get; init; }
+        public string Name { get; set; }
         public RystemDataServiceProvider ConfigureData()
         {
             return RystemDataServiceProvider.WithAzure()
@@ -29,6 +29,21 @@ namespace Rystem.UnitTest.Business.Data
             await sample.WriteAsync(mini, check, installation: installation).NoContext();
             await sample.WriteAsync(mini, check, installation: installation).NoContext();
             await sample.WriteAsync(mini, check, installation: installation).NoContext();
+            if (check)
+            {
+                await foreach (var item in sample.ListAsync<MiniSample>(breakLine: check, installation: installation))
+                {
+                    Assert.Equal("dsadsadsa", item.Content.First().Ale3);
+                    Assert.Equal(3, item.Content.Count);
+                }
+            }
+            else
+            {
+                await foreach (var item in sample.ListAsync<MiniSample>(10, installation))
+                {
+                    Assert.Equal("dsadsadsa", item.Content.Ale3);
+                }
+            }
             if (check)
             {
                 var reading = await sample.ReadAsync<MiniSample>(check, installation).NoContext();

@@ -59,12 +59,7 @@ namespace Rystem.Business.Data
             if (!breakLine)
                 return await value.FromJsonAsync<IEnumerable<T>>();
             else
-            {
-                List<T> values = new();
-                foreach (var line in (await value.ConvertToStringAsync()).Split('\n').Where(x => !string.IsNullOrWhiteSpace(x)))
-                    values.Add(line.FromJson<T>());
-                return values;
-            }
+                return (await value.ConvertToStringAsync()).Split('\n').Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.FromJson<T>());
         }
         public async Task<Stream> ReadAsync(TEntity entity, Installation installation)
         {
@@ -72,6 +67,8 @@ namespace Rystem.Business.Data
             value.Position = 0;
             return value;
         }
+        public Task<IEnumerable<(string Name, Stream Value)>> ListAsync(TEntity entity, int takeCount, Installation installation)
+            => Implementation(installation).ListAsync(entity.Name, takeCount);
         public Task<bool> WriteAsync(TEntity entity, Stream stream, dynamic options, Installation installation)
             => Implementation(installation).WriteAsync(entity, stream, options);
         public async Task<bool> WriteAsync(TEntity entity, string value, dynamic options, Installation installation)
