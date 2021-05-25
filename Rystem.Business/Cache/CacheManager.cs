@@ -3,10 +3,8 @@ using Rystem.Azure.Integration.Cache;
 using Rystem.Azure.Integration.Storage;
 using Rystem.Concurrency;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rystem.Business
@@ -45,7 +43,7 @@ namespace Rystem.Business
         }
         public CacheManager(RystemCacheServiceProvider serviceProvider)
         {
-            MemoryIsActive = serviceProvider.Services.ContainsKey(Installation.Inst50);
+            MemoryIsActive = serviceProvider.Services.ContainsKey(Installation.Memory);
             CacheConfiguration = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
         }
         private bool GetCloudIsActive(Installation installation)

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Rystem.Business
+﻿namespace Rystem.Business
 {
     public enum Installation
     {
@@ -60,5 +54,6 @@ namespace Rystem.Business
         Inst48,
         Inst49,
         Inst50,
+        Memory = int.MaxValue
     }
 }

@@ -34,6 +34,10 @@ namespace Rystem.Net
                 this.Headers[key] = value;
             return this;
         }
+        public RystemHttpRequestBuilder AddToHeaders((string Key, string Value) item)
+            => AddToHeaders(item.Key, item.Value);
+        public RystemHttpRequestBuilder AddContentType(string value)
+            => AddToHeaders("Content-Type", value);
         public RystemHttpRequestBuilder RemoveFromHeaders(string key)
         {
             if (this.Headers.ContainsKey(key))

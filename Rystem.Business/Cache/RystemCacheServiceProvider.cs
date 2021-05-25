@@ -15,7 +15,7 @@ namespace Rystem.Business
           => new RystemCacheServiceProvider().AndMemory(configuration);
         public RystemCacheServiceProvider AndMemory(InMemoryCacheConfiguration configuration)
         {
-            Services.Add(Installation.Inst50, new ProvidedService(ServiceProviderType.InMemory, configuration, string.Empty));
+            Services.Add(Installation.Memory, new ProvidedService(ServiceProviderType.InMemory, configuration, string.Empty));
             return this;
         }
     }
