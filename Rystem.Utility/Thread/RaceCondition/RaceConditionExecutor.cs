@@ -11,13 +11,17 @@ namespace Rystem.Concurrency
         private DateTime LastExecutionPlusExpirationTime;
         internal bool IsExpired => DateTime.UtcNow > LastExecutionPlusExpirationTime;
         private readonly string Key;
-        public RaceConditionExecutor(string id)
-            => Key = id;
+        private readonly TimeSpan TimeWindow;
+        public RaceConditionExecutor(string id, TimeSpan timeWindow)
+        {
+            Key = id;
+            TimeWindow = timeWindow == default ? TimeSpan.FromMinutes(1) : timeWindow;
+        }
         private readonly MemoryImplementation Memory = new();
         public async Task<RaceConditionResponse> ExecuteAsync(Func<Task> action, IDistributedImplementation implementation)
         {
             implementation ??= Memory;
-            LastExecutionPlusExpirationTime = DateTime.UtcNow.AddDays(1);
+            LastExecutionPlusExpirationTime = DateTime.UtcNow.Add(TimeWindow);
             var isTheFirst = false;
             var isWaiting = false;
             await WaitAsync().NoContext();

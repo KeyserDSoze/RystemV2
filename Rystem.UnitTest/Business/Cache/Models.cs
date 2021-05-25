@@ -45,6 +45,7 @@ namespace Rystem.UnitTest.Business.Cache
             await Task.Delay(2000);
             value = await key.InstanceAsync(installation).NoContext();
             Assert.NotNull(value);
+            await key.RestoreAsync(value, installation: installation).NoContext();
             await key.RemoveAsync(installation).NoContext();
             Assert.False(await key.IsPresentAsync(installation).NoContext());
             await key.RestoreAsync().NoContext();

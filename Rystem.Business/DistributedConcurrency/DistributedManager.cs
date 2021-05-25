@@ -27,7 +27,7 @@ namespace Rystem.Concurrency
                         ProvidedService configuration = DistributedConfiguration[installation];
                         switch (configuration.Type)
                         {
-                            case ServiceProviderType.AzureBlobStorage:
+                            case ServiceProviderType.AzureBlockBlobStorage:
                                 Implementations.Add(installation, new BlobStorageImplementation(new BlobStorageIntegration(configuration.Configurations, AzureManager.Instance.Storages[configuration.ServiceKey])));
                                 break;
                             case ServiceProviderType.AzureRedisCache:

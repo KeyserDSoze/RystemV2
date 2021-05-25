@@ -20,9 +20,9 @@ namespace Rystem.Concurrency
         /// <param name="task">Action to run</param>
         /// <param name="installation"></param>
         /// <returns></returns>
-        public static async Task<RaceConditionResponse> RunUnderRaceConditionAsync<TKey>(this TKey key, Func<Task> task, Installation installation = Installation.Default)
+        public static async Task<RaceConditionResponse> RunUnderRaceConditionAsync<TKey>(this TKey key, Func<Task> task, Installation installation = Installation.Default, TimeSpan timeWindow = default)
             where TKey : IDistributedConcurrencyKey
-            => await task.RunUnderRaceConditionAsync(key.Key, key.Manager().Implementation(installation)).NoContext();
+            => await task.RunUnderRaceConditionAsync(key.Key, timeWindow, key.Manager().Implementation(installation)).NoContext();
         /// <summary>
         /// Deal with concurrency and allow only one method
         /// </summary>

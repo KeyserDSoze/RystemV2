@@ -23,7 +23,7 @@ namespace Rystem
         }
         public static string ConvertToString(this Stream entity) 
             => ConvertToStringAsync(entity).ToResult();
-        public static async Task<Stream> ToStream(this string entity)
+        public static async Task<Stream> ToStreamAsync(this string entity)
         {
             NotClosableStream memoryStream = new();
             using StreamWriter writer = new(memoryStream);

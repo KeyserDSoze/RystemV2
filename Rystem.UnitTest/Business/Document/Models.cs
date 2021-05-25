@@ -25,7 +25,10 @@ namespace Rystem.UnitTest.Business.Document
                 .WithAzure()
                 .WithTableStorage()
                 .AndWithAzure(Installation.Inst00)
-                .WithBlobStorage();
+                .WithBlobStorage(new Azure.Integration.Storage.BlobStorageConfiguration
+                {
+                    Name = "coldwea"
+                });
         }
         public static async Task Run(Installation installation)
         {

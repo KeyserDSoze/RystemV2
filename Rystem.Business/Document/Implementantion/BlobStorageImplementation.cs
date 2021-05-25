@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Cosmos.Table;
+﻿using Azure.Storage.Blobs.Models;
+using Microsoft.Azure.Cosmos.Table;
 using Rystem.Azure.Integration;
 using Rystem.Azure.Integration.Storage;
 using Rystem.Text;
@@ -57,8 +58,17 @@ namespace Rystem.Business.Document.Implementantion
                 entities.Add(await ReadEntity(item).NoContext());
             return entities;
         }
+        private const string ApplicationJson = "application/json";
         public async Task<bool> UpdateAsync(TEntity entity)
-            => await Integration.WriteBlockAsync(GetBase(entity), await entity.ToJson().ToStream().NoContext()).NoContext();
+            => await Integration.WriteBlockAsync(GetBase(entity), await entity.ToJson().ToStreamAsync().NoContext(),
+                new BlobUploadOptions
+                {
+                    AccessTier = AccessTier.Hot,
+                    HttpHeaders = new BlobHttpHeaders
+                    {
+                        ContentType = ApplicationJson
+                    }
+                }).NoContext();
         public async Task<bool> UpdateBatchAsync(IEnumerable<TEntity> entities)
         {
             List<Task> events = new();

@@ -41,9 +41,12 @@ namespace Rystem.Azure.Integration.Storage
                 }), RaceId).NoContext();
             return Context;
         }
+        private const string Asterisk = "*";
         public async Task<bool> DeleteAsync(DynamicTableEntity entity)
         {
             var client = Context ?? await GetContextAsync();
+            if (string.IsNullOrWhiteSpace(entity.ETag))
+                entity.ETag = Asterisk;
             TableOperation operation = TableOperation.Delete(entity);
             return (await client.ExecuteAsync(operation).NoContext()).HttpStatusCode == 204;
         }

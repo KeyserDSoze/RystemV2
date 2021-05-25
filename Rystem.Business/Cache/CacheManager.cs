@@ -28,7 +28,7 @@ namespace Rystem.Business
                         ProvidedService configuration = CacheConfiguration[installation];
                         switch (configuration.Type)
                         {
-                            case ServiceProviderType.AzureBlobStorage:
+                            case ServiceProviderType.AzureBlockBlobStorage:
                                 Implementations.Add(installation, new InBlobStorage<TCache>(new BlobStorageIntegration(configuration.Configurations, AzureManager.Instance.Storages[configuration.ServiceKey]), configuration.Configurations.Name ?? "Cache"));
                                 break;
                             case ServiceProviderType.AzureTableStorage:
@@ -49,7 +49,7 @@ namespace Rystem.Business
             CacheConfiguration = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
         }
         private bool GetCloudIsActive(Installation installation)
-            => Implementations.ContainsKey(installation);
+            => CacheConfiguration.ContainsKey(installation) && CacheConfiguration[installation].Type != ServiceProviderType.InMemory;
         private async Task<TCache> InstanceWithoutConsistencyAsync(TCacheKey key, string keyString, Installation installation)
         {
             TCache cache = await key.FetchAsync().NoContext();

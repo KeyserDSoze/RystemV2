@@ -13,6 +13,6 @@ namespace Rystem.Business
         public RystemCacheServiceProvider WithTableStorage(TableStorageConfiguration configuration = default, string serviceKey = default)
             => (RystemCacheServiceProvider)WithIntegration(ServiceProviderType.AzureTableStorage, configuration, serviceKey);
         public RystemCacheServiceProvider WithBlobStorage(BlobStorageConfiguration configuration = default, string serviceKey = default)
-            => (RystemCacheServiceProvider)WithIntegration(ServiceProviderType.AzureBlobStorage, configuration, serviceKey);
+            => (RystemCacheServiceProvider)WithIntegration(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey);
     }
 }

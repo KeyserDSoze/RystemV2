@@ -20,6 +20,7 @@ namespace Rystem.Azure.Integration.Storage
     {
         public BlobStorageConfiguration() : this(string.Empty) { }
     }
+    public sealed record BlobStorageProperties(BlobHttpHeaders Headers = default, Dictionary<string, string> Metadata = default, Dictionary<string, string> Tags = default, BlobRequestConditions HeadersConditions = default, BlobRequestConditions MetadataConditions = default, BlobRequestConditions TagConditions = default);
     public sealed class BlobStorageIntegration : BaseStorageClient
     {
         private BlobContainerClient Context;
@@ -93,16 +94,16 @@ namespace Rystem.Azure.Integration.Storage
             }
             return items;
         }
-        public async Task<bool> SetBlobPropertiesAsync(string name, BlobHttpHeaders headers = default, Dictionary<string, string> metadata = default, Dictionary<string, string> tags = default, BlobRequestConditions headersConditions = default, BlobRequestConditions metadataConditions = default, BlobRequestConditions tagConditions = default, CancellationToken token = default)
+        public async Task<bool> SetBlobPropertiesAsync(string name, BlobStorageProperties properties, CancellationToken token = default)
         {
             var client = Context ?? await GetContextAsync().NoContext();
             var blobClient = client.GetBlobClient(name);
-            if (headers != default)
-                await blobClient.SetHttpHeadersAsync(headers, headersConditions, token).NoContext();
-            if (metadata != default)
-                await blobClient.SetMetadataAsync(metadata, metadataConditions, token).NoContext();
-            if (tags != default)
-                await blobClient.SetTagsAsync(tags, tagConditions, token).NoContext();
+            if (properties.Headers != default)
+                await blobClient.SetHttpHeadersAsync(properties.Headers, properties.HeadersConditions, token).NoContext();
+            if (properties.Metadata != default)
+                await blobClient.SetMetadataAsync(properties.Metadata, properties.MetadataConditions, token).NoContext();
+            if (properties.Tags != default)
+                await blobClient.SetTagsAsync(properties.Tags, properties.TagConditions, token).NoContext();
             return true;
         }
         public async Task<BlobWrapper> ReadAsync(string name, bool fetchProperties = false)
@@ -149,12 +150,12 @@ namespace Rystem.Azure.Integration.Storage
             }
             return items;
         }
-        public async Task<bool> WriteBlockAsync(string name, Stream stream)
+        public async Task<bool> WriteBlockAsync(string name, Stream stream, BlobUploadOptions options)
         {
             var client = Context ?? await GetContextAsync();
             BlockBlobClient cloudBlob = client.GetBlockBlobClient(name);
             stream.Position = 0;
-            await cloudBlob.UploadAsync(stream).NoContext();
+            await cloudBlob.UploadAsync(stream, options).NoContext();
             if (stream is NotClosableStream)
                 (stream as NotClosableStream).ManualDispose();
             return true;

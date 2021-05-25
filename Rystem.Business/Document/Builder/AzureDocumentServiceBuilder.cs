@@ -11,6 +11,6 @@ namespace Rystem.Business
         public RystemDocumentServiceProvider WithTableStorage(TableStorageConfiguration configuration = default, string serviceKey = default)
             => (RystemDocumentServiceProvider)WithIntegration(ServiceProviderType.AzureTableStorage, configuration, serviceKey);
         public RystemDocumentServiceProvider WithBlobStorage(BlobStorageConfiguration configuration = default, string serviceKey = default)
-            => (RystemDocumentServiceProvider)WithIntegration(ServiceProviderType.AzureBlobStorage, configuration, serviceKey);
+            => (RystemDocumentServiceProvider)WithIntegration(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey);
     }
 }

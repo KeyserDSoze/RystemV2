@@ -35,8 +35,15 @@ namespace Rystem.Business
         {
             string keyWithPrefix = GetKeyWithPrefix(key);
             long expiring = expiringTime.Ticks;
-            await Integration.WriteBlockAsync(keyWithPrefix, await value.ToJson().ToStream().NoContext());
-            await Integration.SetBlobPropertiesAsync(keyWithPrefix, new BlobHttpHeaders() { CacheControl = expiring > 0 ? (expiring + DateTime.UtcNow.Ticks).ToString() : string.Empty }).NoContext();
+            await Integration.WriteBlockAsync(keyWithPrefix, await value.ToJson().ToStreamAsync().NoContext(),
+                new BlobUploadOptions
+                {
+                    AccessTier = AccessTier.Hot,
+                    HttpHeaders = new BlobHttpHeaders()
+                    {
+                        CacheControl = expiring > 0 ? (expiring + DateTime.UtcNow.Ticks).ToString() : string.Empty
+                    }
+                }).NoContext();
             return true;
         }
 
