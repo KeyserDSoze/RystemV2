@@ -20,7 +20,7 @@ jobs:
         with:
           PROJECT_FILE_PATH: Rystem.Business/Rystem.Business.csproj
           PACKAGE_NAME: Rystem.Business
-          VERSION_FILE_PATH: Directory.Build.props
+          VERSION_FILE_PATH: Rystem.Business/Rystem.Business.csproj
           VERSION_REGEX: <Version>(.*)<\/Version>
           TAG_COMMIT: true
           TAG_FORMAT: v*
