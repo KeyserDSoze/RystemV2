@@ -21,7 +21,7 @@ jobs:
           PROJECT_FILE_PATH: Rystem.Business/Rystem.Business.csproj
           PACKAGE_NAME: Rystem.Business
           VERSION_FILE_PATH: Directory.Build.props
-          VERSION_REGEX: ^\s*<Version>(.*)<\/Version>\s*$
+          VERSION_REGEX: <Version>(.*)<\/Version>
           TAG_COMMIT: true
           TAG_FORMAT: v*
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
