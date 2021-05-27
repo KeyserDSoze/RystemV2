@@ -62,6 +62,11 @@ namespace Rystem.Cloud.Azure
             List<Subscription> outputSubscriptions = new();
             foreach (var subscription in subscriptions)
             {
+                 string value = await new Uri($"https://management.azure.com{subscription.Id}/providers/Microsoft.CostManagement/exports?api-version=2020-06-01")
+                    .CreateHttpRequest()
+                    .AddToHeaders(await GetAuthHeaders().NoContext())
+                    .Build()
+                    .InvokeAsync().NoContext();
                 Subscription outputSubscription = new(subscription.Id, subscription.TenantId, subscription.DisplayName, subscription.State, new());
                 List<AzureResourceGroup> resourceGroups = await GetResourceGroupsAsync(subscription.SubscriptionId);
                 List<AzureResource> resources = await GetResourcesAsync(subscription.SubscriptionId);
@@ -79,11 +84,19 @@ namespace Rystem.Cloud.Azure
                     ResourceGroup outputResourceGroup = new(resourceGroup.Id, resourceGroup.Name, resourceGroup.Location, resourceGroup.Tags, new());
                     List<Resource> resourcesFromResourceGroup = resources
                         .Where(x => x.Id.ToLower().StartsWith($"/subscriptions/{subscription.SubscriptionId}/resourceGroups/{resourceGroup.Name}/".ToLower()))
-                        .Select(x => new Resource(x.Id, x.Name, x.Type, x.Kind, x.Location, x.Tags, new Sku(x.Sku.Name, x.Sku.Tier, x.Sku.Capacity, x.Sku.Size, x.Sku.Family), x.ManagedBy, x.Plan != default ? new Plan(x.Plan.Name, x.Plan.PromotionCode, x.Plan.Product, x.Plan.Publisher) : default, new(), new(), new()))
+                        .Select(x => new Resource(x.Id, x.Name, x.Type, x.Kind, x.Location, x.Tags, x.Sku != default ? new Sku(x.Sku.Name, x.Sku.Tier, x.Sku.Capacity, x.Sku.Size, x.Sku.Family) : default, x.ManagedBy, x.Plan != default ? new Plan(x.Plan.Name, x.Plan.PromotionCode, x.Plan.Product, x.Plan.Publisher) : default, new(), new(), new()))
                         .ToList();
                     List<Cost> costByResourceGroup = costs.Where(x => x.ResourceGroup.ToLower() == resourceGroup.Name.ToLower()).ToList();
                     foreach (Resource resource in resourcesFromResourceGroup)
                     {
+                        if (resource.Plan != default && resource.Sku != default)
+                        {
+                            string cost = await new Uri($"https://prices.azure.com/api/retail/prices?currencyCode='EUR'&$filter=armSkuName eq '{resource.Sku.Name}' and armRegionName eq '{resource.Location}'")
+                                .CreateHttpRequest()
+                                .AddToHeaders(await GetAuthHeaders().NoContext())
+                                .Build()
+                                .InvokeAsync().NoContext();
+                        }
                         if (azureDeepRequest >= ManagementDeepRequest.Monitoring)
                         {
                             await GetPossibleMetricsAsync(resource).NoContext();
@@ -113,26 +126,29 @@ namespace Rystem.Cloud.Azure
                     };
                     outputSubscription.ResourceGroups.Add(outputResourceGroup);
                 }
+                outputSubscriptions.Add(outputSubscription);
             }
             return outputSubscriptions;
         }
-        private readonly ConcurrentDictionary<string, IEnumerable<string>> PossibleMetricsByType = new();
+        private readonly ConcurrentDictionary<string, List<string>> PossibleMetricsByType = new();
+        private const string WrongMetric = "a";
         private async Task GetPossibleMetricsAsync(Resource resource)
         {
             if (!PossibleMetricsByType.ContainsKey(resource.Type))
             {
                 try
                 {
-                    await GetMetricAsync(resource, DateTime.UtcNow.AddDays(-10), DateTime.UtcNow, "aa", string.Empty);
+                    await GetMetricAsync(resource, DateTime.UtcNow.AddDays(-10), DateTime.UtcNow, WrongMetric, string.Empty);
                 }
                 catch (WebException ex)
                 {
                     try
                     {
+                        const string label = "is not a supported platform metric namespace";
                         using StreamReader streamReader = new(ex.Response.GetResponseStream());
                         var errorResponse = streamReader.ReadToEnd();
-                        if (!errorResponse.ToLower().Contains("is not a supported platform metric namespace"))
-                            PossibleMetricsByType.TryAdd(resource.Type, RegexToSplitValidMetrics.Split(errorResponse).Last().Split(',').Select(x => x.Trim().Trim('}').Trim('"')));
+                        if (!errorResponse.ToLower().Contains(label))
+                            PossibleMetricsByType.TryAdd(resource.Type, RegexToSplitValidMetrics.Split(errorResponse).Last().Split(',').Select(x => x.Trim().Trim('}').Trim('"')).ToList());
                     }
                     catch { }
                 }

@@ -2,10 +2,31 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Description>Library that allows to speed up the business operations on cloud libraries like:
+- Azure Storage, Azure Service Bus, Azure Event Hub, Azure Redis Cache, Azure Key Vault.
+It allows you to deal with multi-instances problem with IoC as central point:
+- Cache multi-instances.
+- Document with NoSql logic (you may choose tablestorage, blobstorage, cosmos as you wish).
+- Queue for decoupling business with event hub, queue storage, service bus.
+- Race condition and lock for multi-instances with redis cache or blob storage.</Description>
+    <Authors>Alessandro Rapiti</Authors>
+    <Company>Rystem</Company>
+    <Copyright>2021</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>
+    <PackageIcon>rystem.png</PackageIcon>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Rystem.Azure\Rystem.Azure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Rystem.Utility\rystem.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
