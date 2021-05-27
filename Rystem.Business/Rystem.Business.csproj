@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -16,6 +16,8 @@ It allows you to deal with multi-instances problem with IoC as central point:
     <RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>
     <PackageIcon>rystem.png</PackageIcon>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Rystem.Business</PackageId>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
