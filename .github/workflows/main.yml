@@ -7,6 +7,8 @@ jobs:
   publish:
     name: build, pack & publish
     runs-on: ubuntu-latest
+    environment: Rystem
+    
     steps:
       - uses: actions/checkout@v2
       - name: Setup dotnet
