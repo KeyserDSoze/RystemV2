@@ -2,6 +2,9 @@
 
 Nuget version: https://www.nuget.org/packages/Rystem/
 
+### Contribute: https://gitcoin.co/grants/3127/rystem
+### Contribute: https://www.buymeacoffee.com/keyserdsoze
+
 **This library allows to speed up the basic operations on system libraries like:**
 - added directly to string the methods to transform to json, csv, bson, byte array, stream and viceversa.
 - added directly to Uri object the possibility to compose in fluid method the request.
