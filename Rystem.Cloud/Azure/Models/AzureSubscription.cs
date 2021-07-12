@@ -28,6 +28,8 @@ namespace Rystem.Cloud.Azure
         public string DisplayName { get; set; }
         [JsonPropertyName("state")]
         public string State { get; set; }
+        [JsonPropertyName("tags")]
+        public Dictionary<string, string> Tags { get; set; }
         [JsonPropertyName("subscriptionPolicies")]
         public AzureSubscriptionPolicies SubscriptionPolicies { get; set; }
     }

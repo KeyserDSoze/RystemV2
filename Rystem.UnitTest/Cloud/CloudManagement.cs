@@ -16,7 +16,7 @@ namespace Rystem.UnitTest.Cloud
         public async Task IsOk()
         {
             MyCloud myCloud = new();
-            var tenant = await myCloud.GetTenantAsync(DateTime.UtcNow.AddDays(-4), DateTime.UtcNow).NoContext();
+            var tenant = await myCloud.GetPreviousMonthTenantAsync().NoContext();
         }
         public class MyCloud : ICloud
         {

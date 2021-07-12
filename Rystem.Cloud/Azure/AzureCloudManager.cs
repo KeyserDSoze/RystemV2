@@ -83,7 +83,7 @@ namespace Rystem.Cloud.Azure
                    .AddToHeaders(await GetAuthHeaders().NoContext())
                    .Build()
                    .InvokeAsync().NoContext();
-            Subscription outputSubscription = new(subscription.Id, subscription.TenantId, subscription.DisplayName, subscription.State, new());
+            Subscription outputSubscription = new(subscription.Id, subscription.TenantId, subscription.DisplayName, subscription.State, subscription.Tags, new());
             List<AzureResourceGroup> resourceGroups = await GetResourceGroupsAsync(subscription.SubscriptionId);
             List<AzureResource> resources = await GetResourcesAsync(subscription.SubscriptionId);
             AzureConsumptions consumptions = await GetConsumptionsAsync(subscription.SubscriptionId, startTime, endTime).NoContext();
