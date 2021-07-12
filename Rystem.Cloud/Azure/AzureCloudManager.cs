@@ -13,6 +13,7 @@ using Rystem.Text;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Runtime.CompilerServices;
 
 namespace Rystem.Cloud.Azure
 {
@@ -52,7 +53,8 @@ namespace Rystem.Cloud.Azure
             => new Tenant(string.Empty, await GetSubscriptionsAsync(from, to, deepRequest).NoContext());
 
         private static readonly Regex RegexToSplitValidMetrics = new("Valid metrics:");
-        private async Task<List<Subscription>> GetSubscriptionsAsync(DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest = ManagementDeepRequest.Subscription)
+        private static readonly object TrafficLight = new();
+        private async Task<List<Subscription>> GetSubscriptionsAsync(DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest)
         {
             List<AzureSubscription> subscriptions = (await new Uri($"https://management.azure.com/subscriptions?api-version=2020-01-01")
                 .CreateHttpRequest()
@@ -60,26 +62,45 @@ namespace Rystem.Cloud.Azure
                 .Build()
                 .InvokeAsync<AzureSubscriptions>(Options)).Subscriptions;
             List<Subscription> outputSubscriptions = new();
+            List<Task> subscriptionTasks = new();
             foreach (var subscription in subscriptions)
             {
-                 string value = await new Uri($"https://management.azure.com{subscription.Id}/providers/Microsoft.CostManagement/exports?api-version=2020-06-01")
-                    .CreateHttpRequest()
-                    .AddToHeaders(await GetAuthHeaders().NoContext())
-                    .Build()
-                    .InvokeAsync().NoContext();
-                Subscription outputSubscription = new(subscription.Id, subscription.TenantId, subscription.DisplayName, subscription.State, new());
-                List<AzureResourceGroup> resourceGroups = await GetResourceGroupsAsync(subscription.SubscriptionId);
-                List<AzureResource> resources = await GetResourcesAsync(subscription.SubscriptionId);
-                List<Cost> costs = azureDeepRequest >= ManagementDeepRequest.Cost ? await GetCostsAsync(subscription.SubscriptionId, startTime, endTime) : new();
-                foreach (var costByResourceGroupNotMoreAvailable in costs.Where(x => !resourceGroups.Any(t => t.Name.ToLower() == x.ResourceGroup.ToLower())).GroupBy(x => x.ResourceGroup))
+                subscriptionTasks.Add(SetSubscriptionAsync());
+                async Task SetSubscriptionAsync()
                 {
-                    resourceGroups.Add(new AzureResourceGroup
-                    {
-                        Id = $"/subscriptions/{subscription.SubscriptionId}/resourceGroups/{costByResourceGroupNotMoreAvailable.Key}",
-                        Name = costByResourceGroupNotMoreAvailable.Key,
-                    });
+                    var outputSubscription = await GetSubscriptionAsync(subscription, startTime, endTime, azureDeepRequest).NoContext();
+                    lock (TrafficLight)
+                        outputSubscriptions.Add(outputSubscription);
                 }
-                foreach (AzureResourceGroup resourceGroup in resourceGroups)
+            }
+            await Task.WhenAll(subscriptionTasks).NoContext();
+            return outputSubscriptions;
+        }
+        private async Task<Subscription> GetSubscriptionAsync(AzureSubscription subscription, DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest)
+        {
+            string value = await new Uri($"https://management.azure.com{subscription.Id}/providers/Microsoft.CostManagement/exports?api-version=2020-06-01")
+                   .CreateHttpRequest()
+                   .AddToHeaders(await GetAuthHeaders().NoContext())
+                   .Build()
+                   .InvokeAsync().NoContext();
+            Subscription outputSubscription = new(subscription.Id, subscription.TenantId, subscription.DisplayName, subscription.State, new());
+            List<AzureResourceGroup> resourceGroups = await GetResourceGroupsAsync(subscription.SubscriptionId);
+            List<AzureResource> resources = await GetResourcesAsync(subscription.SubscriptionId);
+            AzureConsumptions consumptions = await GetConsumptionsAsync(subscription.SubscriptionId, startTime, endTime).NoContext();
+            List<Cost> costs = azureDeepRequest >= ManagementDeepRequest.Cost ? await GetCostsAsync(subscription.SubscriptionId, startTime, endTime, consumptions) : new();
+            foreach (var costByResourceGroupNotMoreAvailable in costs.Where(x => !resourceGroups.Any(t => t.Name.ToLower() == x.ResourceGroup.ToLower())).GroupBy(x => x.ResourceGroup))
+            {
+                resourceGroups.Add(new AzureResourceGroup
+                {
+                    Id = $"/subscriptions/{subscription.SubscriptionId}/resourceGroups/{costByResourceGroupNotMoreAvailable.Key}",
+                    Name = costByResourceGroupNotMoreAvailable.Key,
+                });
+            }
+            List<Task> resourceGroupTasks = new();
+            foreach (AzureResourceGroup resourceGroup in resourceGroups)
+            {
+                resourceGroupTasks.Add(SetResourceGroup());
+                async Task SetResourceGroup()
                 {
                     ResourceGroup outputResourceGroup = new(resourceGroup.Id, resourceGroup.Name, resourceGroup.Location, resourceGroup.Tags, new());
                     List<Resource> resourcesFromResourceGroup = resources
@@ -87,24 +108,28 @@ namespace Rystem.Cloud.Azure
                         .Select(x => new Resource(x.Id, x.Name, x.Type, x.Kind, x.Location, x.Tags, x.Sku != default ? new Sku(x.Sku.Name, x.Sku.Tier, x.Sku.Capacity, x.Sku.Size, x.Sku.Family) : default, x.ManagedBy, x.Plan != default ? new Plan(x.Plan.Name, x.Plan.PromotionCode, x.Plan.Product, x.Plan.Publisher) : default, new(), new(), new()))
                         .ToList();
                     List<Cost> costByResourceGroup = costs.Where(x => x.ResourceGroup.ToLower() == resourceGroup.Name.ToLower()).ToList();
+                    List<Task> resourceTasks = new();
                     foreach (Resource resource in resourcesFromResourceGroup)
                     {
-                        if (resource.Plan != default && resource.Sku != default)
+                        resourceTasks.Add(SetResourceValues());
+                        async Task SetResourceValues()
                         {
-                            string cost = await new Uri($"https://prices.azure.com/api/retail/prices?currencyCode='EUR'&$filter=armSkuName eq '{resource.Sku.Name}' and armRegionName eq '{resource.Location}'")
-                                .CreateHttpRequest()
-                                .AddToHeaders(await GetAuthHeaders().NoContext())
-                                .Build()
-                                .InvokeAsync().NoContext();
+                            if (azureDeepRequest >= ManagementDeepRequest.Monitoring)
+                            {
+                                await GetPossibleMetricsAsync(resource).NoContext();
+                                var monitorings = await GetMonitoringsAsync(resource, startTime, endTime).NoContext();
+                                lock (TrafficLight)
+                                    resource.Monitorings.AddRange(monitorings);
+                            }
+                            lock (TrafficLight)
+                            {
+                                resource.Costs.AddRange(costByResourceGroup.Where(x => x.ResourceId.ToLower() == resource.Id.ToLower()));
+                                outputResourceGroup.Resources.Add(resource);
+                            }
                         }
-                        if (azureDeepRequest >= ManagementDeepRequest.Monitoring)
-                        {
-                            await GetPossibleMetricsAsync(resource).NoContext();
-                            resource.Monitorings.AddRange(await GetMonitoringsAsync(resource, startTime, endTime).NoContext());
-                        }
-                        resource.Costs.AddRange(costByResourceGroup.Where(x => x.ResourceId.ToLower() == resource.Id.ToLower()));
-                        outputResourceGroup.Resources.Add(resource);
-                    }
+                        await Task.WhenAll(resourceTasks).NoContext();
+                    };
+
                     foreach (var costForResourceNotMoreAvailablecostForResourceNotMoreAvailable in costByResourceGroup.Where(x => !resourcesFromResourceGroup.Any(t => t.Id.ToLower() == x.ResourceId.ToLower())).GroupBy(x => x.ResourceId))
                     {
                         var resource = new Resource(
@@ -121,14 +146,31 @@ namespace Rystem.Cloud.Azure
                             new(),
                             new()
                         );
-                        resource.Costs.AddRange(costForResourceNotMoreAvailablecostForResourceNotMoreAvailable);
-                        outputResourceGroup.Resources.Add(resource);
+                        lock (TrafficLight)
+                        {
+                            resource.Costs.AddRange(costForResourceNotMoreAvailablecostForResourceNotMoreAvailable);
+                            outputResourceGroup.Resources.Add(resource);
+                        }
                     };
-                    outputSubscription.ResourceGroups.Add(outputResourceGroup);
+                    lock (TrafficLight)
+                        outputSubscription.ResourceGroups.Add(outputResourceGroup);
                 }
-                outputSubscriptions.Add(outputSubscription);
             }
-            return outputSubscriptions;
+            await Task.WhenAll(resourceGroupTasks).NoContext();
+            return outputSubscription;
+        }
+        public async Task<Subscription> GetSubscriptionAsync(string subscriptionId, DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest)
+        {
+            List<AzureSubscription> subscriptions = (await new Uri($"https://management.azure.com/subscriptions?api-version=2020-01-01")
+              .CreateHttpRequest()
+              .AddToHeaders(await GetAuthHeaders().NoContext())
+              .Build()
+              .InvokeAsync<AzureSubscriptions>(Options)).Subscriptions;
+            AzureSubscription subscription = subscriptions.FirstOrDefault(x => x.SubscriptionId == subscriptionId);
+            if (subscription != default)
+                return await GetSubscriptionAsync(subscription, startTime, endTime, azureDeepRequest).NoContext();
+            else
+                return default;
         }
         private readonly ConcurrentDictionary<string, List<string>> PossibleMetricsByType = new();
         private const string WrongMetric = "a";
@@ -168,7 +210,7 @@ namespace Rystem.Cloud.Azure
                 .AddToHeaders(await GetAuthHeaders().NoContext())
                 .Build()
                 .InvokeAsync<AzureResources>(Options).NoContext()).Resources; //.Replace("$type", "type").FromDefaultJson<AzureResources>()
-        private async Task<List<Cost>> GetCostsAsync(string subscriptionId, DateTime startTime, DateTime endTime)
+        private async Task<List<Cost>> GetCostsAsync(string subscriptionId, DateTime startTime, DateTime endTime, AzureConsumptions azureConsumptions)
         {
             string body = $"{{\"type\":\"Usage\",\"dataSet\":{{\"granularity\":\"Monthly\",\"aggregation\":{{\"totalCost\":{{\"name\":\"Cost\",\"function\":\"Sum\"}},\"totalCostUSD\":{{\"name\":\"CostUSD\",\"function\":\"Sum\"}}}},\"sorting\":[{{\"direction\":\"ascending\",\"name\":\"BillingMonth\"}}],\"grouping\":[{{\"type\":\"Dimension\",\"name\":\"ResourceId\"}},{{\"type\":\"Dimension\",\"name\":\"ResourceType\"}},{{\"type\":\"Dimension\",\"name\":\"ResourceLocation\"}},{{\"type\":\"Dimension\",\"name\":\"ChargeType\"}},{{\"type\":\"Dimension\",\"name\":\"ResourceGroupName\"}},{{\"type\":\"Dimension\",\"name\":\"PublisherType\"}},{{\"type\":\"Dimension\",\"name\":\"ServiceName\"}},{{\"type\":\"Dimension\",\"name\":\"ServiceTier\"}},{{\"type\":\"Dimension\",\"name\":\"Meter\"}}]}},\"timeframe\":\"Custom\",\"timePeriod\":{{\"from\":\"{startTime:yyyy-MM-dd}T00:00:00+00:00\",\"to\":\"{endTime:yyyy-MM-dd}T23:59:59+00:00\"}}}}";
             return (await new Uri($"https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.CostManagement/query?api-version=2019-11-01")
@@ -184,16 +226,36 @@ namespace Rystem.Cloud.Azure
                     x[2].TryGetDateTime(out DateTime eventTime);
                     x[0].TryGetDecimal(out decimal billed);
                     x[1].TryGetDecimal(out decimal usdBilled);
+                    string resourceId = x[3].GetString();
                     return new Cost(eventTime,
                         billed,
                         usdBilled,
-                        x[3].GetString(),
+                        resourceId,
                         x[7].GetString(),
                         x[12].GetString(),
-                        0
+                        azureConsumptions.Value
+                        .Where(ƒ => ƒ.Properties.ResourceId == resourceId)
+                        .Select(ƒ => new Consumption(ƒ.Properties.BillingAccountId,
+                            ƒ.Properties.Quantity,
+                            ƒ.Properties.EffectivePrice,
+                            ƒ.Properties.Cost,
+                            ƒ.Properties.UnitPrice,
+                            ƒ.Properties.BillingCurrency,
+                            ƒ.Properties.OfferId,
+                            ƒ.Properties.ChargeType,
+                            ƒ.Properties.Frequency)).ToList()
                         );
                 }
                 ).ToList();
+        }
+        private async Task<AzureConsumptions> GetConsumptionsAsync(string subscriptionId, DateTime startTime, DateTime endTime)
+        {
+            return (await new Uri($"https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/usageDetails?$filter=properties%2FusageStart%20ge%20'{startTime:yyyy-MM-dd}'%20and%20properties%2FusageEnd%20le%20'{endTime:yyyy-MM-dd}'&$top=1000&api-version=2019-10-01")
+                .CreateHttpRequest()
+                .WithMethod(HttpMethod.Get)
+                .AddToHeaders(await GetAuthHeaders().NoContext())
+                .Build()
+                .InvokeAsync<AzureConsumptions>().NoContext());
         }
         private static readonly List<string> Aggregations = new() { "average", "maximum" };
         private async Task<List<Monitoring>> GetMonitoringsAsync(Resource resource, DateTime startTime, DateTime endTime)
@@ -227,7 +289,7 @@ namespace Rystem.Cloud.Azure
                         .FromJson<AzureMonitoring>()
                         .Value
                         .SelectMany(x => x.Timeseries.SelectMany(x => x.Data))
-                        .Select(x => new Datum(x.TimeStamp, x.Average))
+                        .Select(x => new Datum(x.TimeStamp, x.Maximum > 0 ? x.Maximum : x.Average))
                         .ToList();
                 }
                 catch

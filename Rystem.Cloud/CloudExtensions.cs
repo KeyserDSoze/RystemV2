@@ -29,6 +29,14 @@ namespace System
         public static async Task<Tenant> GetTenantAsync<TEntry>(this TEntry entry, DateTime month, ManagementDeepRequest deepRequest = ManagementDeepRequest.Monitoring, Installation installation = Installation.Default)
             where TEntry : ICloud
             => await entry.GetCloudManagement(installation).GetTenantAsync(new DateTime(month.Year, month.Month, 1), new DateTime(month.AddMonths(1).Year, month.AddMonths(1).Month, 1, 23, 59, 59).AddDays(-1), deepRequest).NoContext();
+
+        public static async Task<Subscription> GetSubscriptionAsync<TEntry>(this TEntry entry, string subscriptionId, DateTime from, DateTime to, ManagementDeepRequest deepRequest = ManagementDeepRequest.Monitoring, Installation installation = Installation.Default)
+            where TEntry : ICloud
+            => await entry.GetCloudManagement(installation).GetSubscriptionAsync(subscriptionId, from, to, deepRequest).NoContext();
+        public static async Task<Subscription> GetSubscriptionAsync<TEntry>(this TEntry entry, string subscriptionId, DateTime month, ManagementDeepRequest deepRequest = ManagementDeepRequest.Monitoring, Installation installation = Installation.Default)
+            where TEntry : ICloud
+            => await entry.GetCloudManagement(installation).GetSubscriptionAsync(subscriptionId, new DateTime(month.Year, month.Month, 1), new DateTime(month.AddMonths(1).Year, month.AddMonths(1).Month, 1, 23, 59, 59).AddDays(-1), deepRequest).NoContext();
+
         public static Task<Tenant> GetPreviousMonthTenantAsync<TEntry>(this TEntry entry, ManagementDeepRequest deepRequest = ManagementDeepRequest.Monitoring, Installation installation = Installation.Default)
             where TEntry : ICloud
             => entry.GetTenantAsync(DateTime.UtcNow.AddMonths(-1), deepRequest, installation);

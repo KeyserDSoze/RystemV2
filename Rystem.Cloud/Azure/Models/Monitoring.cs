@@ -58,6 +58,8 @@ namespace Rystem.Cloud.Azure
         [JsonPropertyName("timeStamp")]
         public DateTime TimeStamp { get; set; }
         [JsonPropertyName("average")]
-        public double Average { get; set; }
+        public double Average { get; set; } 
+        [JsonPropertyName("maximum")]
+        public double Maximum { get; set; }
     }
 }

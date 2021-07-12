@@ -2,10 +2,29 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Alessandro Rapiti</Authors>
+    <Description>Library that allows to manage your azure tenant, you can put under control:
+- your costs,
+- your consumptions,
+- your tags,
+- your metrics.
+The only things you need is an AAD app registration with global reader role. #enjoyrystem</Description>
+    <Copyright>2021</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>rystem.png</PackageIcon>
+    <RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Rystem.Utility\Rystem.Utility.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Rystem.Utility\rystem.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

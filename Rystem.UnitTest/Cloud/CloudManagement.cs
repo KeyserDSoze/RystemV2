@@ -17,7 +17,6 @@ namespace Rystem.UnitTest.Cloud
         {
             MyCloud myCloud = new();
             var tenant = await myCloud.GetTenantAsync(DateTime.UtcNow.AddDays(-4), DateTime.UtcNow).NoContext();
-
         }
         public class MyCloud : ICloud
         {
