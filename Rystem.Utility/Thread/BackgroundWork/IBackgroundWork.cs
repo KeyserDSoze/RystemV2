@@ -7,9 +7,21 @@ namespace Rystem.Background
 {
     public interface IBackgroundWork
     {
-        bool ImmediatelyRunning { get; }
+        bool RunImmediately { get; }
         string Cron { get; }
         Task ActionToDo();
+        public void Run()
+        {
+            string id = $"IBackgroundWork_{GetType().FullName}";
+            if (!BackgroundWork.IsRunning(id))
+            {
+                var expression = CronExpression.Parse(Cron, Cron.Split(' ').Length > 5 ? CronFormat.IncludeSeconds : CronFormat.Standard);
+                BackgroundWork.Run(ActionToDo, $"IBackgroundWork_{GetType().FullName}",
+                    () => (int)expression.GetNextOccurrence(DateTime.UtcNow, true)?.Subtract(DateTime.UtcNow).TotalMilliseconds,
+                    RunImmediately
+                );
+            }
+        }
     }
     public static partial class BackgroundWorkExtensions
     {
@@ -17,11 +29,7 @@ namespace Rystem.Background
             where TEntity : IBackgroundWork, new()
         {
             var entity = new TEntity();
-            var expression = CronExpression.Parse(entity.Cron, entity.Cron.Split(' ').Length > 5 ? CronFormat.IncludeSeconds : CronFormat.Standard);
-            BackgroundWork.Run(entity.ActionToDo, $"IBackgroundWork_{entity.GetType().FullName}",
-                () => (int)expression.GetNextOccurrence(DateTime.UtcNow, true)?.Subtract(DateTime.UtcNow).TotalMilliseconds,
-                entity.ImmediatelyRunning
-            );
+            entity.Run();
             return services;
         }
     }

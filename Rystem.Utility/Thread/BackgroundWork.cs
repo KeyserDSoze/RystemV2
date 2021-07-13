@@ -9,8 +9,8 @@ namespace Rystem.Background
         /// Method that allows task to run continuously in background.
         /// </summary>
         /// <param name="task">Action to perform.</param>
-        /// <param name="nextRunningTime">Time in milliseconds each time the task runs after the first. If firstRunningTime has a value, the first running time is used instead. Default time is 120ms.</param>
-        /// <param name="firstRunningTime">Time in milliseconds for first time the task runs.</param>
+        /// <param name="nextRunningTime">Function that has to return a value in milliseconds. Default time is 120ms.</param>
+        /// <param name="runImmediately">Run immediately at the start.</param>
         public static void Run(Action task, string id = "", Func<int> nextRunningTime = default, bool runImmediately = false)
             => task.RunInBackground(id, nextRunningTime, runImmediately);
         /// <summary>
@@ -18,8 +18,8 @@ namespace Rystem.Background
         /// </summary>
         /// <param name="task">Action to perform.</param>
         /// <param name="id">Task id that runs in background.</param>
-        /// <param name="nextRunningTime">Time in milliseconds each time the task runs after the first. If firstRunningTime has a value, the first running time is used instead. Default time is 120ms.</param>
-        /// <param name="firstRunningTime">Time in milliseconds for first time the task runs.</param>
+        /// <param name="nextRunningTime">Function that has to return a value in milliseconds. Default time is 120ms.</param>
+        /// <param name="runImmediately">Run immediately at the start.</param>
         public static void Run(Func<Task> task, string id = "", Func<int> nextRunningTime = default, bool runImmediately = false)
             => task.RunInBackground(id, nextRunningTime, runImmediately);
         /// <summary>
@@ -28,6 +28,12 @@ namespace Rystem.Background
         /// <param name="id">Task id that runs in background.</param>
         public static void Stop(string id = "")
             => BackgroundWorkExtensions.StopRunningInBackground(null, id);
+        /// <summary>
+        /// Get if your task is running.
+        /// </summary>
+        /// <param name="id">Task id that runs in background.</param>
+        public static bool IsRunning(string id = "")
+            => BackgroundWorkExtensions.IsRunning(null, id);
     }
     public static partial class BackgroundWorkExtensions
     {
@@ -36,8 +42,8 @@ namespace Rystem.Background
         /// </summary>
         /// <param name="task">Action to perform</param>
         /// <param name="id">Task id that runs in background.</param>
-        /// <param name="nextRunningTime">Time in milliseconds each time the task runs after the first. If firstRunningTime has a value, the first running time is used instead.  Default time is 120ms.</param>
-        /// <param name="firstRunningTime">Time in milliseconds for first time the task runs.</param>
+        /// <param name="nextRunningTime">Function that has to return a value in milliseconds. Default time is 120ms.</param>
+        /// <param name="runImmediately">Run immediately at the start.</param>
         public static void RunInBackground(this Action task, string id = "", Func<int> nextRunningTime = default, bool runImmediately = false)
             => BackgroundWorkThread.AddTask(task, id, nextRunningTime, runImmediately);
         /// <summary>
@@ -45,8 +51,8 @@ namespace Rystem.Background
         /// </summary>
         /// <param name="task">Action to perform</param>
         /// <param name="id">Task id that runs in background.</param>
-        /// <param name="nextRunningTime">Time in milliseconds each time the task runs after the first. If firstRunningTime has a value, the first running time is used instead.  Default time is 120ms.</param>
-        /// <param name="firstRunningTime">Time in milliseconds for first time the task runs.</param>
+        /// <param name="nextRunningTime">Function that has to return a value in milliseconds. Default time is 120ms.</param>
+        /// <param name="runImmediately">Run immediately at the start.</param>
         public static void RunInBackground(this Func<Task> task, string id = "", Func<int> nextRunningTime = default, bool runImmediately = false)
             => BackgroundWorkThread.AddTask(task, id, nextRunningTime, runImmediately);
         /// <summary>
@@ -56,5 +62,12 @@ namespace Rystem.Background
         /// <param name="id">Task id that runs in background.</param>
         public static void StopRunningInBackground(this Action task, string id = "")
             => BackgroundWorkThread.RemoveTask(id);
+        /// <summary>
+        /// Get if your task is running.
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="id">Task id that runs in background.</param>
+        public static bool IsRunning(this Action task, string id = "")
+            => BackgroundWorkThread.IsRunning(id);
     }
 }

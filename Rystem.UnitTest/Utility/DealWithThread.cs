@@ -45,7 +45,7 @@ namespace Rystem.UnitTest
                 Counter += 2;
             }
             public static int Counter;
-            public bool ImmediatelyRunning => true;
+            public bool RunImmediately => true;
             public string Cron => "* * * * * *";
         }
 

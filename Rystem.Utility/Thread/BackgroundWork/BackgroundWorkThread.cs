@@ -48,5 +48,7 @@ namespace Rystem.Background
                 }
             }
         }
+        public static bool IsRunning(string id)
+            => Actions.ContainsKey(id);
     }
 }
