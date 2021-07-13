@@ -188,7 +188,7 @@ To understand better how Rystem works please see Rystem.UnitTest project
       //you may also use
       await Lock.RunAsync(action, key);
       
-### Thread -> Ghost (Rystem.BackgroundWork)
+### Thread -> BackgroundWork (Rystem.Background)
       //Run in background a task continuously
       //In this example we are running as Task id 3 a method CountAsync(2) continuously every 300 milliseconds.
       Action action = async () => await CountAsync(2);
@@ -197,11 +197,28 @@ To understand better how Rystem works please see Rystem.UnitTest project
       action.StopRunningInBackground("3");
       
       //you may also use
-      Ghost.Run(async () => await CountAsync(2), "3", 300);
+      BackgroundWork.Run(async () => await CountAsync(2), "3", 300);
       await Task.Delay(1200);
       Ghost.Stop("3");
       
-### Thread -> Sequence (Rystem.BackgroundWork)
+      //you may also use IBackgroundWork
+      private class MyFirstBackgroundWork : IBackgroundWork
+      {
+            public async Task ActionToDo()
+            {
+                //something to do
+            }
+            public bool RunImmediately => true;
+            public string Cron => "* * * * * *";
+      }
+      
+      //with IServiceCollection
+      (Instance of IServiceCollection).AddBackgroundWork<MyFirstBackgroundWork>();
+      
+      //or with the specific method Run()
+      (Instance of MyFirstBackgroundWork).Run();
+      
+### Thread -> Sequence (Rystem.Background)
       //Manage a queue with a T object to allow a batch operation after a maximum buffer elements or a maximum retention of time. 
       //Before install the Aes Password, SaltKey, IVKey in a static constructor or during startup.
        static EnqueueSample()
