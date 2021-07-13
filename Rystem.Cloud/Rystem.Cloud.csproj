@@ -14,7 +14,7 @@ The only things you need is an AAD app registration with global reader role. #en
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>rystem.png</PackageIcon>
     <RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>
-    <Version>1.0.3</Version>
+    <Version>1.0.5</Version>
   </PropertyGroup>
 
   <ItemGroup>

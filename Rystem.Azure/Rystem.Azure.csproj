@@ -1,7 +1,22 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Version>1.0.5</Version>
+    <Authors>Alessandro Rapiti</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>2021</Copyright>
+    <PackageIcon>rystem.png</PackageIcon>
+    <Description>Helper for integration with Azure Services:
+- Redis Cache
+- Event Hub
+- Service Bus
+- KeyVault
+- Table Storage
+- Blob Storage (Block, Append, Page)
+- Queue Storage</Description>
+    <RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>
+    <Company>Rystem</Company>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +40,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Rystem.Utility\Rystem.Utility.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Rystem.Utility\rystem.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
