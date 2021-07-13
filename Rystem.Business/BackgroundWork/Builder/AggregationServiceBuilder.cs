@@ -1,6 +1,6 @@
 ﻿using Rystem.Business;
 
-namespace Rystem.BackgroundWork
+namespace Rystem.Background
 {
     public class AggregationServiceBuilder : ServiceBuilder<RystemAggregationServiceProvider>
     {

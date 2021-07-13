@@ -1,5 +1,6 @@
 ﻿using Rystem.Cloud;
 using Rystem.Cloud.Azure;
+using Rystem.Text;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -17,6 +18,7 @@ namespace Rystem.UnitTest.Cloud
         {
             MyCloud myCloud = new();
             var tenant = await myCloud.GetPreviousMonthTenantAsync().NoContext();
+            string value = tenant.ToJson();
         }
         public class MyCloud : ICloud
         {

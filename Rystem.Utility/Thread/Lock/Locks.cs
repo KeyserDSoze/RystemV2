@@ -1,4 +1,4 @@
-﻿using Rystem.BackgroundWork;
+﻿using Rystem.Background;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +24,7 @@ namespace Rystem.Concurrency
                         Instance.LockConditions.Remove(keyToRemove);
                 }
             };
-            loop.RunInBackground("Rystem.Background.Locks", 1000 * 60 * 60);
+            loop.RunInBackground("Rystem.Background.Locks", () => 1000 * 60 * 60);
         }
         public static Locks Instance { get; } = new();
         private static readonly object Semaphore = new();

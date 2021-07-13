@@ -51,9 +51,16 @@ namespace Rystem.Cloud.Azure
             => ("Authorization", $"Bearer {await GetAccessToken().NoContext()}");
         public async Task<Tenant> GetTenantAsync(DateTime from, DateTime to, ManagementDeepRequest deepRequest)
             => new Tenant(string.Empty, await GetSubscriptionsAsync(from, to, deepRequest).NoContext());
-
         private static readonly Regex RegexToSplitValidMetrics = new("Valid metrics:");
         private static readonly object TrafficLight = new();
+        public async Task<IEnumerable<Subscription>> ListSubscriptionsAsync()
+            => (await new Uri($"https://management.azure.com/subscriptions?api-version=2020-01-01")
+                .CreateHttpRequest()
+                .AddToHeaders(await GetAuthHeaders().NoContext())
+                .Build()
+                .InvokeAsync<AzureSubscriptions>(Options)).Subscriptions.Select(x =>
+                    new Subscription(x.SubscriptionId, x.TenantId, x.DisplayName, x.State, x.Tags, new())
+                );
         private async Task<List<Subscription>> GetSubscriptionsAsync(DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest)
         {
             List<AzureSubscription> subscriptions = (await new Uri($"https://management.azure.com/subscriptions?api-version=2020-01-01")
@@ -221,36 +228,46 @@ namespace Rystem.Cloud.Azure
                 .AddBody(body, EncodingType.UTF8)
                 .Build()
                 .InvokeAsync<AzureCost>(Options).NoContext())
-                .Properties.Rows.Select(x =>
+                .Properties.Rows.Select(consumption =>
                 {
-                    x[2].TryGetDateTime(out DateTime eventTime);
-                    x[0].TryGetDecimal(out decimal billed);
-                    x[1].TryGetDecimal(out decimal usdBilled);
-                    string resourceId = x[3].GetString();
+                    consumption[2].TryGetDateTime(out DateTime eventTime);
+                    consumption[0].TryGetDecimal(out decimal billed);
+                    consumption[1].TryGetDecimal(out decimal usdBilled);
+                    string resourceId = consumption[3].GetString().ToLower();
+                    string subCategory = consumption[10].GetString().ToLower();
+                    string meter = consumption[11].GetString().ToLower();
+                    string startingLabelForProduct = $"{subCategory} - {meter}";
                     return new Cost(eventTime,
                         billed,
                         usdBilled,
                         resourceId,
-                        x[7].GetString(),
-                        x[12].GetString(),
+                        consumption[7].GetString().ToLower(),
+                        consumption[12].GetString().ToLower(),
+                        consumption[9].GetString().ToLower(),
+                        subCategory,
+                        meter,
                         azureConsumptions.Value
-                        .Where(ƒ => ƒ.Properties.ResourceId == resourceId)
-                        .Select(ƒ => new Consumption(ƒ.Properties.BillingAccountId,
-                            ƒ.Properties.Quantity,
-                            ƒ.Properties.EffectivePrice,
-                            ƒ.Properties.Cost,
-                            ƒ.Properties.UnitPrice,
-                            ƒ.Properties.BillingCurrency,
-                            ƒ.Properties.OfferId,
-                            ƒ.Properties.ChargeType,
-                            ƒ.Properties.Frequency)).ToList()
+                            .Where(ƒ => ƒ.Properties.ResourceId.ToLower().Equals(resourceId) && ƒ.Properties.Product.ToLower().StartsWith(startingLabelForProduct))
+                            .Select(ƒ => new Consumption(
+                                ƒ.Properties.BillingAccountId,
+                                ƒ.Properties.Quantity,
+                                ƒ.Properties.EffectivePrice,
+                                ƒ.Properties.Cost,
+                                ƒ.Properties.UnitPrice,
+                                ƒ.Properties.BillingCurrency,
+                                ƒ.Properties.OfferId,
+                                ƒ.Properties.ChargeType,
+                                ƒ.Properties.Frequency,
+                                ƒ.Properties.Date))
+                            .OrderBy(x => x.EventDate)
+                            .ToList()
                         );
                 }
                 ).ToList();
         }
         private async Task<AzureConsumptions> GetConsumptionsAsync(string subscriptionId, DateTime startTime, DateTime endTime)
         {
-            return (await new Uri($"https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/usageDetails?$filter=properties%2FusageStart%20ge%20'{startTime:yyyy-MM-dd}'%20and%20properties%2FusageEnd%20le%20'{endTime:yyyy-MM-dd}'&$top=1000&api-version=2019-10-01")
+            return (await new Uri($"https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/usageDetails?$filter=properties%2FusageStart%20ge%20'{startTime:yyyy-MM-dd}'%20and%20properties%2FusageEnd%20le%20'{endTime:yyyy-MM-dd}'&$top={int.MaxValue}&api-version=2019-10-01")
                 .CreateHttpRequest()
                 .WithMethod(HttpMethod.Get)
                 .AddToHeaders(await GetAuthHeaders().NoContext())

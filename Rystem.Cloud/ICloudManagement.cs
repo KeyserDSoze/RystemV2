@@ -8,5 +8,6 @@ namespace Rystem.Cloud
     {
         Task<Tenant> GetTenantAsync(DateTime from, DateTime to, ManagementDeepRequest deepRequest);
         Task<Subscription> GetSubscriptionAsync(string subscriptionId, DateTime from, DateTime to, ManagementDeepRequest deepRequest);
+        Task<IEnumerable<Subscription>> ListSubscriptionsAsync();
     }
 }

@@ -1,4 +1,4 @@
-﻿using Rystem.BackgroundWork;
+﻿using Rystem.Background;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +24,7 @@ namespace Rystem.Concurrency
                         Instance.RaceConditions.Remove(keyToRemove);
                 }
             };
-            loop.RunInBackground("Rystem.Background.Races", 1000 * 60 * 60);
+            loop.RunInBackground("Rystem.Background.Races", () => 1000 * 60 * 60);
         }
         public static Races Instance { get; } = new();
         private static readonly object Semaphore = new();

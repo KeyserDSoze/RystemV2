@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rystem.BackgroundWork
+namespace Rystem.Background
 {
     public record SequenceProperty<T>(string Name = "", int MaximumBuffer = 5000, TimeSpan MaximumRetention = default, params Func<IEnumerable<T>, Task>[] Actions) : Configuration(Name)
     {
@@ -27,7 +27,7 @@ namespace Rystem.BackgroundWork
                 foreach (var toRefresh in containersToRefresh)
                     toRefresh.Invoke();
             };
-            loop.RunInBackground($"Rystem.Background.Sequences", 1000 * 60);
+            loop.RunInBackground($"Rystem.Background.Sequences", () => 1000 * 60);
         }
         public static Sequences Instance { get; } = new();
         private static readonly object Semaphore = new();

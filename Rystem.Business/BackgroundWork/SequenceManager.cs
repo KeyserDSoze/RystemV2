@@ -9,7 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rystem.BackgroundWork
+namespace Rystem.Background
 {
     internal class SequenceManager<TSequence, T>
         where TSequence : IAggregation<T>

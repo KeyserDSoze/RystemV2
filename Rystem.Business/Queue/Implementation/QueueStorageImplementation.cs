@@ -1,5 +1,5 @@
 ﻿using Rystem.Azure.Integration.Storage;
-using Rystem.BackgroundWork;
+using Rystem.Background;
 using Rystem.Text;
 using System;
 using System.Collections.Generic;
@@ -33,7 +33,7 @@ namespace Rystem.Business.Queue.Implementation
             if (!IsListening)
             {
                 IsListening = true;
-                Ghost.Run(async () =>
+                BackgroundWork.Run(async () =>
                 {
                     try
                     {
@@ -52,14 +52,14 @@ namespace Rystem.Business.Queue.Implementation
                         if (onErrorCallback != default)
                             await onErrorCallback(ex).NoContext();
                     }
-                }, ListenerId, 120 * 10);
+                }, ListenerId, () => 120 * 10);
             }
             return Task.CompletedTask;
         }
         public Task StopListenAsync()
         {
             IsListening = false;
-            Ghost.Stop(ListenerId);
+            BackgroundWork.Stop(ListenerId);
             return Task.CompletedTask;
         }
         public async Task<IEnumerable<TEntity>> ReadAsync(string partitionKey, string rowKey)

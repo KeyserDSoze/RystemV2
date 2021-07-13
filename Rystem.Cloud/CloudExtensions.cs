@@ -40,5 +40,8 @@ namespace System
         public static Task<Tenant> GetPreviousMonthTenantAsync<TEntry>(this TEntry entry, ManagementDeepRequest deepRequest = ManagementDeepRequest.Monitoring, Installation installation = Installation.Default)
             where TEntry : ICloud
             => entry.GetTenantAsync(DateTime.UtcNow.AddMonths(-1), deepRequest, installation);
+        public static Task<IEnumerable<Subscription>> ListSubscriptionsAsync<TEntry>(this TEntry entry)
+            where TEntry : ICloud
+            => entry.ListSubscriptionsAsync();
     }
 }
