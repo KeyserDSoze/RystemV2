@@ -12,18 +12,20 @@ namespace Rystem.Background
         bool RunImmediately { get; }
         string Cron { get; }
         Task ActionToDoAsync();
+        private string Id => $"BackgroundWork_{Key ?? string.Empty}_{GetType().FullName}";
         public void Run()
         {
-            string id = $"BackgroundWork_{Key ?? string.Empty}_{GetType().FullName}";
-            if (!BackgroundWork.IsRunning(id))
+            if (!BackgroundWork.IsRunning(Id))
             {
                 var expression = CronExpression.Parse(Cron, Cron.Split(' ').Length > 5 ? CronFormat.IncludeSeconds : CronFormat.Standard);
-                BackgroundWork.Run(ActionToDoAsync, id,
+                BackgroundWork.Run(ActionToDoAsync, Id,
                     () => (int)expression.GetNextOccurrence(DateTime.UtcNow, true)?.Subtract(DateTime.UtcNow).TotalMilliseconds,
                     RunImmediately
                 );
             }
         }
+        public void Stop()
+            => BackgroundWork.Stop(Id);
     }
     public static partial class BackgroundWorkExtensions
     {
