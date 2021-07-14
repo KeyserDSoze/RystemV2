@@ -7,11 +7,11 @@ using System.Collections.Generic;
 
 namespace Rystem.Azure.Installation
 {
-    public class AzureManager
+    public sealed class AzureManager
     {
-        private AzureManager() { }
-        public static AzureManager Instance { get; } = new AzureManager();
-        public AzureFactory Factory { get; } = new AzureFactory();
+        public AzureManager() { }
+        private AzureFactory factory;
+        public AzureFactory Factory => factory ??= new AzureFactory(this);
         public Dictionary<string, RedisCacheOptions> RedisCaches { get; } = new();
         public Dictionary<string, EventHubOptions> EventHubs { get; } = new();
         public Dictionary<string, ServiceBusOptions> ServiceBuses { get; } = new();

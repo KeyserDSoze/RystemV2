@@ -28,10 +28,10 @@ namespace Rystem.Concurrency
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new BlobStorageImplementation(AzureManager.Instance.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey)));
+                                Implementations.Add(installation, new BlobStorageImplementation(AzureBuilder.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey)));
                                 break;
                             case ServiceProviderType.AzureRedisCache:
-                                Implementations.Add(installation, new RedisCacheImplementation(AzureManager.Instance.Factory.RedisCache(configuration.ServiceKey)));
+                                Implementations.Add(installation, new RedisCacheImplementation(AzureBuilder.Factory.RedisCache(configuration.ServiceKey)));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");

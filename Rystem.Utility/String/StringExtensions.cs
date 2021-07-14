@@ -27,7 +27,8 @@ namespace Rystem
         {
             NotClosableStream memoryStream = new();
             using StreamWriter writer = new(memoryStream);
-            await writer.WriteAsync(entity);
+            await writer.WriteAsync(entity).NoContext();
+            await writer.FlushAsync().NoContext();
             memoryStream.Position = 0;
             return memoryStream;
         }

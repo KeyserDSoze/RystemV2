@@ -5,19 +5,16 @@ using Rystem.Azure.Integration.Secrets;
 using Rystem.Azure.Integration.Storage;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Rystem.Azure.Installation
 {
     public class AzureBuilder
     {
         private readonly IServiceCollection Services;
-        internal AzureBuilder() { }
+        public static readonly AzureFactory Factory = new(new AzureManager());
         internal AzureBuilder(IServiceCollection services)
         {
-            Services = services?.AddSingleton<AzureFactory>();
+            Services = services?.AddSingleton((x) => Factory);
         }
         /// <summary>
         /// Add Azure storage service
@@ -26,15 +23,15 @@ namespace Rystem.Azure.Installation
         /// <param name="serviceKey">A specific key that you will use during your object configuration.</param>
         /// <returns></returns>
         public AzureBuilder AddStorage(StorageOptions options, string serviceKey = default)
-            => Add(AzureManager.Instance.Storages, options, serviceKey);
+            => Add(Factory.Manager.Storages, options, serviceKey);
         public AzureBuilder AddMessage(EventHubOptions options, string serviceKey = default)
-            => Add(AzureManager.Instance.EventHubs, options, serviceKey);
+            => Add(Factory.Manager.EventHubs, options, serviceKey);
         public AzureBuilder AddMessage(ServiceBusOptions options, string serviceKey = default)
-            => Add(AzureManager.Instance.ServiceBuses, options, serviceKey);
+            => Add(Factory.Manager.ServiceBuses, options, serviceKey);
         public AzureBuilder AddCache(RedisCacheOptions options, string serviceKey = default)
-            => Add(AzureManager.Instance.RedisCaches, options, serviceKey);
+            => Add(Factory.Manager.RedisCaches, options, serviceKey);
         public AzureBuilder AddKeyVault(KeyVaultOptions options, string serviceKey = default)
-            => Add(AzureManager.Instance.KeyVaults, options, serviceKey);
+            => Add(Factory.Manager.KeyVaults, options, serviceKey);
         private AzureBuilder Add<T>(Dictionary<string, T> dictionary, T options, string serviceKey = default)
         {
             if (serviceKey == default)
