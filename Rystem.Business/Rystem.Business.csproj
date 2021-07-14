@@ -17,7 +17,7 @@ It allows you to deal with multi-instances problem with IoC as central point:
     <PackageIcon>rystem.png</PackageIcon>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Rystem.Business</PackageId>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -32,21 +32,22 @@ namespace Rystem.UnitTest
         [Fact]
         public async Task RunInIServiceCollection()
         {
-            new MyServiceCollection().AddBackgroundWork<MyFirstBackgroundWork>();
+            new MyServiceCollection().AddBackgroundWork<MyFirstBackgroundWork>(() => this);
             await Task.Delay(2000);
             BackgroundWork.Stop();
-            Assert.Equal(6, MyFirstBackgroundWork.Counter);
+            Assert.Equal(6, Counter);
         }
         private class MyFirstBackgroundWork : IBackgroundWork
         {
-            public async Task ActionToDo()
+            public async Task ActionToDoAsync()
             {
+                DealWithThread dealWithThread = (DealWithThread)Properties;
                 await Task.Delay(0).NoContext();
-                Counter += 2;
+                dealWithThread.Counter += 2;
             }
-            public static int Counter;
             public bool RunImmediately => true;
             public string Cron => "* * * * * *";
+            public object Properties { get; init; }
         }
 
         private class MyServiceCollection : IServiceCollection

@@ -1,4 +1,5 @@
-﻿using Azure.Identity;
+﻿using Azure;
+using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Secrets;
@@ -31,6 +32,14 @@ namespace Rystem.Azure.Integration.Secrets
         {
             _ = await SecretClient.SetSecretAsync(key, value);
         }
+        public async Task<List<SecretProperties>> ListSecretsAsync()
+        {
+            var secrets = new List<SecretProperties>();
+            await foreach (SecretProperties secretProperties in SecretClient.GetPropertiesOfSecretsAsync())
+                secrets.Add(secretProperties);
+            return secrets;
+        }
+      
         public async Task<KeyVaultKey> GetKeyAsync(string key, string version = default)
         {
             return (await KeyClient.GetKeyAsync(key, version)).Value;
@@ -38,6 +47,13 @@ namespace Rystem.Azure.Integration.Secrets
         public async Task SetKeyAsync(string key, string value)
         {
             _ = await KeyClient.CreateKeyAsync(key, value);
+        }
+        public async Task<List<KeyProperties>> ListKeysAsync()
+        {
+            var keys = new List<KeyProperties>();
+            await foreach (KeyProperties keyProperty in KeyClient.GetPropertiesOfKeysAsync())
+                keys.Add(keyProperty);
+            return keys;
         }
     }
 }
