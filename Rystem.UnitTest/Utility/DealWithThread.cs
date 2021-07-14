@@ -39,6 +39,7 @@ namespace Rystem.UnitTest
         }
         private class MyFirstBackgroundWork : IBackgroundWork
         {
+            public string Key => "Hi";
             public async Task ActionToDoAsync()
             {
                 DealWithThread dealWithThread = (DealWithThread)Properties;

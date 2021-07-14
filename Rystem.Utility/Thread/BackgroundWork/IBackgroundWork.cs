@@ -7,13 +7,14 @@ namespace Rystem.Background
 {
     public interface IBackgroundWork
     {
+        string Key { get; }
         object Properties { get; init; }
         bool RunImmediately { get; }
         string Cron { get; }
         Task ActionToDoAsync();
         public void Run()
         {
-            string id = $"BackgroundWork_{GetType().FullName}";
+            string id = $"BackgroundWork_{Key ?? string.Empty}_{GetType().FullName}";
             if (!BackgroundWork.IsRunning(id))
             {
                 var expression = CronExpression.Parse(Cron, Cron.Split(' ').Length > 5 ? CronFormat.IncludeSeconds : CronFormat.Standard);
