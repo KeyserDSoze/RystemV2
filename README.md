@@ -204,16 +204,21 @@ To understand better how Rystem works please see Rystem.UnitTest project
       //you may also use IBackgroundWork
       private class MyFirstBackgroundWork : IBackgroundWork
       {
-            public async Task ActionToDo()
+            public string Key => "Hi"; //this is the key of the instance, if you create two instances with the same key, the second run overwrites the first running instance. If you create two instances with two different keys you can run both task of the same class.
+            public async Task ActionToDoAsync() 
             {
-                //something to do
+                //sample of actions to do
+                DealWithThread dealWithThread = (DealWithThread)Properties;
+                await Task.Delay(0).NoContext();
+                dealWithThread.Counter += 2;
             }
-            public bool RunImmediately => true;
-            public string Cron => "* * * * * *";
+            public bool RunImmediately => true;  //run at the start, before the Cron scheduling.
+            public string Cron => "* * * * * *";  //you can use Cron with seconds and Cron without seconds, as you wish.
+            public object Properties { get; init; } //you can pass an object to your instance in the DI AddBackgroundWork
       }
       
       //with IServiceCollection
-      (Instance of IServiceCollection).AddBackgroundWork<MyFirstBackgroundWork>();
+      (Instance of IServiceCollection).AddBackgroundWork<MyFirstBackgroundWork>(() => return an object that you can find in Properties);
       
       //or with the specific method Run()
       (Instance of MyFirstBackgroundWork).Run();
