@@ -1,5 +1,6 @@
 ﻿using Azure.Identity;
 using Azure.Messaging.ServiceBus;
+using Rystem.Azure.Integration.Secrets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +14,18 @@ namespace Rystem.Azure.Integration.Message
     /// <summary>
     /// Leave ConnectionString empty if you want to connect through the managed identity
     /// </summary>
-    public sealed record ServiceBusOptions(string FullyQualifiedName, string AccessKey, ServiceBusProcessorOptions Options = default)
+    public sealed record ServiceBusOptions(string FullyQualifiedName, string AccessKey, ServiceBusProcessorOptions Options = default) : IRystemOptions
     {
         public string ConnectionString => $"Endpoint=sb://{FullyQualifiedName}.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey={AccessKey}";
+        public bool UseKeyVault { get; }
+        public KeyVaultValue KeyVaultValue { get; }
+
+        public ServiceBusOptions(KeyVaultValue keyVaultValue, ServiceBusProcessorOptions options = default)
+            : this(string.Empty, string.Empty, options)
+        {
+            KeyVaultValue = keyVaultValue;
+            UseKeyVault = true;
+        }
     }
     public sealed record ServiceBusConfiguration(string Name) : Configuration(Name)
     {
@@ -34,9 +44,9 @@ namespace Rystem.Azure.Integration.Message
         public ServiceBusIntegration(ServiceBusConfiguration configuration, ServiceBusOptions options)
         {
             Configuration = configuration;
-            if (!string.IsNullOrWhiteSpace(options.AccessKey))
+            if (!string.IsNullOrWhiteSpace(options.AccessKey) || options.UseKeyVault)
             {
-                ServiceBusClient client = new(options.ConnectionString);
+                ServiceBusClient client = new((options as IRystemOptions).GetConnectionStringAsync().ToResult());
                 this.Client = client.CreateSender(configuration.Name);
                 this.ClientReader = client.CreateProcessor(configuration.Name, options.Options);
             }

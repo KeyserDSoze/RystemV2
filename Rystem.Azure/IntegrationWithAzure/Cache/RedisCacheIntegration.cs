@@ -1,4 +1,5 @@
-﻿using Rystem.Concurrency;
+﻿using Rystem.Azure.Integration.Secrets;
+using Rystem.Concurrency;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,18 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Cache
 {
-    public sealed record RedisCacheOptions(string ConnectionString, TimeSpan ExpiringDefault, int NumberOfClients = 1);
+    public sealed record RedisCacheOptions(string ConnectionString, TimeSpan ExpiringDefault, int NumberOfClients = 1) : IRystemOptions
+    {
+        public bool UseKeyVault { get; }
+        public KeyVaultValue KeyVaultValue { get; }
+
+        public RedisCacheOptions(KeyVaultValue keyVaultValue, TimeSpan expiringDefault, int numberOfClients = 1)
+            : this(string.Empty, expiringDefault, numberOfClients)
+        {
+            KeyVaultValue = keyVaultValue;
+            UseKeyVault = true;
+        }
+    }
     public sealed record RedisCacheConfiguration(string Prefix, TimeSpan ExpiringDefault, int NumberOfClients = 1) : Configuration(Prefix)
     {
         public RedisCacheConfiguration() : this(string.Empty, default) { }
@@ -41,7 +53,7 @@ namespace Rystem.Azure.Integration.Cache
             for (int i = 0; i < options.NumberOfClients; i++)
                 Connections.Add(new Lazy<ConnectionMultiplexer>(() =>
                 {
-                    ConnectionMultiplexer connectionMultiplexer = ConnectionMultiplexer.Connect(Options.ConnectionString);
+                    ConnectionMultiplexer connectionMultiplexer = ConnectionMultiplexer.Connect((Options as IRystemOptions).GetConnectionStringAsync().ToResult());
                     return connectionMultiplexer;
                 }));
         }

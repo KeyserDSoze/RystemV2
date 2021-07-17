@@ -27,18 +27,18 @@ namespace Rystem.Azure.Integration.Storage
         private async Task<CloudTable> GetContextAsync()
         {
             if (Context == default)
-                await RaceCondition.RunAsync((Func<Task>)(async () =>
+                await RaceCondition.RunAsync(async () =>
                 {
                     if (Context == default)
                     {
-                        var storageAccount = CloudStorageAccount.Parse(Options.GetConnectionString());
+                        var storageAccount = CloudStorageAccount.Parse(await (Options as IRystemOptions).GetConnectionStringAsync().NoContext());
                         var client = storageAccount.CreateCloudTableClient();
                         var tableClient = client.GetTableReference(Configuration.Name);
                         if (!await tableClient.ExistsAsync().NoContext())
                             await tableClient.CreateIfNotExistsAsync().NoContext();
                         Context = tableClient;
                     }
-                }), RaceId).NoContext();
+                }, RaceId).NoContext();
             return Context;
         }
         private const string Asterisk = "*";

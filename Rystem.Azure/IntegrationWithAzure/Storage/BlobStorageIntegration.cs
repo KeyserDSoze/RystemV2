@@ -37,9 +37,9 @@ namespace Rystem.Azure.Integration.Storage
                     if (Context == default)
                     {
                         BlobContainerClient blobClient = default;
-                        if (!string.IsNullOrWhiteSpace(Options.AccountKey))
+                        if (!string.IsNullOrWhiteSpace(Options.AccountKey) || Options.UseKeyVault)
                         {
-                            var client = new BlobServiceClient(Options.GetConnectionString());
+                            var client = new BlobServiceClient(await (Options as IRystemOptions).GetConnectionStringAsync().NoContext());
                             blobClient = client.GetBlobContainerClient(Configuration.Name.ToLower());
                         }
                         else

@@ -28,9 +28,9 @@ namespace Rystem.Azure.Integration.Storage
                     if (Context == default)
                     {
                         QueueClient queueClient = default;
-                        if (!string.IsNullOrWhiteSpace(Options.AccountKey))
+                        if (!string.IsNullOrWhiteSpace(Options.AccountKey) || Options.UseKeyVault)
                         {
-                            var client = new QueueServiceClient(Options.GetConnectionString());
+                            var client = new QueueServiceClient(await (Options as IRystemOptions).GetConnectionStringAsync().NoContext());
                             queueClient = client.GetQueueClient(Configuration.Name.ToLower());
                         }
                         else

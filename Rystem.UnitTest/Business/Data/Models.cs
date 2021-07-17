@@ -58,13 +58,16 @@ namespace Rystem.UnitTest.Business.Data
             Assert.True(await sample.DeleteAsync(installation).NoContext());
             Assert.False(await sample.DeleteAsync(installation).NoContext());
             Assert.False(await sample.ExistsAsync(installation).NoContext());
-            MiniContainer miniContainer = new();
-            for (int i = 0; i < 1_000_000; i++)
-                miniContainer.Samples.Add(mini);
-            await sample.WriteAsync(miniContainer, default, installation).NoContext();
-            var minis = await sample.ReadAsync<MiniContainer>(installation);
-            await sample.DeleteAsync().NoContext();
-            Assert.Equal(1_000_000, minis.Samples.Count);
+            if (installation != Installation.Inst00)
+            {
+                MiniContainer miniContainer = new();
+                for (int i = 0; i < 1_000_000; i++)
+                    miniContainer.Samples.Add(mini);
+                await sample.WriteAsync(miniContainer, default, installation).NoContext();
+                var minis = await sample.ReadAsync<MiniContainer>(installation);
+                await sample.DeleteAsync().NoContext();
+                Assert.Equal(1_000_000, minis.Samples.Count);
+            }
         }
     }
     public class MiniContainer

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rystem.Azure.Integration.Secrets;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,10 +10,19 @@ namespace Rystem.Azure.Integration.Storage
     /// <summary>
     /// Leave AccountKey empty if you want to connect through the managed identity. Not valid for TableStorage.
     /// </summary>
-    public sealed record StorageOptions(string AccountName, string AccountKey = default)
+    public sealed record StorageOptions(string AccountName, string AccountKey = default) : IRystemOptions
     {
-        public string GetConnectionString()
+        public string ConnectionString
             => string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net", AccountName, AccountKey);
+        public bool UseKeyVault { get; }
+        public KeyVaultValue KeyVaultValue { get; }
+
+        public StorageOptions(KeyVaultValue keyVaultValue)
+            : this(default, default)
+        {
+            KeyVaultValue = keyVaultValue;
+            UseKeyVault = true;
+        }
     }
     public abstract class BaseStorageClient
     {
