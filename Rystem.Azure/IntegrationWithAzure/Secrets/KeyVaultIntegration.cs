@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Secrets
 {
-    public sealed record KeyVaultOptions(string Url, SecretClientOptions SecretOptions, CertificateClientOptions CertificateOptions, KeyClientOptions KeyOptions);
+    public sealed record KeyVaultOptions(string Url, SecretClientOptions SecretOptions = default, CertificateClientOptions CertificateOptions = default, KeyClientOptions KeyOptions = default);
 
     /// <summary>
     /// Remember when using user assigned managed identity to set up the environment with the variable AZURE_CLIENT_ID and value of the client id (both, webapp and function). 
