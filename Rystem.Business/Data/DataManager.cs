@@ -1,5 +1,5 @@
 ﻿using Azure.Storage.Blobs.Models;
-using Rystem.Azure.Installation;
+using Rystem.Azure;
 using Rystem.Business.Data.Implementantion;
 using Rystem.Text;
 using System;
@@ -15,7 +15,8 @@ namespace Rystem.Business.Data
     {
         private readonly IDictionary<Installation, IDataImplementation<TEntity>> Implementations = new Dictionary<Installation, IDataImplementation<TEntity>>();
         private readonly IDictionary<Installation, ProvidedService> DataConfiguration;
-        private static readonly object TrafficLight = new();
+        private readonly object TrafficLight = new();
+        private readonly RystemServices Services = new();
         private IDataImplementation<TEntity> Implementation(Installation installation)
         {
             if (!Implementations.ContainsKey(installation))
@@ -26,10 +27,10 @@ namespace Rystem.Business.Data
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new BlockBlobStorageImplementation<TEntity>(AzureBuilder.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new BlockBlobStorageImplementation<TEntity>(Services.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
                                 break;
                             case ServiceProviderType.AzureAppendBlobStorage:
-                                Implementations.Add(installation, new AppendBlobStorageImplementation<TEntity>(AzureBuilder.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new AppendBlobStorageImplementation<TEntity>(Services.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");

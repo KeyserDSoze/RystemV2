@@ -1,4 +1,4 @@
-﻿using Rystem.Azure.Installation;
+﻿using Rystem.Azure;
 using Rystem.Azure.Integration.Storage;
 using Rystem.Business.Document.Implementantion;
 using System;
@@ -15,7 +15,8 @@ namespace Rystem.Business.Document
     {
         private readonly IDictionary<Installation, IDocumentImplementation<TEntity>> Implementations = new Dictionary<Installation, IDocumentImplementation<TEntity>>();
         private readonly IDictionary<Installation, ProvidedService> DocumentConfiguration;
-        private static readonly object TrafficLight = new();
+        private readonly object TrafficLight = new();
+        private readonly RystemServices Services = new();
         private IDocumentImplementation<TEntity> Implementation(Installation installation)
         {
             if (!Implementations.ContainsKey(installation))
@@ -26,10 +27,10 @@ namespace Rystem.Business.Document
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureTableStorage:
-                                Implementations.Add(installation, new TableStorageImplementation<TEntity>(AzureBuilder.Factory.TableStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new TableStorageImplementation<TEntity>(Services.Factory.TableStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
                                 break;
                             case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new BlobStorageImplementation<TEntity>(AzureBuilder.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new BlobStorageImplementation<TEntity>(Services.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");

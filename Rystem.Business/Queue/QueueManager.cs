@@ -1,4 +1,4 @@
-﻿using Rystem.Azure.Installation;
+﻿using Rystem.Azure;
 using Rystem.Azure.Integration.Message;
 using Rystem.Azure.Integration.Storage;
 using Rystem.Business.Queue.Implementation;
@@ -15,7 +15,8 @@ namespace Rystem.Business.Queue
     {
         private readonly IDictionary<Installation, IQueueImplementation<TEntity>> Implementations = new Dictionary<Installation, IQueueImplementation<TEntity>>();
         private readonly IDictionary<Installation, ProvidedService> QueueConfiguration;
-        private static readonly object TrafficLight = new();
+        private readonly object TrafficLight = new();
+        private readonly RystemServices Services = new();
         private IQueueImplementation<TEntity> Implementation(Installation installation)
         {
             if (!Implementations.ContainsKey(installation))
@@ -26,13 +27,13 @@ namespace Rystem.Business.Queue
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureQueueStorage:
-                                Implementations.Add(installation, new QueueStorageImplementation<TEntity>(AzureBuilder.Factory.QueueStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new QueueStorageImplementation<TEntity>(Services.Factory.QueueStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
                                 break;
                             case ServiceProviderType.AzureEventHub:
-                                Implementations.Add(installation, new EventHubImplementation<TEntity>(AzureBuilder.Factory.EventHub(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new EventHubImplementation<TEntity>(Services.Factory.EventHub(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
                                 break;
                             case ServiceProviderType.AzureServiceBus:
-                                Implementations.Add(installation, new ServiceBusImplementations<TEntity>(AzureBuilder.Factory.ServiceBus(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new ServiceBusImplementations<TEntity>(Services.Factory.ServiceBus(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");

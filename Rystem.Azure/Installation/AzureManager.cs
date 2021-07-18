@@ -1,11 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Rystem.Azure.Integration.Cache;
 using Rystem.Azure.Integration.Message;
 using Rystem.Azure.Integration.Secrets;
 using Rystem.Azure.Integration.Storage;
 using System.Collections.Generic;
 
-namespace Rystem.Azure.Installation
+namespace Rystem.Azure
 {
     public sealed class AzureManager
     {
@@ -20,7 +21,7 @@ namespace Rystem.Azure.Installation
     }
     public static class AzureManagerExtensions
     {
-        public static AzureBuilder WithAzure(this IServiceCollection services)
-            => new(services);
+        public static AzureBuilder WithAzure(this IServiceCollection services, ILogger<RystemServices> logger = default)
+            => RystemServices.Builder = new(services, logger);
     }
 }

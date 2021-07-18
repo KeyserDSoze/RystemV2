@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Rystem.Azure.Integration.Cache;
 using Rystem.Azure.Integration.Message;
 using Rystem.Azure.Integration.Secrets;
@@ -6,15 +7,18 @@ using Rystem.Azure.Integration.Storage;
 using System;
 using System.Collections.Generic;
 
-namespace Rystem.Azure.Installation
+namespace Rystem.Azure
 {
     public class AzureBuilder
     {
         private readonly IServiceCollection Services;
-        public static readonly AzureFactory Factory = new(new AzureManager());
-        internal AzureBuilder(IServiceCollection services)
+        internal readonly AzureFactory Factory = new(new AzureManager());
+        internal readonly ILogger<RystemServices> Logger;
+        internal AzureBuilder(IServiceCollection services, ILogger<RystemServices> logger)
         {
-            Services = services?.AddSingleton((x) => Factory);
+            Services = services?.AddSingleton<RystemServices>();
+            Logger = logger;
+            Logger?.LogInformation("Rystem: AzureBuilder created.");
         }
         /// <summary>
         /// Add Azure storage service
@@ -37,8 +41,9 @@ namespace Rystem.Azure.Installation
             if (serviceKey == default)
                 serviceKey = string.Empty;
             if (dictionary.ContainsKey(serviceKey))
-                throw new ArgumentException($"Key {serviceKey} already installed for {typeof(T).Name}.");
+                throw new ArgumentException($"Key {serviceKey} already installed for {options.GetType().Name}.");
             dictionary.Add(serviceKey, options);
+            Logger?.LogInformation($"Rystem: Added {serviceKey} with {options.GetType().FullName}.");
             return this;
         }
         public IServiceCollection Build()

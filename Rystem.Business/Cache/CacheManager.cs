@@ -1,4 +1,4 @@
-﻿using Rystem.Azure.Installation;
+﻿using Rystem.Azure;
 using Rystem.Azure.Integration.Cache;
 using Rystem.Azure.Integration.Storage;
 using Rystem.Concurrency;
@@ -16,7 +16,8 @@ namespace Rystem.Business
         private readonly Dictionary<Installation, ICacheImplementation<TCache>> Implementations = new();
         private readonly Dictionary<Installation, ProvidedService> CacheConfiguration;
         private bool MemoryIsActive { get; }
-        private static readonly object TrafficLight = new();
+        private readonly object TrafficLight = new();
+        private readonly RystemServices Services = new();
         private ICacheImplementation<TCache> Implementation(Installation installation)
         {
             if (!Implementations.ContainsKey(installation))
@@ -27,13 +28,13 @@ namespace Rystem.Business
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new InBlobStorage<TCache>(AzureBuilder.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
+                                Implementations.Add(installation, new InBlobStorage<TCache>(Services.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
                                 break;
                             case ServiceProviderType.AzureTableStorage:
-                                Implementations.Add(installation, new InTableStorage<TCache>(AzureBuilder.Factory.TableStorage(configuration.Configurations, configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
+                                Implementations.Add(installation, new InTableStorage<TCache>(Services.Factory.TableStorage(configuration.Configurations, configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
                                 break;
                             case ServiceProviderType.AzureRedisCache:
-                                Implementations.Add(installation, new InRedisCache<TCache>(AzureBuilder.Factory.RedisCache(configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
+                                Implementations.Add(installation, new InRedisCache<TCache>(Services.Factory.RedisCache(configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");

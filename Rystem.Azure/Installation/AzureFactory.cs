@@ -1,5 +1,4 @@
-﻿using Rystem.Azure.Installation;
-using Rystem.Azure.Integration.Cache;
+﻿using Rystem.Azure.Integration.Cache;
 using Rystem.Azure.Integration.Message;
 using Rystem.Azure.Integration.Secrets;
 using Rystem.Azure.Integration.Storage;

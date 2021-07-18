@@ -1,4 +1,4 @@
-﻿using Rystem.Azure.Installation;
+﻿using Rystem.Azure;
 using Rystem.Azure.Integration.Cache;
 using Rystem.Azure.Integration.Storage;
 using Rystem.Business;
@@ -17,7 +17,8 @@ namespace Rystem.Concurrency
         private readonly Dictionary<Installation, IDistributedImplementation> Implementations = new();
         private readonly Dictionary<Installation, ProvidedService> DistributedConfiguration;
         private bool MemoryIsActive { get; }
-        private static readonly object TrafficLight = new();
+        private readonly object TrafficLight = new();
+        private readonly RystemServices Services = new();
         public IDistributedImplementation Implementation(Installation installation)
         {
             if (!Implementations.ContainsKey(installation))
@@ -28,10 +29,10 @@ namespace Rystem.Concurrency
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new BlobStorageImplementation(AzureBuilder.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey)));
+                                Implementations.Add(installation, new BlobStorageImplementation(Services.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey)));
                                 break;
                             case ServiceProviderType.AzureRedisCache:
-                                Implementations.Add(installation, new RedisCacheImplementation(AzureBuilder.Factory.RedisCache(configuration.ServiceKey)));
+                                Implementations.Add(installation, new RedisCacheImplementation(Services.Factory.RedisCache(configuration.ServiceKey)));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
