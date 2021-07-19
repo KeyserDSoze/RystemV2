@@ -13,7 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rystem.Azure", "Rystem.Azur
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rystem.Business", "Rystem.Business\Rystem.Business.csproj", "{CBF2E482-DB54-4E77-B542-9608CB2220EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rystem.Cloud", "Rystem.Cloud\Rystem.Cloud.csproj", "{23C7531C-7D61-436A-B678-BD1C4A5C5BFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rystem.Cloud", "Rystem.Cloud\Rystem.Cloud.csproj", "{23C7531C-7D61-436A-B678-BD1C4A5C5BFE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{F9B48BB8-FC9B-4C97-8CFF-654A8862C928}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rystem.Test.WebApi", "Rystem.Test.WebApi\Rystem.Test.WebApi.csproj", "{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,9 +49,18 @@ Global
 		{23C7531C-7D61-436A-B678-BD1C4A5C5BFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23C7531C-7D61-436A-B678-BD1C4A5C5BFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23C7531C-7D61-436A-B678-BD1C4A5C5BFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{05411F2F-74BF-4CAB-8479-BB66266D57C9} = {F9B48BB8-FC9B-4C97-8CFF-654A8862C928}
+		{CE156CA5-DD83-4F0C-A1EE-403680EDCA0E} = {F9B48BB8-FC9B-4C97-8CFF-654A8862C928}
+		{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8} = {F9B48BB8-FC9B-4C97-8CFF-654A8862C928}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {752F3EA7-DF16-46EC-9F54-7A975ABC0144}
