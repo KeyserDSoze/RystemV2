@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /RystemV2/appsettings.json
 /Rystem.UnitTest/appsettings.json
+/Rystem.Test.WebApi/appsettings.json
+/Rystem.Test.WebApi/appsettings.json
