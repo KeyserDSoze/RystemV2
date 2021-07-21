@@ -266,7 +266,7 @@ namespace Rystem.Cloud.Azure
                         consumption[9].GetString().ToLower(),
                         subCategory,
                         meter,
-                        azureConsumptions.Value
+                        azureConsumptions?.Value?
                             .Where(ƒ => ƒ.Properties.ResourceId.ToLower().Equals(resourceId) && ƒ.Properties.Product.ToLower().StartsWith(startingLabelForProduct))
                             .Select(ƒ => new Consumption(
                                 ƒ.Properties.BillingAccountId,
@@ -280,7 +280,7 @@ namespace Rystem.Cloud.Azure
                                 ƒ.Properties.Frequency,
                                 ƒ.Properties.Date))
                             .OrderBy(x => x.EventDate)
-                            .ToList()
+                            .ToList() ?? new()
                         );
                 }
                 ).ToList();
