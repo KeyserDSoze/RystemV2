@@ -13,12 +13,9 @@ namespace Rystem.Azure
     {
         private readonly IServiceCollection Services;
         internal readonly AzureFactory Factory = new(new AzureManager());
-        internal readonly ILogger<RystemServices> Logger;
-        internal AzureBuilder(IServiceCollection services, ILogger<RystemServices> logger)
+        internal AzureBuilder(IServiceCollection services)
         {
             Services = services?.AddSingleton<RystemServices>();
-            Logger = logger;
-            Logger?.LogInformation("Rystem: AzureBuilder created.");
         }
         /// <summary>
         /// Add Azure storage service
@@ -43,7 +40,6 @@ namespace Rystem.Azure
             if (dictionary.ContainsKey(serviceKey))
                 throw new ArgumentException($"Key {serviceKey} already installed for {options.GetType().Name}.");
             dictionary.Add(serviceKey, options);
-            Logger?.LogInformation($"Rystem: Added {serviceKey} with {options.GetType().FullName}.");
             return this;
         }
         public IServiceCollection Build()

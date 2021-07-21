@@ -6,6 +6,5 @@ namespace Rystem.Azure
     {
         internal static AzureBuilder Builder;
         public AzureFactory Factory => Builder.Factory;
-        public ILogger<RystemServices> Logger = Builder.Logger;
     }
 }

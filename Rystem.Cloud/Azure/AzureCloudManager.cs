@@ -49,8 +49,8 @@ namespace Rystem.Cloud.Azure
         }
         private async Task<(string Name, string Value)> GetAuthHeaders()
             => ("Authorization", $"Bearer {await GetAccessToken().NoContext()}");
-        public async Task<Tenant> GetTenantAsync(DateTime from, DateTime to, ManagementDeepRequest deepRequest)
-            => new Tenant(string.Empty, await GetSubscriptionsAsync(from, to, deepRequest).NoContext());
+        public async Task<Tenant> GetTenantAsync(DateTime from, DateTime to, ManagementDeepRequest deepRequest, bool multiTasking)
+            => new Tenant(string.Empty, await GetSubscriptionsAsync(from, to, deepRequest, multiTasking).NoContext());
         private static readonly Regex RegexToSplitValidMetrics = new("Valid metrics:");
         private static readonly object TrafficLight = new();
         public async Task<IEnumerable<Subscription>> ListSubscriptionsAsync()
@@ -61,7 +61,7 @@ namespace Rystem.Cloud.Azure
                 .InvokeAsync<AzureSubscriptions>(Options)).Subscriptions.Select(x =>
                     new Subscription(x.SubscriptionId, x.TenantId, x.DisplayName, x.State, x.Tags, new())
                 );
-        private async Task<List<Subscription>> GetSubscriptionsAsync(DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest)
+        private async Task<List<Subscription>> GetSubscriptionsAsync(DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest, bool multiTasking)
         {
             List<AzureSubscription> subscriptions = (await new Uri($"https://management.azure.com/subscriptions?api-version=2020-01-01")
                 .CreateHttpRequest()
@@ -72,7 +72,10 @@ namespace Rystem.Cloud.Azure
             List<Task> subscriptionTasks = new();
             foreach (var subscription in subscriptions)
             {
-                subscriptionTasks.Add(SetSubscriptionAsync());
+                if (multiTasking)
+                    subscriptionTasks.Add(SetSubscriptionAsync());
+                else
+                    await SetSubscriptionAsync();
                 async Task SetSubscriptionAsync()
                 {
                     var outputSubscription = await GetSubscriptionAsync(subscription, startTime, endTime, azureDeepRequest).NoContext();

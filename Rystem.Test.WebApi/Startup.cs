@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Rystem.Azure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,8 +27,13 @@ namespace Rystem.Test.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var storage = Configuration.GetSection("Storage");
             services.AddApplicationInsightsTelemetry();
             services.AddControllers();
+            services
+                .WithAzure()
+                .AddStorage(new Azure.Integration.Storage.StorageOptions(storage["Name"], storage["Key"]))
+                .Build();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Rystem.Test.WebApi", Version = "v1" });

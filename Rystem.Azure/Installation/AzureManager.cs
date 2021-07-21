@@ -21,7 +21,7 @@ namespace Rystem.Azure
     }
     public static class AzureManagerExtensions
     {
-        public static AzureBuilder WithAzure(this IServiceCollection services, ILogger<RystemServices> logger = default)
-            => RystemServices.Builder = new(services, logger);
+        public static AzureBuilder WithAzure(this IServiceCollection services)
+            => RystemServices.Builder = new(services);
     }
 }
