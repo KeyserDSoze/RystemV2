@@ -34,6 +34,7 @@ namespace Rystem.Cloud.Azure
             string body = $"grant_type=client_credentials&client_id={AppRegistration.ClientId}&client_secret={AppRegistration.ClientSecret}&resource=https://management.azure.com/";
             AzureAccount = await new Uri($"https://login.microsoftonline.com/{AppRegistration.TenantId}/oauth2/token")
                 .CreateHttpRequest()
+                .SetTimeout(180_000)
                 .WithMethod(HttpMethod.Post)
                 .AddContentType("application/x-www-form-urlencoded")
                 .AddBody(body, EncodingType.UTF8)
@@ -56,6 +57,7 @@ namespace Rystem.Cloud.Azure
         public async Task<IEnumerable<Subscription>> ListSubscriptionsAsync()
             => (await new Uri($"https://management.azure.com/subscriptions?api-version=2020-01-01")
                 .CreateHttpRequest()
+                .SetTimeout(180_000)
                 .AddToHeaders(await GetAuthHeaders().NoContext())
                 .Build()
                 .InvokeAsync<AzureSubscriptions>(Options)).Subscriptions.Select(x =>
@@ -65,6 +67,7 @@ namespace Rystem.Cloud.Azure
         {
             List<AzureSubscription> subscriptions = (await new Uri($"https://management.azure.com/subscriptions?api-version=2020-01-01")
                 .CreateHttpRequest()
+                .SetTimeout(180_000)
                 .AddToHeaders(await GetAuthHeaders().NoContext())
                 .Build()
                 .InvokeAsync<AzureSubscriptions>(Options)).Subscriptions;
@@ -76,6 +79,7 @@ namespace Rystem.Cloud.Azure
                     subscriptionTasks.Add(SetSubscriptionAsync());
                 else
                     await SetSubscriptionAsync();
+
                 async Task SetSubscriptionAsync()
                 {
                     var outputSubscription = await GetSubscriptionAsync(subscription, startTime, endTime, azureDeepRequest, executeRequestInParallel).NoContext();
@@ -90,6 +94,7 @@ namespace Rystem.Cloud.Azure
         {
             string value = await new Uri($"https://management.azure.com{subscription.Id}/providers/Microsoft.CostManagement/exports?api-version=2020-06-01")
                    .CreateHttpRequest()
+                   .SetTimeout(180_000)
                    .AddToHeaders(await GetAuthHeaders().NoContext())
                    .Build()
                    .InvokeAsync().NoContext();
@@ -181,6 +186,7 @@ namespace Rystem.Cloud.Azure
         {
             List<AzureSubscription> subscriptions = (await new Uri($"https://management.azure.com/subscriptions?api-version=2020-01-01")
               .CreateHttpRequest()
+              .SetTimeout(180_000)
               .AddToHeaders(await GetAuthHeaders().NoContext())
               .Build()
               .InvokeAsync<AzureSubscriptions>(Options)).Subscriptions;
@@ -219,12 +225,14 @@ namespace Rystem.Cloud.Azure
         private async Task<List<AzureResourceGroup>> GetResourceGroupsAsync(string subscriptionId)
             => (await new Uri($"https://management.azure.com/subscriptions/{subscriptionId}/resourcegroups?api-version=2020-06-01")
                 .CreateHttpRequest()
+                .SetTimeout(180_000)
                 .AddToHeaders(await GetAuthHeaders().NoContext())
                 .Build()
                 .InvokeAsync<AzureResourceGroups>(Options).NoContext()).ResourceGroups;
         private async Task<List<AzureResource>> GetResourcesAsync(string subscriptionId)
             => (await new Uri($"https://management.azure.com/subscriptions/{subscriptionId}/resources?api-version=2020-06-01")
                 .CreateHttpRequest()
+                .SetTimeout(180_000)
                 .AddToHeaders(await GetAuthHeaders().NoContext())
                 .Build()
                 .InvokeAsync<AzureResources>(Options).NoContext()).Resources; //.Replace("$type", "type").FromDefaultJson<AzureResources>()
@@ -233,6 +241,7 @@ namespace Rystem.Cloud.Azure
             string body = $"{{\"type\":\"Usage\",\"dataSet\":{{\"granularity\":\"Monthly\",\"aggregation\":{{\"totalCost\":{{\"name\":\"Cost\",\"function\":\"Sum\"}},\"totalCostUSD\":{{\"name\":\"CostUSD\",\"function\":\"Sum\"}}}},\"sorting\":[{{\"direction\":\"ascending\",\"name\":\"BillingMonth\"}}],\"grouping\":[{{\"type\":\"Dimension\",\"name\":\"ResourceId\"}},{{\"type\":\"Dimension\",\"name\":\"ResourceType\"}},{{\"type\":\"Dimension\",\"name\":\"ResourceLocation\"}},{{\"type\":\"Dimension\",\"name\":\"ChargeType\"}},{{\"type\":\"Dimension\",\"name\":\"ResourceGroupName\"}},{{\"type\":\"Dimension\",\"name\":\"PublisherType\"}},{{\"type\":\"Dimension\",\"name\":\"ServiceName\"}},{{\"type\":\"Dimension\",\"name\":\"ServiceTier\"}},{{\"type\":\"Dimension\",\"name\":\"Meter\"}}]}},\"timeframe\":\"Custom\",\"timePeriod\":{{\"from\":\"{startTime:yyyy-MM-dd}T00:00:00+00:00\",\"to\":\"{endTime:yyyy-MM-dd}T23:59:59+00:00\"}}}}";
             return (await new Uri($"https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.CostManagement/query?api-version=2019-11-01")
                 .CreateHttpRequest()
+                .SetTimeout(180_000)
                 .WithMethod(HttpMethod.Post)
                 .AddToHeaders(await GetAuthHeaders().NoContext())
                 .AddContentType("application/json")
@@ -280,6 +289,7 @@ namespace Rystem.Cloud.Azure
         {
             return (await new Uri($"https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/usageDetails?$filter=properties%2FusageStart%20ge%20'{startTime:yyyy-MM-dd}'%20and%20properties%2FusageEnd%20le%20'{endTime:yyyy-MM-dd}'&$top={int.MaxValue}&api-version=2019-10-01")
                 .CreateHttpRequest()
+                .SetTimeout(180_000)
                 .WithMethod(HttpMethod.Get)
                 .AddToHeaders(await GetAuthHeaders().NoContext())
                 .Build()
@@ -303,7 +313,6 @@ namespace Rystem.Cloud.Azure
                     }
                     catch (Exception ex)
                     {
-                        string elif = ex.ToString();
                     }
                 }
             }
@@ -329,6 +338,7 @@ namespace Rystem.Cloud.Azure
         private async Task<string> GetMetricAsync(Resource resource, DateTime startTime, DateTime endTime, string metricName, string metricAggregation = "average") //"maximum"
             => await new Uri($"https://management.azure.com{resource.Id}/providers/microsoft.Insights/metrics?timespan={startTime:yyyy-MM-dd}T23:00:00.000Z/{endTime:yyyy-MM-dd}T23:00:00.000Z&interval=PT6H{(!string.IsNullOrWhiteSpace(metricName) ? $"&metricnames={metricName}" : string.Empty)}{(!string.IsNullOrWhiteSpace(metricAggregation) ? $"&aggregation={metricAggregation}" : string.Empty)}&metricNamespace={HttpUtility.UrlEncode(resource.Type)}&autoadjusttimegrain=true&validatedimensions=false&api-version=2019-07-01")
                 .CreateHttpRequest()
+                .SetTimeout(180_000)
                 .AddToHeaders(await GetAuthHeaders().NoContext())
                 .Build()
                 .InvokeAsync()
