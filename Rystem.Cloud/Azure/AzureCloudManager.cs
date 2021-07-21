@@ -267,7 +267,7 @@ namespace Rystem.Cloud.Azure
                         subCategory,
                         meter,
                         azureConsumptions?.Value?
-                            .Where(ƒ => ƒ.Properties.ResourceId.ToLower().Equals(resourceId) && ƒ.Properties.Product.ToLower().StartsWith(startingLabelForProduct))
+                            .Where(ƒ => ƒ.Properties != null && ƒ.Properties.ResourceId?.ToLower().Equals(resourceId) == true && ƒ.Properties.Product?.ToLower().StartsWith(startingLabelForProduct) == true)
                             .Select(ƒ => new Consumption(
                                 ƒ.Properties.BillingAccountId,
                                 ƒ.Properties.Quantity,
