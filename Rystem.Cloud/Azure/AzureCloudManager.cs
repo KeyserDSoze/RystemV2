@@ -49,8 +49,8 @@ namespace Rystem.Cloud.Azure
         }
         private async Task<(string Name, string Value)> GetAuthHeaders()
             => ("Authorization", $"Bearer {await GetAccessToken().NoContext()}");
-        public async Task<Tenant> GetTenantAsync(DateTime from, DateTime to, ManagementDeepRequest deepRequest, bool multiTasking)
-            => new Tenant(string.Empty, await GetSubscriptionsAsync(from, to, deepRequest, multiTasking).NoContext());
+        public async Task<Tenant> GetTenantAsync(DateTime from, DateTime to, ManagementDeepRequest deepRequest, bool executeRequestInParallel)
+            => new Tenant(string.Empty, await GetSubscriptionsAsync(from, to, deepRequest, executeRequestInParallel).NoContext());
         private static readonly Regex RegexToSplitValidMetrics = new("Valid metrics:");
         private static readonly object TrafficLight = new();
         public async Task<IEnumerable<Subscription>> ListSubscriptionsAsync()
@@ -61,7 +61,7 @@ namespace Rystem.Cloud.Azure
                 .InvokeAsync<AzureSubscriptions>(Options)).Subscriptions.Select(x =>
                     new Subscription(x.SubscriptionId, x.TenantId, x.DisplayName, x.State, x.Tags, new())
                 );
-        private async Task<List<Subscription>> GetSubscriptionsAsync(DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest, bool multiTasking)
+        private async Task<List<Subscription>> GetSubscriptionsAsync(DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest, bool executeRequestInParallel)
         {
             List<AzureSubscription> subscriptions = (await new Uri($"https://management.azure.com/subscriptions?api-version=2020-01-01")
                 .CreateHttpRequest()
@@ -72,13 +72,13 @@ namespace Rystem.Cloud.Azure
             List<Task> subscriptionTasks = new();
             foreach (var subscription in subscriptions)
             {
-                if (multiTasking)
+                if (executeRequestInParallel)
                     subscriptionTasks.Add(SetSubscriptionAsync());
                 else
                     await SetSubscriptionAsync();
                 async Task SetSubscriptionAsync()
                 {
-                    var outputSubscription = await GetSubscriptionAsync(subscription, startTime, endTime, azureDeepRequest).NoContext();
+                    var outputSubscription = await GetSubscriptionAsync(subscription, startTime, endTime, azureDeepRequest, executeRequestInParallel).NoContext();
                     lock (TrafficLight)
                         outputSubscriptions.Add(outputSubscription);
                 }
@@ -86,7 +86,7 @@ namespace Rystem.Cloud.Azure
             await Task.WhenAll(subscriptionTasks).NoContext();
             return outputSubscriptions;
         }
-        private async Task<Subscription> GetSubscriptionAsync(AzureSubscription subscription, DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest)
+        private async Task<Subscription> GetSubscriptionAsync(AzureSubscription subscription, DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest, bool executeRequestInParallel)
         {
             string value = await new Uri($"https://management.azure.com{subscription.Id}/providers/Microsoft.CostManagement/exports?api-version=2020-06-01")
                    .CreateHttpRequest()
@@ -109,8 +109,12 @@ namespace Rystem.Cloud.Azure
             List<Task> resourceGroupTasks = new();
             foreach (AzureResourceGroup resourceGroup in resourceGroups)
             {
-                resourceGroupTasks.Add(SetResourceGroup());
-                async Task SetResourceGroup()
+                if (executeRequestInParallel)
+                    resourceGroupTasks.Add(SetResourceGroupAsync());
+                else
+                    await SetResourceGroupAsync().NoContext();
+
+                async Task SetResourceGroupAsync()
                 {
                     ResourceGroup outputResourceGroup = new(resourceGroup.Id, resourceGroup.Name, resourceGroup.Location, resourceGroup.Tags, new());
                     List<Resource> resourcesFromResourceGroup = resources
@@ -121,8 +125,12 @@ namespace Rystem.Cloud.Azure
                     List<Task> resourceTasks = new();
                     foreach (Resource resource in resourcesFromResourceGroup)
                     {
-                        resourceTasks.Add(SetResourceValues());
-                        async Task SetResourceValues()
+                        if (executeRequestInParallel)
+                            resourceTasks.Add(SetResourceValuesAsync());
+                        else
+                            await SetResourceValuesAsync().NoContext();
+
+                        async Task SetResourceValuesAsync()
                         {
                             if (azureDeepRequest >= ManagementDeepRequest.Monitoring)
                             {
@@ -169,7 +177,7 @@ namespace Rystem.Cloud.Azure
             await Task.WhenAll(resourceGroupTasks).NoContext();
             return outputSubscription;
         }
-        public async Task<Subscription> GetSubscriptionAsync(string subscriptionId, DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest)
+        public async Task<Subscription> GetSubscriptionAsync(string subscriptionId, DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest, bool executeRequestInParallel)
         {
             List<AzureSubscription> subscriptions = (await new Uri($"https://management.azure.com/subscriptions?api-version=2020-01-01")
               .CreateHttpRequest()
@@ -178,7 +186,7 @@ namespace Rystem.Cloud.Azure
               .InvokeAsync<AzureSubscriptions>(Options)).Subscriptions;
             AzureSubscription subscription = subscriptions.FirstOrDefault(x => x.SubscriptionId == subscriptionId);
             if (subscription != default)
-                return await GetSubscriptionAsync(subscription, startTime, endTime, azureDeepRequest).NoContext();
+                return await GetSubscriptionAsync(subscription, startTime, endTime, azureDeepRequest, executeRequestInParallel).NoContext();
             else
                 return default;
         }

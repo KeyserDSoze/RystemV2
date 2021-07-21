@@ -6,8 +6,8 @@ namespace Rystem.Cloud
 {
     internal interface ICloudManagement
     {
-        Task<Tenant> GetTenantAsync(DateTime from, DateTime to, ManagementDeepRequest deepRequest, bool multiTasking);
-        Task<Subscription> GetSubscriptionAsync(string subscriptionId, DateTime from, DateTime to, ManagementDeepRequest deepRequest);
+        Task<Tenant> GetTenantAsync(DateTime from, DateTime to, ManagementDeepRequest deepRequest, bool executeRequestInParallel);
+        Task<Subscription> GetSubscriptionAsync(string subscriptionId, DateTime from, DateTime to, ManagementDeepRequest deepRequest, bool executeRequestInParallel);
         Task<IEnumerable<Subscription>> ListSubscriptionsAsync();
     }
 }
