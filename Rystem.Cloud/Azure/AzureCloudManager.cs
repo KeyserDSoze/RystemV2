@@ -22,7 +22,7 @@ namespace Rystem.Cloud.Azure
     {
         private readonly AzureAadAppRegistration AppRegistration;
         private AzureAccount AzureAccount { get; set; }
-        public List<CloudManagementError> Errors { get; } = new();
+        private readonly List<CloudManagementError> Errors = new();
         public AzureCloudManager(AzureAadAppRegistration appRegistration)
             => AppRegistration = appRegistration;
         private bool IsAuthenticated => AzureAccount != null && DateTime.UtcNow >= AzureAccount.StartTime && DateTime.UtcNow <= AzureAccount.EndTime;
@@ -58,8 +58,8 @@ namespace Rystem.Cloud.Azure
         }
         private async Task<(string Name, string Value)> GetAuthHeaders()
             => ("Authorization", $"Bearer {await GetAccessToken().NoContext()}");
-        public async Task<Tenant> GetTenantAsync(DateTime from, DateTime to, ManagementDeepRequest deepRequest, bool executeRequestInParallel)
-            => new Tenant(string.Empty, await GetSubscriptionsAsync(from, to, deepRequest, executeRequestInParallel).NoContext(), Errors);
+        public async Task<(Tenant Tenant, List<CloudManagementError> Errors)> GetTenantAsync(DateTime from, DateTime to, ManagementDeepRequest deepRequest, bool executeRequestInParallel)
+            => (new Tenant(string.Empty, await GetSubscriptionsAsync(from, to, deepRequest, executeRequestInParallel).NoContext()), Errors);
         private static readonly Regex RegexToSplitValidMetrics = new("Valid metrics:");
         private static readonly object TrafficLight = new();
         public async Task<IEnumerable<Subscription>> ListSubscriptionsAsync()
@@ -210,7 +210,7 @@ namespace Rystem.Cloud.Azure
                 return default;
             }
         }
-        public async Task<Subscription> GetSubscriptionAsync(string subscriptionId, DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest, bool executeRequestInParallel)
+        public async Task<(Subscription Subscription, List<CloudManagementError> Errors)> GetSubscriptionAsync(string subscriptionId, DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest, bool executeRequestInParallel)
         {
             List<AzureSubscription> subscriptions = (await new Uri($"https://management.azure.com/subscriptions?api-version=2020-01-01")
               .CreateHttpRequest()
@@ -220,7 +220,7 @@ namespace Rystem.Cloud.Azure
               .InvokeAsync<AzureSubscriptions>(Options)).Subscriptions;
             AzureSubscription subscription = subscriptions.FirstOrDefault(x => x.SubscriptionId == subscriptionId);
             if (subscription != default)
-                return await GetSubscriptionAsync(subscription, startTime, endTime, azureDeepRequest, executeRequestInParallel).NoContext();
+                return (await GetSubscriptionAsync(subscription, startTime, endTime, azureDeepRequest, executeRequestInParallel).NoContext(), Errors);
             else
                 return default;
         }
