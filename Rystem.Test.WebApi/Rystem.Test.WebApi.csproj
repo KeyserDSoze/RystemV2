@@ -13,6 +13,7 @@
     <ProjectReference Include="..\Rystem.Azure\Rystem.Azure.csproj" />
     <ProjectReference Include="..\Rystem.Business\Rystem.Business.csproj" />
     <ProjectReference Include="..\Rystem.Cloud\Rystem.Cloud.csproj" />
+    <ProjectReference Include="..\Rystem.FluentApi\Rystem.FluentApi.csproj" />
     <ProjectReference Include="..\Rystem.Utility\Rystem.Utility.csproj" />
   </ItemGroup>
 

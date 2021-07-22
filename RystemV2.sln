@@ -17,7 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rystem.Cloud", "Rystem.Clou
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{F9B48BB8-FC9B-4C97-8CFF-654A8862C928}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rystem.Test.WebApi", "Rystem.Test.WebApi\Rystem.Test.WebApi.csproj", "{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rystem.Test.WebApi", "Rystem.Test.WebApi\Rystem.Test.WebApi.csproj", "{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rystem.FluentApi", "Rystem.FluentApi\Rystem.FluentApi.csproj", "{4A178C68-3DB0-4594-BDBB-D29F05297FD0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,10 @@ Global
 		{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A178C68-3DB0-4594-BDBB-D29F05297FD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A178C68-3DB0-4594-BDBB-D29F05297FD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A178C68-3DB0-4594-BDBB-D29F05297FD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A178C68-3DB0-4594-BDBB-D29F05297FD0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
