@@ -2,7 +2,11 @@
 
 namespace Rystem.Cloud
 {
-    public record CloudManagementError(string SubscriptionId, string Name, CloudManagementErrorType Type, Exception Exception);
+    public record CloudManagementError(string SubscriptionId, string Name, CloudManagementErrorType Type, Exception Exception)
+    {
+        public override string ToString()
+            => $"{SubscriptionId}---{Name}---{Type}---{Exception}";
+    }
     public enum CloudManagementErrorType
     {
         Authentication,

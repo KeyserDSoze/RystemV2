@@ -59,7 +59,7 @@ namespace Rystem.Cloud.Azure
         private async Task<(string Name, string Value)> GetAuthHeaders()
             => ("Authorization", $"Bearer {await GetAccessToken().NoContext()}");
         public async Task<Tenant> GetTenantAsync(DateTime from, DateTime to, ManagementDeepRequest deepRequest, bool executeRequestInParallel)
-            => new Tenant(string.Empty, await GetSubscriptionsAsync(from, to, deepRequest, executeRequestInParallel).NoContext());
+            => new Tenant(string.Empty, await GetSubscriptionsAsync(from, to, deepRequest, executeRequestInParallel).NoContext(), Errors);
         private static readonly Regex RegexToSplitValidMetrics = new("Valid metrics:");
         private static readonly object TrafficLight = new();
         public async Task<IEnumerable<Subscription>> ListSubscriptionsAsync()
