@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Rystem.Azure.Integration.Cache;
 using Rystem.Azure.Integration.Message;
@@ -23,5 +24,9 @@ namespace Rystem.Azure
     {
         public static AzureBuilder WithAzure(this IServiceCollection services)
             => RystemServices.Builder = new(services);
+        public static IHost WithRystem(this IHost host)
+        {
+            return host;
+        }
     }
 }
