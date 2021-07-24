@@ -57,7 +57,7 @@ namespace Rystem.Background
                                 break;
                             }
                             catch { }
-                            await Task.Delay(4000).NoContext();
+                            await Task.Delay(1000).NoContext();
                         }
                         await entity.ActionToDoAsync().NoContext();
                     },
