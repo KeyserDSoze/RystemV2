@@ -27,10 +27,10 @@ namespace Rystem.Business.Document
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureTableStorage:
-                                Implementations.Add(installation, new TableStorageImplementation<TEntity>(Services.Factory.TableStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new TableStorageImplementation<TEntity>(Services.AzureFactory.TableStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
                                 break;
                             case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new BlobStorageImplementation<TEntity>(Services.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new BlobStorageImplementation<TEntity>(Services.AzureFactory.BlobStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");

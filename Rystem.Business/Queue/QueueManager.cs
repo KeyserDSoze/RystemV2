@@ -27,13 +27,13 @@ namespace Rystem.Business.Queue
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureQueueStorage:
-                                Implementations.Add(installation, new QueueStorageImplementation<TEntity>(Services.Factory.QueueStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new QueueStorageImplementation<TEntity>(Services.AzureFactory.QueueStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
                                 break;
                             case ServiceProviderType.AzureEventHub:
-                                Implementations.Add(installation, new EventHubImplementation<TEntity>(Services.Factory.EventHub(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new EventHubImplementation<TEntity>(Services.AzureFactory.EventHub(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
                                 break;
                             case ServiceProviderType.AzureServiceBus:
-                                Implementations.Add(installation, new ServiceBusImplementations<TEntity>(Services.Factory.ServiceBus(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new ServiceBusImplementations<TEntity>(Services.AzureFactory.ServiceBus(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");

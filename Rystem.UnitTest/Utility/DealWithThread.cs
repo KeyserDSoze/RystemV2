@@ -32,84 +32,35 @@ namespace Rystem.UnitTest
         [Fact]
         public async Task RunInIServiceCollection()
         {
-            new MyServiceCollection().AddBackgroundWork<MyFirstBackgroundWork>(() => this);
-            await Task.Delay(2000);
+            new ServiceCollection()
+                .AddBackgroundWork<MyFirstBackgroundWork>(x =>
+                {
+                    x.Cron = "* * * * * *";
+                    x.RunImmediately = true;
+                    x.Key = "The best of the keys";
+                })
+                .AddSingleton<MyDiTest>()
+                .WithRystem();
+            await Task.Delay(2600);
             BackgroundWork.Stop();
-            Assert.Equal(6, Counter);
+            var myDi = RystemManager.GetService<MyDiTest>();
+            Assert.Equal(6, myDi.Counter);
+        }
+        private class MyDiTest
+        {
+            public int Counter { get; set; }
         }
         private class MyFirstBackgroundWork : IBackgroundWork
         {
-            public string Key => "Hi";
+            private readonly MyDiTest MyDiTest;
+            public MyFirstBackgroundWork(MyDiTest myDiTest)
+                => MyDiTest = myDiTest;
             public async Task ActionToDoAsync()
             {
-                DealWithThread dealWithThread = (DealWithThread)Properties;
                 await Task.Delay(0).NoContext();
-                dealWithThread.Counter += 2;
-            }
-            public bool RunImmediately => true;
-            public string Cron => "* * * * * *";
-            public object Properties { get; init; }
-        }
-
-        private class MyServiceCollection : IServiceCollection
-        {
-            public ServiceDescriptor this[int index] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-            public int Count => throw new NotImplementedException();
-
-            public bool IsReadOnly => throw new NotImplementedException();
-
-            public void Add(ServiceDescriptor item)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Clear()
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool Contains(ServiceDescriptor item)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void CopyTo(ServiceDescriptor[] array, int arrayIndex)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IEnumerator<ServiceDescriptor> GetEnumerator()
-            {
-                throw new NotImplementedException();
-            }
-
-            public int IndexOf(ServiceDescriptor item)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Insert(int index, ServiceDescriptor item)
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool Remove(ServiceDescriptor item)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void RemoveAt(int index)
-            {
-                throw new NotImplementedException();
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                throw new NotImplementedException();
+                MyDiTest.Counter += 2;
             }
         }
-
         private int Counter;
         private async Task CountAsync(int v)
         {

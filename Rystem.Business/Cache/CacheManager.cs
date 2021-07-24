@@ -28,13 +28,13 @@ namespace Rystem.Business
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new InBlobStorage<TCache>(Services.Factory.BlobStorage(configuration.Configurations, configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
+                                Implementations.Add(installation, new InBlobStorage<TCache>(Services.AzureFactory.BlobStorage(configuration.Configurations, configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
                                 break;
                             case ServiceProviderType.AzureTableStorage:
-                                Implementations.Add(installation, new InTableStorage<TCache>(Services.Factory.TableStorage(configuration.Configurations, configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
+                                Implementations.Add(installation, new InTableStorage<TCache>(Services.AzureFactory.TableStorage(configuration.Configurations, configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
                                 break;
                             case ServiceProviderType.AzureRedisCache:
-                                Implementations.Add(installation, new InRedisCache<TCache>(Services.Factory.RedisCache(configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
+                                Implementations.Add(installation, new InRedisCache<TCache>(Services.AzureFactory.RedisCache(configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");

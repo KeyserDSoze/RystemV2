@@ -1,43 +1,77 @@
 ﻿using Cronos;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rystem.Background
 {
+    public interface IBackgroundOptionedWork : IBackgroundWork
+    {
+        BackgroundWorkOptions Options { get; }
+    }
     public interface IBackgroundWork
     {
-        string Key { get; }
-        object Properties { get; init; }
-        bool RunImmediately { get; }
-        string Cron { get; }
         Task ActionToDoAsync();
-        private string Id => $"BackgroundWork_{Key ?? string.Empty}_{GetType().FullName}";
-        public void Run()
-        {
-            if (!BackgroundWork.IsRunning(Id))
-            {
-                var expression = CronExpression.Parse(Cron, Cron.Split(' ').Length > 5 ? CronFormat.IncludeSeconds : CronFormat.Standard);
-                BackgroundWork.Run(ActionToDoAsync, Id,
-                    () => (int)expression.GetNextOccurrence(DateTime.UtcNow, true)?.Subtract(DateTime.UtcNow).TotalMilliseconds,
-                    RunImmediately
-                );
-            }
-        }
-        public void Stop()
-            => BackgroundWork.Stop(Id);
+    }
+    public class BackgroundWorkOptions
+    {
+        public string Key { get; set; }
+        public bool RunImmediately { get; set; }
+        public string Cron { get; set; }
     }
     public static partial class BackgroundWorkExtensions
     {
-        public static IServiceCollection AddBackgroundWork<TEntity>(this IServiceCollection services, Func<object> propertiesRetriever = default)
-            where TEntity : IBackgroundWork, new()
+        public static IServiceCollection AddBackgroundWork<TEntity>(this IServiceCollection services, Action<BackgroundWorkOptions> options)
+            where TEntity : class, IBackgroundWork
         {
-            var entity = new TEntity()
+            services.AddTransient<TEntity>();
+            var bOptions = new BackgroundWorkOptions()
             {
-                Properties = propertiesRetriever?.Invoke()
+                Key = Guid.NewGuid().ToString(),
+                Cron = "0 1 * * *",
+                RunImmediately = false
             };
-            entity.Run();
+            options.Invoke(bOptions);
+            Start<TEntity>(bOptions);
             return services;
         }
+        private static string GetKey<TEntity>(string key)
+            where TEntity : class, IBackgroundWork
+            => $"BackgroundWork_{key}_{typeof(TEntity).FullName}";
+        private static void Start<TEntity>(BackgroundWorkOptions options)
+            where TEntity : class, IBackgroundWork
+        {
+            string key = GetKey<TEntity>(options.Key);
+            if (!BackgroundWork.IsRunning(key))
+            {
+                var expression = CronExpression.Parse(options.Cron, options.Cron.Split(' ').Length > 5 ? CronFormat.IncludeSeconds : CronFormat.Standard);
+                BackgroundWork.Run(async () =>
+                    {
+                        TEntity entity = default;
+                        while (entity == null)
+                        {
+                            try
+                            {
+                                entity = RystemManager.GetService<TEntity>();
+                                break;
+                            }
+                            catch { }
+                            await Task.Delay(4000).NoContext();
+                        }
+                        await entity.ActionToDoAsync().NoContext();
+                    },
+                    key,
+                    () => (int)expression.GetNextOccurrence(DateTime.UtcNow, true)?.Subtract(DateTime.UtcNow).TotalMilliseconds,
+                    options.RunImmediately
+                );
+            }
+        }
+        public static void Run<T>(this T entity)
+            where T : class, IBackgroundOptionedWork
+            => Start<T>(entity.Options);
+        public static void Stop<T>(this T entity)
+            where T : class, IBackgroundOptionedWork
+            => BackgroundWork.Stop(GetKey<T>(entity.Options.Key));
     }
 }
