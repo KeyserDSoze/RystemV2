@@ -15,7 +15,7 @@ namespace Rystem.Azure
         internal readonly AzureFactory Factory = new(new AzureManager());
         internal AzureBuilder(IServiceCollection services)
         {
-            Services = services?.AddSingleton<RystemServices>();
+            Services = services.AddSingleton<RystemServices>();
         }
         /// <summary>
         /// Add Azure storage service

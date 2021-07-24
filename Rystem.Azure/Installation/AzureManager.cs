@@ -23,10 +23,6 @@ namespace Rystem.Azure
     public static class AzureManagerExtensions
     {
         public static AzureBuilder WithAzure(this IServiceCollection services)
-            => RystemServices.Builder = new(services);
-        public static IHost WithRystem(this IHost host)
-        {
-            return host;
-        }
+            => RystemServices.AzureBuilder = new(RystemManager.ServiceCollection = services ?? new ServiceCollection());
     }
 }
