@@ -41,7 +41,7 @@ namespace Rystem.UnitTest
                 })
                 .AddSingleton<MyDiTest>()
                 .WithRystem();
-            await Task.Delay(2600);
+            await Task.Delay(2000);
             BackgroundWork.Stop();
             var myDi = RystemManager.GetService<MyDiTest>();
             Assert.Equal(6, myDi.Counter);
