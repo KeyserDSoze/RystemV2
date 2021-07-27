@@ -155,7 +155,7 @@ namespace Rystem.Azure.Integration.Storage
             var client = Context ?? await GetContextAsync();
             BlockBlobClient cloudBlob = client.GetBlockBlobClient(name);
             stream.Position = 0;
-            await cloudBlob.UploadAsync(stream, options).NoContext();
+            await cloudBlob.UploadAsync(stream, options ?? new()).NoContext();
             if (stream is NotClosableStream)
                 (stream as NotClosableStream).ManualDispose();
             return true;

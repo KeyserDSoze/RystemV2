@@ -6,6 +6,6 @@ namespace Rystem.Azure
     public class RystemServices
     {
         internal static AzureBuilder AzureBuilder;
-        public AzureFactory AzureFactory => AzureBuilder.Factory;
+        public AzureFactory AzureFactory => AzureBuilder.AzureFactory;
     }
 }

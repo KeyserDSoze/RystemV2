@@ -1,4 +1,6 @@
-﻿using Rystem.Azure.Integration;
+﻿using Rystem;
+using Rystem.Azure.Integration;
+using Rystem.Azure.Integration.Storage;
 using Rystem.Business;
 using Rystem.Business.Document;
 using Rystem.Text;
@@ -26,15 +28,17 @@ namespace RystemV2
                 .AddStorage(new Rystem.Azure.Integration.Storage.StorageOptions(settings.Storage.Name, settings.Storage.Key))
                 .Build();
         }
+       
         static async Task Main(string[] args)
         {
             //(new Sample() as IDocument).Build();
             //await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.UpdateAsync(Installation.Inst00).NoContext();
             //await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd3", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.UpdateAsync(Installation.Inst00).NoContext();
             //var x = (await new Sample().ToListAsync(x => x.Ale1 == "dddd", Installation.Inst00).NoContext()).ToList();
-            await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.SendAsync().NoContext();
-            await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd3", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.SendAsync().NoContext();
-            var x = (await new Sample().ReadAsync().NoContext()).ToList();
+            //await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.SendAsync().NoContext();
+            //await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd3", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.SendAsync().NoContext();
+            //var x = (await new Sample().ReadAsync().NoContext()).ToList();
+          
         }
         public class Sample : IQueue
         {

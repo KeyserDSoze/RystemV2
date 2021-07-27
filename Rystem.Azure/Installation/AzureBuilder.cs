@@ -12,7 +12,7 @@ namespace Rystem.Azure
     public class AzureBuilder
     {
         private readonly IServiceCollection Services;
-        internal readonly AzureFactory Factory = new(new AzureManager());
+        internal readonly AzureFactory AzureFactory = new(new AzureManager());
         internal AzureBuilder(IServiceCollection services)
         {
             Services = services.AddSingleton<RystemServices>();
@@ -24,15 +24,21 @@ namespace Rystem.Azure
         /// <param name="serviceKey">A specific key that you will use during your object configuration.</param>
         /// <returns></returns>
         public AzureBuilder AddStorage(StorageOptions options, string serviceKey = default)
-            => Add(Factory.Manager.Storages, options, serviceKey);
+            => Add(AzureFactory.Manager.Storages, options, serviceKey);
         public AzureBuilder AddMessage(EventHubOptions options, string serviceKey = default)
-            => Add(Factory.Manager.EventHubs, options, serviceKey);
+            => Add(AzureFactory.Manager.EventHubs, options, serviceKey);
         public AzureBuilder AddMessage(ServiceBusOptions options, string serviceKey = default)
-            => Add(Factory.Manager.ServiceBuses, options, serviceKey);
+            => Add(AzureFactory.Manager.ServiceBuses, options, serviceKey);
         public AzureBuilder AddCache(RedisCacheOptions options, string serviceKey = default)
-            => Add(Factory.Manager.RedisCaches, options, serviceKey);
+        {
+            Add(AzureFactory.Manager.RedisCaches, options, serviceKey);
+            return this;
+        }
         public AzureBuilder AddKeyVault(KeyVaultOptions options, string serviceKey = default)
-            => Add(Factory.Manager.KeyVaults, options, serviceKey);
+        {
+            Add(AzureFactory.Manager.KeyVaults, options, serviceKey);
+            return this;
+        }
         private AzureBuilder Add<T>(Dictionary<string, T> dictionary, T options, string serviceKey = default)
         {
             if (serviceKey == default)

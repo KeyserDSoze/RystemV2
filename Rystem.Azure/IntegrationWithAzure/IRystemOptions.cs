@@ -13,7 +13,7 @@ namespace Rystem.Azure
             if (!UseKeyVault)
                 return ConnectionString;
             else
-                return (await RystemServices.AzureBuilder.Factory.KeyVault(KeyVaultValue.ServiceKey).GetSecretAsync(KeyVaultValue.Key).NoContext()).Value;
+                return (await RystemServices.AzureBuilder.AzureFactory.KeyVault(KeyVaultValue.ServiceKey).GetSecretAsync(KeyVaultValue.Key).NoContext()).Value;
         }
     }
 }

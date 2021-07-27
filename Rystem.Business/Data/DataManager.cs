@@ -71,8 +71,9 @@ namespace Rystem.Business.Data
             => Implementation(installation).ListAsync(entity.Name, takeCount);
         public Task<bool> WriteAsync(TEntity entity, Stream stream, dynamic options, Installation installation)
             => Implementation(installation).WriteAsync(entity, stream, options);
-        public async Task<bool> WriteAsync(TEntity entity, string value, dynamic options, Installation installation)
-            => await WriteAsync(entity, await value.ToStreamAsync(), options, installation).NoContext();
+        public async Task<bool> WriteAsync(TEntity entity, string value, dynamic options, Installation installation) 
+            => await WriteAsync(entity, await value.ToStreamAsync().NoContext(), options, installation).ConfigureAwait(false);
+
         public Task<bool> WriteAsync(TEntity entity, byte[] value, dynamic options, Installation installation)
             => WriteAsync(entity, value.ToStream(), options, installation);
         private const string ApplicationJson = "application/json";
