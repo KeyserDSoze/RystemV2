@@ -19,6 +19,17 @@ namespace Rystem.Test.WebApi.Models
                 .WithBlockBlob(new BlobStorageConfiguration("rawcost"));
         }
     }
+    public class TenantData2 : IData
+    {
+        public string Name { get; set; }
+
+        public RystemDataServiceProvider ConfigureData()
+        {
+            return RystemDataServiceProvider
+                .WithAzure()
+                .WithBlockBlob(new BlobStorageConfiguration("debuglog"));
+        }
+    }
     public class Moralta
     {
         
