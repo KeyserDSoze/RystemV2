@@ -18,13 +18,13 @@ namespace Rystem.Background
                 RunImmediately = false
             };
             options.Invoke(bOptions);
-            Start<TEntity>(bOptions);
+            Start<TEntity>(default, bOptions);
             return services;
         }
         private static string GetKey<TEntity>(string key)
             where TEntity : class, IBackgroundWork
             => $"BackgroundWork_{key}_{typeof(TEntity).FullName}";
-        private static void Start<TEntity>(BackgroundWorkOptions options)
+        private static void Start<TEntity>(TEntity entity, BackgroundWorkOptions options)
             where TEntity : class, IBackgroundWork
         {
             string key = GetKey<TEntity>(options.Key);
@@ -33,22 +33,27 @@ namespace Rystem.Background
                 var expression = CronExpression.Parse(options.Cron, options.Cron.Split(' ').Length > 5 ? CronFormat.IncludeSeconds : CronFormat.Standard);
                 BackgroundWork.Run(async () =>
                     {
-                        TEntity entity = default;
-                        int attempt = 0;
-                        while (entity == null || attempt > 30)
+                        if (entity == default)
                         {
-                            try
+                            TEntity entityFromServices = default;
+                            int attempt = 0;
+                            while (entityFromServices == null || attempt > 30)
                             {
-                                entity = RystemManager.GetService<TEntity>();
-                                break;
+                                try
+                                {
+                                    entityFromServices = RystemManager.GetService<TEntity>();
+                                    break;
+                                }
+                                catch
+                                {
+                                    attempt++;
+                                }
+                                await Task.Delay(300).NoContext();
                             }
-                            catch
-                            {
-                                attempt++;
-                            }
-                            await Task.Delay(300).NoContext();
+                            await entityFromServices.ActionToDoAsync().NoContext();
                         }
-                        await entity.ActionToDoAsync().NoContext();
+                        else
+                            await entity.ActionToDoAsync().NoContext();
                     },
                     key,
                     () => (int)expression.GetNextOccurrence(DateTime.UtcNow, true)?.Subtract(DateTime.UtcNow).TotalMilliseconds,
@@ -58,7 +63,7 @@ namespace Rystem.Background
         }
         public static void Run<T>(this T entity)
             where T : class, IBackgroundOptionedWork
-            => Start<T>(entity.Options);
+            => Start(entity, entity.Options);
         public static void Stop<T>(this T entity)
             where T : class, IBackgroundOptionedWork
             => BackgroundWork.Stop(GetKey<T>(entity.Options.Key));

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Rystem.Azure;
+using Rystem.Background;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +38,21 @@ namespace Rystem.Test.WebApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Rystem.Test.WebApi", Version = "v1" });
+            });
+            //new DailyImport()
+            //{
+            //    Options = new Background.BackgroundWorkOptions()
+            //    {
+            //        Cron = "* * * * * *",
+            //        Key = "da",
+            //        RunImmediately = false
+            //    }
+            //}.Run();
+            services.AddBackgroundWork<MonthlyReviewImport>(x =>
+            {
+                x.Cron = "* * * * *";
+                x.Key = "da";
+                x.RunImmediately = false;
             });
         }
 
