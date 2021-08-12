@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Rystem.Business.Document
+namespace Rystem.Business
 {
     public class NoDocumentAttribute : Attribute
     {

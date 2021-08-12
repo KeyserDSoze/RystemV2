@@ -11,7 +11,6 @@ namespace Rystem.Business
 {
     internal class CacheManager<TCacheKey, TCache>
         where TCacheKey : ICacheKey<TCache>
-        where TCache : new()
     {
         private readonly Dictionary<Installation, ICacheImplementation<TCache>> Implementations = new();
         private readonly Dictionary<Installation, ProvidedService> CacheConfiguration;
