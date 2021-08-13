@@ -15,8 +15,8 @@ namespace System
             where TCacheKey : ICacheKey<TCache>
             => entity.DefaultManager(nameof(CacheExtensions), (key) => new CacheManager<TCacheKey, TCache>(key.BuildCache())) as CacheManager<TCacheKey, TCache>;
 
-        public static async Task<TEntry> InstanceAsync<TEntry>(this ICacheKey<TEntry> entry, Installation installation = Installation.Default, bool withConsistency = false)
-            => await entry.Manager<ICacheKey<TEntry>, TEntry>().InstanceAsync(entry, withConsistency, installation).NoContext();
+        public static async Task<TEntry> InstanceAsync<TEntry>(this ICacheKey<TEntry> entry, TimeSpan expiringTime = default, Installation installation = Installation.Default, bool withConsistency = false)
+            => await entry.Manager<ICacheKey<TEntry>, TEntry>().InstanceAsync(entry, withConsistency, expiringTime, installation).NoContext();
         public static async Task<bool> RemoveAsync<TEntry>(this ICacheKey<TEntry> entry, Installation installation = Installation.Default)
             => await entry.Manager<ICacheKey<TEntry>, TEntry>().DeleteAsync(entry, installation).NoContext();
         public static async Task<bool> RestoreAsync<TEntry>(this ICacheKey<TEntry> entry, TEntry value = default, TimeSpan expiringTime = default, Installation installation = Installation.Default)
@@ -50,8 +50,8 @@ namespace System
             }
         }
 
-        public static TEntry Instance<TEntry>(this ICacheKey<TEntry> entry, Installation installation = Installation.Default, bool withConsistency = false)
-            => entry.InstanceAsync(installation, withConsistency).ToResult();
+        public static TEntry Instance<TEntry>(this ICacheKey<TEntry> entry, TimeSpan expiringTime = default, Installation installation = Installation.Default, bool withConsistency = false)
+            => entry.InstanceAsync(expiringTime, installation, withConsistency).ToResult();
         public static bool Remove<TEntry>(this ICacheKey<TEntry> entry, Installation installation = Installation.Default)
             => entry.RemoveAsync(installation).ToResult();
         public static bool Restore<TEntry>(this ICacheKey<TEntry> entry, TEntry value = default, TimeSpan expiringTime = default, Installation installation = Installation.Default)

@@ -13,7 +13,7 @@ namespace Rystem.Business
         where TCacheKey : ICacheKey<TCache>
     {
         private readonly Dictionary<Installation, ICacheImplementation<TCache>> Implementations = new();
-        private readonly Dictionary<Installation, ProvidedService> CacheConfiguration;
+        private readonly Dictionary<Installation, ProvidedService> CacheConfigurations;
         private bool MemoryIsActive { get; }
         private readonly object TrafficLight = new();
         private readonly RystemServices Services = new();
@@ -23,7 +23,7 @@ namespace Rystem.Business
                 lock (TrafficLight)
                     if (!Implementations.ContainsKey(installation))
                     {
-                        ProvidedService configuration = CacheConfiguration[installation];
+                        ProvidedService configuration = CacheConfigurations[installation];
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlockBlobStorage:
@@ -41,23 +41,31 @@ namespace Rystem.Business
                     }
             return Implementations[installation];
         }
+        private TimeSpan GetCorrectTimespan(TimeSpan expiringTime, Installation installation)
+        {
+            var option = CacheConfigurations[installation].Options as CacheConfiguration;
+            if (expiringTime == default && option?.ExpiringDefault != default)
+                expiringTime = option.ExpiringDefault;
+            return expiringTime;
+        }
+
         public CacheManager(RystemCacheServiceProvider serviceProvider)
         {
             MemoryIsActive = serviceProvider.Services.ContainsKey(Installation.Memory);
-            CacheConfiguration = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
+            CacheConfigurations = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
         }
         private bool GetCloudIsActive(Installation installation)
-            => CacheConfiguration.ContainsKey(installation) && CacheConfiguration[installation].Type != ServiceProviderType.InMemory;
-        private async Task<TCache> InstanceWithoutConsistencyAsync(TCacheKey key, string keyString, Installation installation)
+            => CacheConfigurations.ContainsKey(installation) && CacheConfigurations[installation].Type != ServiceProviderType.InMemory;
+        private async Task<TCache> InstanceWithoutConsistencyAsync(TCacheKey key, string keyString, TimeSpan expiringTime, Installation installation)
         {
             TCache cache = await key.FetchAsync().NoContext();
             if (MemoryIsActive)
-                new Key(keyString).Update(cache, default);
+                new Key(keyString).Update(cache, GetCorrectTimespan(expiringTime, Installation.Memory));
             if (GetCloudIsActive(installation))
-                await Implementation(installation).UpdateAsync(keyString, cache, default).NoContext();
+                await Implementation(installation).UpdateAsync(keyString, cache, GetCorrectTimespan(expiringTime, installation)).NoContext();
             return cache;
         }
-        public async Task<TCache> InstanceAsync(TCacheKey key, bool withConsistency, Installation installation)
+        public async Task<TCache> InstanceAsync(TCacheKey key, bool withConsistency, TimeSpan expiringTime, Installation installation)
         {
             string keyString = key.ToKeyString();
             if (MemoryIsActive)
@@ -75,11 +83,11 @@ namespace Rystem.Business
                 }
             }
             if (!withConsistency)
-                return await InstanceWithoutConsistencyAsync(key, keyString, installation).NoContext();
+                return await InstanceWithoutConsistencyAsync(key, keyString, expiringTime, installation).NoContext();
             else
             {
                 TCache cache = default;
-                await RaceCondition.RunAsync(async () => cache = await InstanceWithoutConsistencyAsync(key, keyString, installation).NoContext(), keyString).NoContext();
+                await RaceCondition.RunAsync(async () => cache = await InstanceWithoutConsistencyAsync(key, keyString, expiringTime, installation).NoContext(), keyString).NoContext();
                 return cache;
             }
         }
@@ -91,11 +99,11 @@ namespace Rystem.Business
             bool result = false;
             if (MemoryIsActive)
             {
-                new Key(keyString).Update(value, expiringTime);
+                new Key(keyString).Update(value, GetCorrectTimespan(expiringTime, Installation.Memory));
                 result = true;
             }
             if (GetCloudIsActive(installation))
-                result |= await Implementation(installation).UpdateAsync(keyString, value, expiringTime).NoContext();
+                result |= await Implementation(installation).UpdateAsync(keyString, value, GetCorrectTimespan(expiringTime, installation)).NoContext();
             return result;
         }
         public async Task<bool> ExistsAsync(TCacheKey key, Installation installation)

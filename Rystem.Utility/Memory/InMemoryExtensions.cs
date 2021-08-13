@@ -1,13 +1,9 @@
 ﻿using Rystem.Memory;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace System
 {
-    public record Key(string Value);
+    public record Key(string Value = "");
     public static class InMemoryExtensions
     {
         public static T Instance<T>(this Key key)

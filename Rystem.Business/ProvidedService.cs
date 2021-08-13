@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Rystem.Business
 {
-    internal record ProvidedService(ServiceProviderType Type, dynamic Configurations, string ServiceKey);
+    internal record ProvidedService(ServiceProviderType Type, dynamic Configurations, string ServiceKey, dynamic Options);
     public abstract class ServiceProvider<T>
         where T : ServiceProvider<T>
     {

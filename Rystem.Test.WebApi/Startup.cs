@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Rystem.Azure;
 using Rystem.Background;
+using Rystem.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +40,10 @@ namespace Rystem.Test.WebApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Rystem.Test.WebApi", Version = "v1" });
             });
+            services.AddCacheInMemory(x =>
+            {
+                x.AddCheck(new StartingStringCacheChecker(CachedHttpMethod.Get, "W"));
+            });
             //new DailyImport()
             //{
             //    Options = new Background.BackgroundWorkOptions()
@@ -48,12 +53,12 @@ namespace Rystem.Test.WebApi
             //        RunImmediately = false
             //    }
             //}.Run();
-            services.AddBackgroundWork<MonthlyReviewImport>(x =>
-            {
-                x.Cron = "* * * * *";
-                x.Key = "da";
-                x.RunImmediately = false;
-            });
+            //services.AddBackgroundWork<MonthlyReviewImport>(x =>
+            //{
+            //    x.Cron = "* * * * *";
+            //    x.Key = "da";
+            //    x.RunImmediately = false;
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,9 +72,8 @@ namespace Rystem.Test.WebApi
             }
 
             app.UseHttpsRedirection();
-
+            app.UseCacheInMemory();
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -15,13 +15,13 @@ namespace Rystem.UnitTest.Business.Cache
         public RystemCacheServiceProvider ConfigureCache()
         {
             return RystemCacheServiceProvider
-                .WithAzure(Installation.Default)
+                .WithAzure(new CacheConfiguration(TimeSpan.FromMinutes(5)), Installation.Default)
                 .WithTableStorage()
-                .AndWithAzure(Installation.Inst00)
+                .AndWithAzure(default, Installation.Inst00)
                 .WithBlobStorage()
-                .AndWithAzure(Installation.Inst01)
+                .AndWithAzure(new CacheConfiguration(TimeSpan.FromMinutes(5)), Installation.Inst01)
                 .WithRedisCache()
-                .AndMemory(new InMemoryCacheConfiguration(TimeSpan.FromSeconds(1)));
+                .AndMemory(new CacheConfiguration(TimeSpan.FromSeconds(1)));
         }
 
         public Task<Sample> FetchAsync()
@@ -40,10 +40,10 @@ namespace Rystem.UnitTest.Business.Cache
         public static async Task Run(Installation installation)
         {
             var key = CreateKey(1);
-            var value = await key.InstanceAsync(installation).NoContext();
+            var value = await key.InstanceAsync(default, installation).NoContext();
             Assert.NotNull(value);
             await Task.Delay(2000);
-            value = await key.InstanceAsync(installation).NoContext();
+            value = await key.InstanceAsync(default, installation).NoContext();
             Assert.NotNull(value);
             await key.RestoreAsync(value, installation: installation).NoContext();
             await key.RemoveAsync(installation).NoContext();

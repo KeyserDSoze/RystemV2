@@ -24,8 +24,8 @@ namespace Rystem.Business
         public async Task<T> InstanceAsync(string key)
         {
             string keyWithPrefix = GetKeyWithPrefix(key);
-            var instance = await Integration.ReadAsync(keyWithPrefix).NoContext();
-            if (!string.IsNullOrWhiteSpace(instance.Properties.CacheControl) && DateTime.UtcNow > new DateTime(long.Parse(instance.Properties.CacheControl)))
+            var instance = await Integration.ReadAsync(keyWithPrefix, true).NoContext();
+            if (!string.IsNullOrWhiteSpace(instance.Properties?.CacheControl) && DateTime.UtcNow > new DateTime(long.Parse(instance.Properties.CacheControl)))
                 await this.DeleteAsync(keyWithPrefix).NoContext();
             else
                 return (await instance.Content.ConvertToStringAsync().NoContext()).FromJson<T>();

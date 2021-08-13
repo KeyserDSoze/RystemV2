@@ -5,14 +5,14 @@ namespace Rystem.Business
 {
     public class AzureCacheServiceBuilder : ServiceBuilder<RystemCacheServiceProvider>
     {
-        public AzureCacheServiceBuilder(Installation installation, ServiceProvider<RystemCacheServiceProvider> rystemServiceProvider) : base(installation, rystemServiceProvider)
-        {
-        }
+        private readonly CacheConfiguration Configuration;
+        public AzureCacheServiceBuilder(Installation installation, CacheConfiguration configuration, ServiceProvider<RystemCacheServiceProvider> rystemServiceProvider) : base(installation, rystemServiceProvider) 
+            => Configuration = configuration;
         public RystemCacheServiceProvider WithRedisCache(RedisCacheConfiguration configuration = default, string serviceKey = default)
-            => (RystemCacheServiceProvider)WithIntegration(ServiceProviderType.AzureRedisCache, configuration, serviceKey);
+            => (RystemCacheServiceProvider)WithIntegration(ServiceProviderType.AzureRedisCache, configuration, serviceKey, Configuration);
         public RystemCacheServiceProvider WithTableStorage(TableStorageConfiguration configuration = default, string serviceKey = default)
-            => (RystemCacheServiceProvider)WithIntegration(ServiceProviderType.AzureTableStorage, configuration, serviceKey);
+            => (RystemCacheServiceProvider)WithIntegration(ServiceProviderType.AzureTableStorage, configuration, serviceKey, Configuration);
         public RystemCacheServiceProvider WithBlobStorage(BlobStorageConfiguration configuration = default, string serviceKey = default)
-            => (RystemCacheServiceProvider)WithIntegration(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey);
+            => (RystemCacheServiceProvider)WithIntegration(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey, Configuration);
     }
 }

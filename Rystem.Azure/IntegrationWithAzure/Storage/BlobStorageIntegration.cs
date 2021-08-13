@@ -117,8 +117,8 @@ namespace Rystem.Azure.Integration.Storage
             IDictionary<string, string> tags = default;
             if (fetchProperties)
             {
-                properties = (await blobClient.GetPropertiesAsync()).Value;
-                tags = (await blobClient.GetTagsAsync()).Value.Tags;
+                properties = (await blobClient.GetPropertiesAsync().NoContext()).Value;
+                tags = (await blobClient.GetTagsAsync().NoContext()).Value.Tags;
             }
             return new BlobWrapper
             {
@@ -218,7 +218,7 @@ namespace Rystem.Azure.Integration.Storage
         private readonly ConcurrentDictionary<string, BlobLeaseClient> TokenAcquireds = new();
         private static readonly MemoryStream EmptyStream = new(Array.Empty<byte>());
         private readonly Dictionary<string, BlobLockWrapper> BlobLockClients = new();
-        private protected async Task<BlobLockWrapper> GetBlobClientForLockAsync(string name)
+        private async Task<BlobLockWrapper> GetBlobClientForLockAsync(string name)
         {
             if (!BlobLockClients.ContainsKey(name))
             {

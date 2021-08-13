@@ -1,6 +1,4 @@
 ﻿using Rystem.IO;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,6 +8,8 @@ namespace Rystem
 {
     public static class StringExtensions
     {
+        public static string ToUpperCaseFirst(this string value)
+            => string.IsNullOrWhiteSpace(value) ? value : $"{value.FirstOrDefault().ToString().ToUpper()}{value[1..].ToLower()}";
         public static Stream ToStream(this byte[] bytes)
             => new MemoryStream(bytes)
             {
@@ -21,7 +21,7 @@ namespace Rystem
             using StreamReader streamReader = new(entity);
             return streamReader.ReadToEndAsync();
         }
-        public static string ConvertToString(this Stream entity) 
+        public static string ConvertToString(this Stream entity)
             => ConvertToStringAsync(entity).ToResult();
         public static async Task<Stream> ToStreamAsync(this string entity)
         {
@@ -32,7 +32,7 @@ namespace Rystem
             memoryStream.Position = 0;
             return memoryStream;
         }
-       
+
         public static string ConvertToString(this byte[] entity, EncodingType type = EncodingType.UTF8)
         {
             switch (type)

@@ -27,11 +27,11 @@ namespace Rystem.Test.WebApi.Controllers
         [HttpGet]
         public async Task<IEnumerable<WeatherForecast>> Get()
         {
-            bool isOk = await new TenantData { Name = $"99169c38-99a6-4511-9596-51869cca9f6e/202107(3).json" }.WriteAsync("x").NoContext();
-            bool isOk2 = await new TenantData2 { Name = $"99169c38-99a6-4511-9596-51869cca9f6e/202107(3).json" }.WriteAsync("x").NoContext();
-            var x = await new TenantData() { Name = $"99169c38-99a6-4511-9596-51869cca9f6e/202107(2).json" }.ReadAsync().NoContext();
-            var t = await x.ConvertToStringAsync().NoContext();
-            int q = t.Length;
+            //bool isOk = await new TenantData { Name = $"99169c38-99a6-4511-9596-51869cca9f6e/202107(3).json" }.WriteAsync("x").NoContext();
+            //bool isOk2 = await new TenantData2 { Name = $"99169c38-99a6-4511-9596-51869cca9f6e/202107(3).json" }.WriteAsync("x").NoContext();
+            //var x = await new TenantData() { Name = $"99169c38-99a6-4511-9596-51869cca9f6e/202107(2).json" }.ReadAsync().NoContext();
+            //var t = await x.ConvertToStringAsync().NoContext();
+            //int q = t.Length;
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
