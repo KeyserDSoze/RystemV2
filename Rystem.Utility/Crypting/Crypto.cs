@@ -9,15 +9,16 @@ using System.Threading.Tasks;
 
 namespace Rystem.Security.Cryptography
 {
+    public record AesCryptoOptions(string Password, string SaltKey, string VIKey);
     public static class Crypto
     {
         public static class Aes
         {
-            public static void Configure(string password, string saltKey, string vIKey)
+            public static void Configure(AesCryptoOptions options)
             {
-                Password = password;
-                SaltKeyAsBytes = Encoding.ASCII.GetBytes(saltKey);
-                VIKeyAsBytes = Encoding.ASCII.GetBytes(vIKey);
+                Password = options.Password;
+                SaltKeyAsBytes = Encoding.ASCII.GetBytes(options.SaltKey);
+                VIKeyAsBytes = Encoding.ASCII.GetBytes(options.VIKey);
                 IsConfigured = true;
             }
             internal static bool IsConfigured { get; set; }
