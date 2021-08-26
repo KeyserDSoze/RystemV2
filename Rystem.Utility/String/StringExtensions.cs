@@ -17,7 +17,8 @@ namespace Rystem
             };
         public static Task<string> ConvertToStringAsync(this Stream entity)
         {
-            entity.Position = 0;
+            if (entity.CanSeek)
+                entity.Position = 0;
             using StreamReader streamReader = new(entity);
             return streamReader.ReadToEndAsync();
         }
