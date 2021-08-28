@@ -8,14 +8,20 @@ namespace Rystem
 {
     public static class Try
     {
-        public static Catcher Execute(Func<Task> action) => new(action);
-        public static Catcher<T> Execute<T>(Func<Task<T>> action) => new(action);
+        public static Catcher Execute(Func<Task> action, int runninAttempts = 1) => new(action, runninAttempts);
+        public static Catcher<T> Execute<T>(Func<Task<T>> action, int runninAttempts = 1) => new(action, runninAttempts);
     }
     public class Catcher
     {
         private readonly Func<Task> Action;
         private readonly Dictionary<Type, Func<Exception, Task>> Catches = new();
-        internal Catcher(Func<Task> action) => Action = action;
+        private readonly int RunningAttempts;
+        internal Catcher(Func<Task> action, int runninAttempts)
+        {
+            Action = action;
+            RunningAttempts = runninAttempts;
+        }
+
         public Catcher Catch<TException>(Func<Exception, Task> action)
             where TException : Exception
         {
@@ -24,24 +30,35 @@ namespace Rystem
         }
         public async Task<CatchResponse> InvokeAsync()
         {
-            try
+            CatchResponse catchResponse = CatchResponse.Empty;
+            for (int i = 0; i < RunningAttempts; i++)
             {
-                await Action.Invoke().NoContext();
-                return CatchResponse.Empty;
+                try
+                {
+                    await Action.Invoke().NoContext();
+                    return CatchResponse.Empty;
+                }
+                catch (Exception ex)
+                {
+                    Type type = ex.GetType();
+                    if (Catches.ContainsKey(type))
+                        await Catches[type].Invoke(ex);
+                    catchResponse = new CatchResponse(ex);
+                }
             }
-            catch (Exception ex)
-            {
-                Type type = ex.GetType();
-                if (Catches.ContainsKey(type))
-                    await Catches[type].Invoke(ex);
-                return new CatchResponse(ex);
-            }
+            return catchResponse;
         }
     }
     public class Catcher<T>
     {
         private readonly Func<Task<T>> Action;
-        internal Catcher(Func<Task<T>> action) => Action = action;
+        private readonly int RunningAttempts;
+        internal Catcher(Func<Task<T>> action, int runningAttempts)
+        {
+            Action = action;
+            RunningAttempts = runningAttempts;
+        }
+
         private readonly Dictionary<Type, Func<Exception, Task>> Catches = new();
         public Catcher<T> Catch<TException>(Func<Exception, Task> action)
             where TException : Exception
@@ -51,17 +68,22 @@ namespace Rystem
         }
         public async Task<CatchResponse<T>> InvokeAsync()
         {
-            try
+            CatchResponse<T> catchResponse = CatchResponse<T>.Empty;
+            for (int i = 0; i < RunningAttempts; i++)
             {
-                return new CatchResponse<T>(await Action.Invoke().NoContext());
+                try
+                {
+                    return new CatchResponse<T>(await Action.Invoke().NoContext());
+                }
+                catch (Exception ex)
+                {
+                    Type type = ex.GetType();
+                    if (Catches.ContainsKey(type))
+                        await Catches[type].Invoke(ex);
+                    catchResponse = new CatchResponse<T>(ex);
+                }
             }
-            catch (Exception ex)
-            {
-                Type type = ex.GetType();
-                if (Catches.ContainsKey(type))
-                    await Catches[type].Invoke(ex);
-                return new CatchResponse<T>(ex);
-            }
+            return catchResponse;
         }
     }
     public class CatchResponse
@@ -79,5 +101,6 @@ namespace Rystem
         public CatchResponse(Exception exception) : base(exception) { }
         public CatchResponse(T result) : base(default)
             => this.Result = result;
+        public new static CatchResponse<T> Empty { get; } = new CatchResponse<T>(default(T));
     }
 }

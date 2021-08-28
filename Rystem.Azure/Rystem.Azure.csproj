@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <Version>1.3.15</Version>
+    <Version>1.3.16</Version>
     <Authors>Alessandro Rapiti</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>2021</Copyright>
@@ -20,10 +20,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.4.0" />
-    <PackageReference Include="Azure.Messaging.EventGrid" Version="4.4.0" />
-    <PackageReference Include="Azure.Messaging.EventHubs" Version="5.5.0" />
-    <PackageReference Include="Azure.Messaging.EventHubs.Processor" Version="5.5.0" />
+    <PackageReference Include="Azure.Identity" Version="1.4.1" />
+    <PackageReference Include="Azure.Messaging.EventGrid" Version="4.6.0" />
+    <PackageReference Include="Azure.Messaging.EventHubs" Version="5.6.0" />
+    <PackageReference Include="Azure.Messaging.EventHubs.Processor" Version="5.6.0" />
     <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.2.1" />
     <PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.2.0" />
     <PackageReference Include="Azure.Security.KeyVault.Keys" Version="4.2.0" />

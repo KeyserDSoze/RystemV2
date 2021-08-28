@@ -56,7 +56,7 @@ namespace Rystem.Background
                             await entity.ActionToDoAsync().NoContext();
                     },
                     key,
-                    () => (int)expression.GetNextOccurrence(DateTime.UtcNow, true)?.Subtract(DateTime.UtcNow).TotalMilliseconds,
+                    () => expression.GetNextOccurrence(DateTime.UtcNow, true)?.Subtract(DateTime.UtcNow).TotalMilliseconds ?? 120,
                     options.RunImmediately
                 );
             }
