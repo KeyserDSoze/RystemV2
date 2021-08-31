@@ -13,7 +13,7 @@ namespace Rystem.UnitTest
     {
         static Crypting()
         {
-            Crypto.Aes.Configure("4a4a4a4a", "4a4a4a4a", "4a4a4a4a4a4a4a4a");
+            Crypto.Aes.Configure(new AesCryptoOptions("4a4a4a4a", "4a4a4a4a", "4a4a4a4a4a4a4a4a"));
         }
         [Fact]
         public void Aes()
