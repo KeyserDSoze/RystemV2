@@ -67,12 +67,12 @@ namespace Rystem.Cloud
                 }
             }
         }
-        public Dictionary<string, List<Consumption>> GetConsumptions(Dictionary<string, List<Consumption>> consumptions = default)
+        public Dictionary<ConsumptionKey, List<Consumption>> GetConsumptions(bool withBillAccountAndOfferId = false, Dictionary<ConsumptionKey, List<Consumption>> consumptions = default)
         {
             if (consumptions == default)
                 consumptions = new();
             foreach (var subscription in Subscriptions)
-                _ = subscription.GetConsumptions(consumptions);
+                _ = subscription.GetConsumptions(withBillAccountAndOfferId, consumptions);
             return consumptions;
         }
     }
