@@ -1,6 +1,7 @@
 ﻿using Cronos;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rystem.Background
@@ -18,7 +19,7 @@ namespace Rystem.Background
                 RunImmediately = false
             };
             options.Invoke(bOptions);
-            Start<TEntity>(default, bOptions);
+            ThreadPool.QueueUserWorkItem(x => Start<TEntity>(default, bOptions));
             return services;
         }
         private static string GetKey<TEntity>(string key)
@@ -37,14 +38,17 @@ namespace Rystem.Background
                         {
                             TEntity entityFromServices = default;
                             int attempt = 0;
-                            while (entityFromServices == null || attempt > 30)
+                            while (entityFromServices == default && attempt < 30)
                             {
                                 try
                                 {
                                     entityFromServices = RystemManager.GetService<TEntity>();
-                                    break;
+                                    if (entityFromServices != default)
+                                        break;
+                                    else
+                                        attempt++;
                                 }
-                                catch
+                                catch (Exception ex)
                                 {
                                     attempt++;
                                 }

@@ -6,7 +6,16 @@ namespace Rystem
 {
     public class RystemManager
     {
-        public static T GetService<T>() => (T)(Services ??= ServiceCollection?.BuildServiceProvider()).GetService(typeof(T));
+        public static T GetService<T>()
+        {
+            if (Count != ServiceCollection.Count)
+            {
+                Services = ServiceCollection.BuildServiceProvider();
+                Count = ServiceCollection.Count;
+            }
+            return (T)Services.GetService(typeof(T));
+        }
+        private static int Count = 0;
         internal static IServiceProvider Services { get; set; }
         public static IServiceCollection ServiceCollection { get; set; }
     }

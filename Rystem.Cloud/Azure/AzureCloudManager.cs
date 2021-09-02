@@ -110,6 +110,20 @@ namespace Rystem.Cloud.Azure
         {
             try
             {
+                var tags = await new Uri($"https://management.azure.com{subscription.Id}/tagNames?api-version=2021-04-01")
+                        .CreateHttpRequest()
+                       .SetTimeout(180_000)
+                       .AddToHeaders(await GetAuthHeaders().NoContext())
+                       .Build()
+                       .InvokeAsync<AzureTagObject>().NoContext();
+                if (tags != default && tags.Value.Length > 0)
+                {
+                    foreach (var tag in tags.Value)
+                    {
+                        if (!subscription.Tags.ContainsKey(tag.TagName))
+                            subscription.Tags.Add(tag.TagName, tag.Values.FirstOrDefault()?.TagValue ?? string.Empty);
+                    }
+                }
                 string value = await new Uri($"https://management.azure.com{subscription.Id}/providers/Microsoft.CostManagement/exports?api-version=2020-06-01")
                        .CreateHttpRequest()
                        .SetTimeout(180_000)
