@@ -19,7 +19,7 @@ namespace Rystem.Background
                 RunImmediately = false
             };
             options.Invoke(bOptions);
-            ThreadPool.QueueUserWorkItem(x => Start<TEntity>(default, bOptions));
+            services.AddRystemFullyAddedCallback(() => ThreadPool.QueueUserWorkItem(x => Start<TEntity>(default, bOptions)));
             return services;
         }
         private static string GetKey<TEntity>(string key)

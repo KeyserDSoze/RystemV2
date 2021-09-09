@@ -21,10 +21,17 @@ namespace Rystem
     }
     public static class RystemManagerExtesions
     {
+        private static event Action AfterRystemIsFullyAdded;
         public static IHost WithRystem(this IHost host)
         {
             RystemManager.Services = host.Services;
+            AfterRystemIsFullyAdded.Invoke();
             return host;
+        }
+        public static IServiceCollection AddRystemFullyAddedCallback(this IServiceCollection services, Action action)
+        {
+            AfterRystemIsFullyAdded += action;
+            return services;
         }
         public static IServiceCollection WithRystem(this IServiceCollection services)
         {
