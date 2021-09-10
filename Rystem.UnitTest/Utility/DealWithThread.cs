@@ -60,6 +60,10 @@ namespace Rystem.UnitTest
                 await Task.Delay(0).NoContext();
                 MyDiTest.Counter += 2;
             }
+            public Task OnException(Exception exception)
+            {
+                return Task.CompletedTask;
+            }
         }
         private int Counter;
         private async Task CountAsync(int v)

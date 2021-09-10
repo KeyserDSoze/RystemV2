@@ -34,30 +34,33 @@ namespace Rystem.Background
                 var expression = CronExpression.Parse(options.Cron, options.Cron.Split(' ').Length > 5 ? CronFormat.IncludeSeconds : CronFormat.Standard);
                 BackgroundWork.Run(async () =>
                     {
-                        if (entity == default)
+                        int attempt = 0;
+                        while (entity == default && attempt < 30)
                         {
-                            TEntity entityFromServices = default;
-                            int attempt = 0;
-                            while (entityFromServices == default && attempt < 30)
+                            try
                             {
-                                try
-                                {
-                                    entityFromServices = RystemManager.GetService<TEntity>();
-                                    if (entityFromServices != default)
-                                        break;
-                                    else
-                                        attempt++;
-                                }
-                                catch (Exception ex)
-                                {
+                                entity = RystemManager.GetService<TEntity>();
+                                if (entity != default)
+                                    break;
+                                else
                                     attempt++;
-                                }
-                                await Task.Delay(300).NoContext();
                             }
-                            await entityFromServices.ActionToDoAsync().NoContext();
+                            catch (Exception exception)
+                            {
+                                attempt++;
+                                if (attempt >= 30)
+                                    throw new NullReferenceException($"{typeof(TEntity).FullName} can't be retrieved from Service Collection. Please check your startup. Error: {exception.Message}");
+                            }
+                            await Task.Delay(300).NoContext();
                         }
-                        else
+                        try
+                        {
                             await entity.ActionToDoAsync().NoContext();
+                        }
+                        catch (Exception exception)
+                        {
+                            await entity.OnException(exception).NoContext();
+                        }
                     },
                     key,
                     () => expression.GetNextOccurrence(DateTime.UtcNow, true)?.Subtract(DateTime.UtcNow).TotalMilliseconds ?? 120,

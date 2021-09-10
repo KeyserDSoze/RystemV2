@@ -21,5 +21,9 @@ namespace Rystem.Test.WebApi
             await Task.Delay(0);
             Console.WriteLine("I'm doing that");
         }
+        public Task OnException(Exception exception)
+        {
+            return Task.CompletedTask;
+        }
     }
 }
