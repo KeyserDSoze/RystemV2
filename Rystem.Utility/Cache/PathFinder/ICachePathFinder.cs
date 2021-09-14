@@ -1,6 +1,6 @@
-﻿namespace Rystem.Memory
+﻿namespace Rystem.Cache
 {
-    public interface ICacheCheker
+    public interface ICachePathFinder
     {
         CachedHttpMethod Method { get; }
         bool IsMatching(string uri);

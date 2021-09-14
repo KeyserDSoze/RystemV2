@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Rystem.Memory
+namespace Rystem.Cache
 {
     [Flags]
     public enum CachedHttpMethod

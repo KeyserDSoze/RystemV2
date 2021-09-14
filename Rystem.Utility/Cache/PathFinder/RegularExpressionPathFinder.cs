@@ -1,9 +1,9 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Rystem.Memory
+namespace Rystem.Cache
 {
   
-    public record RegularExpressionCacheChecker(CachedHttpMethod Method, Regex Regex) : ICacheCheker
+    public record RegularExpressionPathFinder(CachedHttpMethod Method, Regex Regex) : ICachePathFinder
     {
         public bool IsMatching(string uri)
             => Regex.IsMatch(uri.ToLower());

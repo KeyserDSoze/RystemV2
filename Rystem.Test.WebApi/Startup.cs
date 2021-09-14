@@ -9,7 +9,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Rystem.Azure;
 using Rystem.Background;
-using Rystem.Memory;
+using Rystem.Business;
+using Rystem.Business.Cache;
+using Rystem.Cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,10 +42,14 @@ namespace Rystem.Test.WebApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Rystem.Test.WebApi", Version = "v1" });
             });
-            services.AddCacheInMemory(x =>
+            services.AddCache(x =>
             {
-                x.AddCheck(new StartingStringCacheChecker(CachedHttpMethod.Get, "W"));
-            });
+                x.AddPath(new StartingStringPathFinder(CachedHttpMethod.Get, "W"));
+            })
+                .AddAzureCache(() => RystemCacheServiceProvider
+                    .WithAzure()
+                    .WithBlobStorage(new Azure.Integration.Storage.BlobStorageConfiguration("MyOwnCache"))
+                    );
             //new DailyImport()
             //{
             //    Options = new Background.BackgroundWorkOptions()
@@ -72,7 +78,7 @@ namespace Rystem.Test.WebApi
             }
 
             app.UseHttpsRedirection();
-            app.UseCacheInMemory();
+            app.UseCache();
             app.UseRouting();
             app.UseAuthorization();
 

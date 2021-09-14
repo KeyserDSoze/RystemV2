@@ -1,7 +1,7 @@
 ﻿
-namespace Rystem.Memory
+namespace Rystem.Cache
 {
-    public record StartingStringCacheChecker(CachedHttpMethod Method, string StartingWith) : ICacheCheker
+    public record StartingStringPathFinder(CachedHttpMethod Method, string StartingWith) : ICachePathFinder
     {
         public bool IsMatching(string uri)
             => uri.TrimStart('/').ToLower().StartsWith(StartingWith.ToLower());

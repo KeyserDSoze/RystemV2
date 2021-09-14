@@ -2,19 +2,20 @@
 using System;
 using Microsoft.AspNetCore.Builder;
 
-namespace Rystem.Memory
+namespace Rystem.Cache
 {
     public static class CacheExtensions
     {
-        public static IServiceCollection AddCacheInMemory(this IServiceCollection services, Action<CacheOptions> action)
+        public static CacheBuilder AddCache(this IServiceCollection services, Action<CacheOptions> action)
         {
             CacheOptions options = new();
             action.Invoke(options);
             services.AddSingleton(options);
             services.AddSingleton<CacheMiddleware>();
-            return services;
+            services.AddSingleton<ICacheService, MemoryCacheService>();
+            return new CacheBuilder(services);
         }
-        public static IApplicationBuilder UseCacheInMemory(this IApplicationBuilder applicationBuilder)
+        public static IApplicationBuilder UseCache(this IApplicationBuilder applicationBuilder)
         {
             applicationBuilder.UseMiddleware<CacheMiddleware>();
             return applicationBuilder;

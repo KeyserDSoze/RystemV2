@@ -5,25 +5,29 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.IO;
 
-namespace Rystem.Memory
+namespace Rystem.Cache
 {
     public class CacheMiddleware : IMiddleware
     {
         private static readonly Type HttpMethodType = typeof(CachedHttpMethod);
-        private readonly ConcurrentDictionary<string, HttpResponseCache> Responses = new();
         private readonly CacheOptions Options;
-        public CacheMiddleware(CacheOptions options)
-            => Options = options;
+        private readonly ICacheService CacheService;
+        public CacheMiddleware(CacheOptions options, ICacheService cacheService)
+        {
+            Options = options;
+            CacheService = cacheService;
+        }
+
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
             string uri = context.Request.Path.Value.ToLower();
             CachedHttpMethod method = (CachedHttpMethod)(Enum.Parse(HttpMethodType, context.Request.Method.ToUpperCaseFirst()));
             string key = $"{method}-{uri}";
-            bool inCache = false;
+            bool inCache = await CacheService.ExistsAsync(key).NoContext();
             Stream originalBody = context.Response.Body;
-            if (inCache = Responses.ContainsKey(key))
+            if (inCache)
             {
-                var response = Responses[key];
+                var response = await CacheService.InstanceAsync(key).NoContext();
                 context.Response.StatusCode = response.StatusCode;
                 context.Response.Headers.TryAdd("R-Status", "Cached");
                 foreach (var header in response.Headers)
@@ -37,17 +41,24 @@ namespace Rystem.Memory
                 context.Response.Body = new MemoryStream();
                 await next.Invoke(context);
             }
-            if (!inCache && Options.IsMatching(method, uri))
+            if (!inCache)
             {
-                context.Response.Body.Position = 0;
-                Dictionary<string, string> headers = new();
-                foreach (var header in context.Response.Headers)
-                    headers.Add(header.Key, header.Value);
-                Responses.TryAdd(key,
-                    new HttpResponseCache(context.Response.StatusCode,
-                    headers,
-                    (context.Response.Body as MemoryStream).ToArray()));
-                await originalBody.WriteAsync(Responses[key].Body).NoContext();
+                var matchingResult = Options.IsMatching(method, uri);
+                if (matchingResult.IsMatch)
+                {
+                    context.Response.Body.Position = 0;
+                    Dictionary<string, string> headers = new();
+                    foreach (var header in context.Response.Headers)
+                        headers.Add(header.Key, header.Value);
+                    await CacheService.UpdateAsync(key,
+                        new HttpResponseCache(context.Response.StatusCode,
+                        headers,
+                        (context.Response.Body as MemoryStream).ToArray()),
+                            matchingResult.ExpireAfter == default ?
+                            Options.DefaultExpireAfter : matchingResult.ExpireAfter
+                        ).NoContext();
+                    await originalBody.WriteAsync((await CacheService.InstanceAsync(key).NoContext()).Body).NoContext();
+                }
             }
         }
     }
