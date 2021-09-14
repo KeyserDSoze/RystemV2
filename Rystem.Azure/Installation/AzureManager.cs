@@ -5,6 +5,7 @@ using Rystem.Azure.Integration.Cache;
 using Rystem.Azure.Integration.Message;
 using Rystem.Azure.Integration.Secrets;
 using Rystem.Azure.Integration.Storage;
+using Rystem.Azure.Integration.Cosmos;
 using System.Collections.Generic;
 
 namespace Rystem.Azure
@@ -19,6 +20,7 @@ namespace Rystem.Azure
         public Dictionary<string, ServiceBusOptions> ServiceBuses { get; } = new();
         public Dictionary<string, KeyVaultOptions> KeyVaults { get; } = new();
         public Dictionary<string, StorageOptions> Storages { get; } = new();
+        public Dictionary<string, CosmosOptions> Cosmos { get; } = new();
     }
     public static class AzureManagerExtensions
     {

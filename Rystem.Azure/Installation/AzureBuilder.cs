@@ -4,6 +4,7 @@ using Rystem.Azure.Integration.Cache;
 using Rystem.Azure.Integration.Message;
 using Rystem.Azure.Integration.Secrets;
 using Rystem.Azure.Integration.Storage;
+using Rystem.Azure.Integration.Cosmos;
 using System;
 using System.Collections.Generic;
 
@@ -25,6 +26,8 @@ namespace Rystem.Azure
         /// <returns></returns>
         public AzureBuilder AddStorage(StorageOptions options, string serviceKey = default)
             => Add(AzureFactory.Manager.Storages, options, serviceKey);
+        public AzureBuilder AddCosmos(CosmosOptions options, string serviceKey = default)
+            => Add(AzureFactory.Manager.Cosmos, options, serviceKey);
         public AzureBuilder AddMessage(EventHubOptions options, string serviceKey = default)
             => Add(AzureFactory.Manager.EventHubs, options, serviceKey);
         public AzureBuilder AddMessage(ServiceBusOptions options, string serviceKey = default)

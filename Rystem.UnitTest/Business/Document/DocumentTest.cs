@@ -27,5 +27,10 @@ namespace Rystem.UnitTest.Business.Document
         {
             await Sample.Run(Installation.Inst00).NoContext();
         }
+        [Fact]
+        public async Task Cosmos()
+        {
+            await Sample.Run(Installation.Inst01).NoContext();
+        }
     }
 }

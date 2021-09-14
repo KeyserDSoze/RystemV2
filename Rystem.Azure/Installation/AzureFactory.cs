@@ -2,6 +2,7 @@
 using Rystem.Azure.Integration.Message;
 using Rystem.Azure.Integration.Secrets;
 using Rystem.Azure.Integration.Storage;
+using Rystem.Azure.Integration.Cosmos;
 using System;
 using System.Collections.Generic;
 
@@ -26,6 +27,8 @@ namespace Rystem.Azure
             => Get<BlobStorageIntegration>("BlobStorage", $"{key}-{blobStorageConfiguration.Name}", () => new(blobStorageConfiguration, Manager.Storages[key]));
         public TableStorageIntegration TableStorage(TableStorageConfiguration tableStorageConfiguration, string key = "")
             => Get<TableStorageIntegration>("TableStorage", $"{key}-{tableStorageConfiguration.Name}", () => new(tableStorageConfiguration, Manager.Storages[key]));
+        public CosmosNoSqlIntegration CosmosNoSql(CosmosConfiguration cosmosNoSqlConfiguration, string key = "")
+            => Get<CosmosNoSqlIntegration>("CosmosNoSql", $"{key}-{cosmosNoSqlConfiguration.Name}-{cosmosNoSqlConfiguration.ContainerProperties?.Id}", () => new(cosmosNoSqlConfiguration, Manager.Cosmos[key]));
         public Dictionary<string, StorageOptions> Storages { get; } = new();
         private readonly object TrafficLight = new();
         private T Get<T>(string baseKey, string key, Func<T> retrieveInstance)

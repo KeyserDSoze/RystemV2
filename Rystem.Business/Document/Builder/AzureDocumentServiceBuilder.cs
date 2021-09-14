@@ -1,4 +1,5 @@
 ﻿using Rystem.Azure.Integration.Storage;
+using Rystem.Azure.Integration.Cosmos;
 
 namespace Rystem.Business
 {
@@ -12,5 +13,7 @@ namespace Rystem.Business
             => (RystemDocumentServiceProvider)WithIntegration(ServiceProviderType.AzureTableStorage, configuration, serviceKey);
         public RystemDocumentServiceProvider WithBlobStorage(BlobStorageConfiguration configuration = default, string serviceKey = default)
             => (RystemDocumentServiceProvider)WithIntegration(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey);
+        public RystemDocumentServiceProvider WithCosmosNoSql(CosmosConfiguration configuration = default, string serviceKey = default)
+            => (RystemDocumentServiceProvider)WithIntegration(ServiceProviderType.AzureCosmosNoSql, configuration, serviceKey);
     }
 }

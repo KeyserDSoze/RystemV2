@@ -32,6 +32,9 @@ namespace Rystem.Business.Document
                             case ServiceProviderType.AzureBlockBlobStorage:
                                 Implementations.Add(installation, new BlobStorageImplementation<TEntity>(Services.AzureFactory.BlobStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
                                 break;
+                            case ServiceProviderType.AzureCosmosNoSql:
+                                Implementations.Add(installation, new CosmosNoSqlImplementation<TEntity>(Services.AzureFactory.CosmosNoSql(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
                         }

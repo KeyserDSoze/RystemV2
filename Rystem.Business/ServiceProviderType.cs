@@ -14,6 +14,7 @@ namespace Rystem.Business
         AzureQueueStorage,
         AzureEventHub,
         AzureServiceBus,
-        AzureRedisCache
+        AzureRedisCache,
+        AzureCosmosNoSql
     }
 }

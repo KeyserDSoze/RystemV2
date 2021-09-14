@@ -16,7 +16,6 @@ namespace Rystem.Business.Document.Implementantion
     internal class TableStorageImplementation<TEntity> : IDocumentImplementation<TEntity>
         where TEntity : IDocument, new()
     {
-        private readonly Dictionary<string, PropertyInfo> BaseProperties = new();
         private readonly List<PropertyInfo> Properties = new();
         private readonly List<PropertyInfo> SpecialProperties = new();
 

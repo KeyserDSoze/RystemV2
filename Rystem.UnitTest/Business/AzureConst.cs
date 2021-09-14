@@ -19,12 +19,14 @@ namespace Rystem.UnitTest
             var eventHub = config.GetSection("EventHub");
             var serviceBus = config.GetSection("ServiceBus");
             var redisCache = config.GetSection("RedisCache");
+            var cosmos = config.GetSection("Cosmos");
             RystemInstaller
               .WithAzure()
               .AddStorage(new Azure.Integration.Storage.StorageOptions(storage["Name"], storage["Key"]))
               .AddMessage(new Azure.Integration.Message.EventHubOptions(eventHub["FullyQualifiedName"], eventHub["AccessKey"], new Azure.Integration.Storage.StorageOptions(storage["Name"], storage["Key"])))
               .AddMessage(new Azure.Integration.Message.ServiceBusOptions(serviceBus["FullyQualifiedName"], serviceBus["AccessKey"]))
               .AddCache(new Azure.Integration.Cache.RedisCacheOptions(redisCache["ConnectionString"], TimeSpan.FromHours(1), 4))
+              .AddCosmos(new Azure.Integration.Cosmos.CosmosOptions(cosmos["AccountName"], cosmos["AccountKey"]))
               .Build();
         }
     }

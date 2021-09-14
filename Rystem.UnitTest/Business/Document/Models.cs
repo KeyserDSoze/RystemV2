@@ -28,7 +28,9 @@ namespace Rystem.UnitTest.Business.Document
                 .WithBlobStorage(new Azure.Integration.Storage.BlobStorageConfiguration
                 {
                     Name = "coldwea"
-                });
+                })
+                .AndWithAzure(Installation.Inst01)
+                .WithCosmosNoSql(new Azure.Integration.Cosmos.CosmosConfiguration(DatabaseName: "Colon"));
         }
         public static async Task Run(Installation installation)
         {
