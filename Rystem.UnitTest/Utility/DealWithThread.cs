@@ -43,7 +43,7 @@ namespace Rystem.UnitTest
                 .WithRystem();
             await Task.Delay(2000);
             BackgroundWork.Stop();
-            var myDi = RystemManager.GetService<MyDiTest>();
+            var myDi = ServiceLocator.GetService<MyDiTest>();
             Assert.Equal(6, myDi.Counter);
         }
         private class MyDiTest

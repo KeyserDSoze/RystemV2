@@ -3,17 +3,29 @@ using Rystem.Azure.Integration.Cosmos;
 
 namespace Rystem.Business
 {
-    public class AzureDocumentServiceBuilder : ServiceBuilder<RystemDocumentServiceProvider>
+    public class AzureDocumentServiceBuilder<T> : ServiceBuilder
+        where T : new()
     {
-        public AzureDocumentServiceBuilder(Installation installation, ServiceProvider<RystemDocumentServiceProvider> rystemServiceProvider) : base(installation, rystemServiceProvider)
+        public AzureDocumentServiceBuilder(Installation installation, ServiceProvider rystemServiceProvider) : base(installation, rystemServiceProvider)
         {
         }
 
-        public RystemDocumentServiceProvider WithTableStorage(TableStorageConfiguration configuration = default, string serviceKey = default)
-            => (RystemDocumentServiceProvider)WithIntegration(ServiceProviderType.AzureTableStorage, configuration, serviceKey);
-        public RystemDocumentServiceProvider WithBlobStorage(BlobStorageConfiguration configuration = default, string serviceKey = default)
-            => (RystemDocumentServiceProvider)WithIntegration(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey);
-        public RystemDocumentServiceProvider WithCosmosNoSql(CosmosConfiguration configuration = default, string serviceKey = default)
-            => (RystemDocumentServiceProvider)WithIntegration(ServiceProviderType.AzureCosmosNoSql, configuration, serviceKey);
+        public RystemDocumentServicePrimaryKey<T> WithTableStorage(TableStorageConfiguration configuration = default, string serviceKey = default)
+        {
+            var options = new RystemDocumentServiceProviderOptions();
+            return new RystemDocumentServicePrimaryKey<T>(WithIntegration(ServiceProviderType.AzureTableStorage, configuration, serviceKey, options), options);
+        }
+
+        public RystemDocumentServicePrimaryKey<T> WithBlobStorage(BlobStorageConfiguration configuration = default, string serviceKey = default)
+        {
+            var options = new RystemDocumentServiceProviderOptions();
+            return new RystemDocumentServicePrimaryKey<T>(WithIntegration(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey, options), options);
+        }
+
+        public RystemDocumentServicePrimaryKey<T> WithCosmosNoSql(CosmosConfiguration configuration = default, string serviceKey = default)
+        {
+            var options = new RystemDocumentServiceProviderOptions();
+            return new RystemDocumentServicePrimaryKey<T>(WithIntegration(ServiceProviderType.AzureCosmosNoSql, configuration, serviceKey, options), options);
+        }
     }
 }

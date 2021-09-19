@@ -34,29 +34,29 @@ namespace Rystem.UnitTest.Business.Document
         }
         public static async Task Run(Installation installation)
         {
-            var elements = (await new Sample().ToListAsync(installation: installation).NoContext()).ToList();
+            var elements = (await new Sample().ListAsync(installation: installation).NoContext()).ToList();
             await elements.DeleteBatchAsync(installation).NoContext();
             await CreateNewSample(1).UpdateAsync(installation).NoContext();
             await CreateNewSample(1).UpdateAsync(installation).NoContext();
-            elements = (await new Sample().ToListAsync(x => x.PrimaryKey == "1", installation).NoContext()).ToList();
+            elements = (await new Sample().ListAsync(x => x.PrimaryKey == "1", installation).NoContext()).ToList();
             Assert.Equal(2, elements.Count);
             foreach (var x in elements)
                 if (await x.ExistsAsync(installation).NoContext())
                     await x.DeleteAsync(installation).NoContext();
-            elements = (await new Sample().ToListAsync(x => x.PrimaryKey == 1.ToString(), installation).NoContext()).ToList();
+            elements = (await new Sample().ListAsync(x => x.PrimaryKey == 1.ToString(), installation).NoContext()).ToList();
             Assert.Empty(elements);
             List<Sample> samples = new();
             for (int i = 0; i < 10; i++)
                 samples.Add(CreateNewSample(i));
             await samples.UpdateBatchAsync(installation).NoContext();
-            elements = (await new Sample().ToListAsync(x => x.PrimaryKey == 1.ToString(), installation).NoContext()).ToList();
+            elements = (await new Sample().ListAsync(x => x.PrimaryKey == 1.ToString(), installation).NoContext()).ToList();
             Assert.Single(elements);
-            elements = (await new Sample().ToListAsync(installation: installation).NoContext()).ToList();
+            elements = (await new Sample().ListAsync(installation: installation).NoContext()).ToList();
             Assert.Equal(10, elements.Count);
             foreach (var x in elements)
                 if (await x.ExistsAsync(installation).NoContext())
                     await x.DeleteAsync(installation).NoContext();
-            elements = (await new Sample().ToListAsync(x => x.PrimaryKey == 1.ToString(), installation).NoContext()).ToList();
+            elements = (await new Sample().ListAsync(x => x.PrimaryKey == 1.ToString(), installation).NoContext()).ToList();
             Assert.Empty(elements);
         }
         private static Sample CreateNewSample(int x)

@@ -1,5 +1,4 @@
 ﻿using Rystem.Azure.Integration.Storage;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,29 +7,30 @@ using System.Threading.Tasks;
 namespace Rystem.Business.Data.Implementantion
 {
     internal class AppendBlobStorageImplementation<TEntity> : IDataImplementation<TEntity>
-        where TEntity : IData
     {
-        private readonly Type EntityType;
         private readonly BlobStorageIntegration Integration;
-        internal AppendBlobStorageImplementation(BlobStorageIntegration integration, Type entityType)
+        public bool IsMultipleLines { get; }
+        public RystemDataServiceProviderOptions Options { get; }
+        internal AppendBlobStorageImplementation(BlobStorageIntegration integration, RystemDataServiceProviderOptions options)
         {
             Integration = integration;
-            this.EntityType = entityType;
+            Options = options;
+            IsMultipleLines = true;
         }
-        public Task<bool> DeleteAsync(TEntity entity)
-            => Integration.DeleteAsync(entity.Name);
-        public Task<bool> ExistsAsync(TEntity entity)
-            => Integration.ExistsAsync(entity.Name);
-        public async Task<Stream> ReadAsync(TEntity entity)
+        public Task<bool> DeleteAsync(string name)
+            => Integration.DeleteAsync(name);
+        public Task<bool> ExistsAsync(string name)
+            => Integration.ExistsAsync(name);
+        public async Task<Stream> ReadAsync(string name)
         {
-            var value = await Integration.ReadAsync(entity.Name, false).NoContext();
+            var value = await Integration.ReadAsync(name, false).NoContext();
             return value.Content;
         }
-        public async Task<IEnumerable<(string Name, Stream Value)>> ListAsync(string filter, int takeCount)
+        public async Task<IEnumerable<(string Name, Stream Value)>> ListAsync(string filter, int? takeCount = null)
             => (await Integration.ListAsync(filter, takeCount).NoContext()).Select(x => (x.Name, x.Content));
-        public Task<bool> SetPropertiesAsync(TEntity entity, dynamic properties)
-            => Integration.SetBlobPropertiesAsync(entity.Name, properties);
-        public Task<bool> WriteAsync(TEntity entity, Stream stream, dynamic _)
-            => Integration.WriteAppendAsync(entity.Name, stream);
+        public Task<bool> SetPropertiesAsync(string name, dynamic properties)
+            => Integration.SetBlobPropertiesAsync(name, properties);
+        public Task<bool> WriteAsync(string name, Stream stream, dynamic _)
+            => Integration.WriteAppendAsync(name, stream);
     }
 }

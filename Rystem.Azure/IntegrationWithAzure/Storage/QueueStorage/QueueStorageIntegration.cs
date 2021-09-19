@@ -3,22 +3,16 @@ using Azure.Storage.Queues;
 using Rystem.Concurrency;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Storage
 {
-    public sealed record QueueStorageConfiguration(string Name) : Configuration(Name)
-    {
-        public QueueStorageConfiguration() : this(string.Empty) { }
-    }
     public sealed class QueueStorageIntegration : BaseStorageClient
     {
         private QueueClient Context;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
         public QueueStorageConfiguration Configuration { get; }
-        public QueueStorageIntegration(QueueStorageConfiguration configuration, StorageOptions options) : base(options)
+        public QueueStorageIntegration(QueueStorageConfiguration configuration, StorageAccount options) : base(options)
             => Configuration = configuration;
         private async Task<QueueClient> GetContextAsync()
         {
@@ -28,15 +22,15 @@ namespace Rystem.Azure.Integration.Storage
                     if (Context == default)
                     {
                         QueueClient queueClient = default;
-                        if (!string.IsNullOrWhiteSpace(Options.AccountKey) || Options.UseKeyVault)
+                        if (!string.IsNullOrWhiteSpace(Account.AccountKey) || Account.UseKeyVault)
                         {
-                            var client = new QueueServiceClient(await (Options as IRystemOptions).GetConnectionStringAsync().NoContext());
+                            var client = new QueueServiceClient(await (Account as IRystemOptions).GetConnectionStringAsync().NoContext());
                             queueClient = client.GetQueueClient(Configuration.Name.ToLower());
                         }
                         else
                         {
                             queueClient = new QueueClient(new Uri(string.Format("https://{0}.queue.core.windows.net/{1}",
-                                                Options.AccountName,
+                                                Account.AccountName,
                                                 Configuration.Name.ToLower())),
                                                 new DefaultAzureCredential());
                         }

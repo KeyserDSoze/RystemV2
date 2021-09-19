@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace Rystem.Business.Document.Implementantion
 {
     internal class TableStorageImplementation<TEntity> : IDocumentImplementation<TEntity>
-        where TEntity : IDocument, new()
+        where TEntity : new()
     {
         private readonly List<PropertyInfo> Properties = new();
         private readonly List<PropertyInfo> SpecialProperties = new();
@@ -22,12 +22,14 @@ namespace Rystem.Business.Document.Implementantion
         private static readonly Type NoDocumentAttribute = typeof(NoDocumentAttribute);
         private readonly Type EntityType;
         private readonly TableStorageIntegration Integration;
+        public RystemDocumentServiceProviderOptions Options { get; }
 
-        internal TableStorageImplementation(TableStorageIntegration integration, Type entityType)
+        internal TableStorageImplementation(TableStorageIntegration integration, RystemDocumentServiceProviderOptions options)
         {
             Integration = integration;
-            this.EntityType = entityType;
-            foreach (PropertyInfo pi in this.EntityType.GetProperties())
+            Options = options;
+            EntityType = typeof(TEntity);
+            foreach (PropertyInfo pi in EntityType.GetProperties())
             {
                 if (pi.GetCustomAttribute(NoDocumentAttribute) != default || pi.Name == DocumentImplementationConst.PrimaryKey || pi.Name == DocumentImplementationConst.SecondaryKey || pi.Name == DocumentImplementationConst.Timestamp)
                     continue;
@@ -41,11 +43,11 @@ namespace Rystem.Business.Document.Implementantion
             }
         }
         private const string Asterisk = "*";
-        private static DynamicTableEntity GetBase(TEntity entity)
+        private DynamicTableEntity GetBase(TEntity entity)
             => new()
             {
-                PartitionKey = entity.PrimaryKey,
-                RowKey = entity.SecondaryKey,
+                PartitionKey = Options.PrimaryKey.GetValue(entity).ToString(),
+                RowKey = Options.SecondaryKey.GetValue(entity).ToString(),
                 ETag = Asterisk,
             };
         public Task<bool> DeleteAsync(TEntity entity)
@@ -101,12 +103,10 @@ namespace Rystem.Business.Document.Implementantion
 
         private TEntity ReadEntity(DynamicTableEntity dynamicTableEntity)
         {
-            TEntity entity = new()
-            {
-                PrimaryKey = dynamicTableEntity.PartitionKey,
-                SecondaryKey = dynamicTableEntity.RowKey,
-                Timestamp = dynamicTableEntity.Timestamp.DateTime.ToUniversalTime()
-            };
+            TEntity entity = new();
+            Options.PrimaryKey.SetValue(entity, dynamicTableEntity.PartitionKey);
+            Options.SecondaryKey.SetValue(entity, dynamicTableEntity.RowKey);
+            Options.Timestamp.SetValue(entity, dynamicTableEntity.Timestamp.DateTime.ToUniversalTime());
             foreach (PropertyInfo pi in this.Properties)
                 if (dynamicTableEntity.Properties.ContainsKey(pi.Name))
                     SetValue(dynamicTableEntity.Properties[pi.Name], pi);

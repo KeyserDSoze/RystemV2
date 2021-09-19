@@ -3,17 +3,16 @@ using Rystem.Reflection;
 
 namespace Rystem.Business
 {
-    public abstract class ServiceBuilder<T>
-        where T : ServiceProvider<T>
+    public abstract class ServiceBuilder
     {
-        private protected readonly ServiceProvider<T> RystemServiceProvider;
+        private protected readonly ServiceProvider RystemServiceProvider;
         private protected readonly Installation Installation;
-        public ServiceBuilder(Installation installation, ServiceProvider<T> rystemServiceProvider)
+        public ServiceBuilder(Installation installation, ServiceProvider rystemServiceProvider)
         {
             RystemServiceProvider = rystemServiceProvider;
             Installation = installation;
         }
-        private protected ServiceProvider<T> WithIntegration<TConfiguration>(ServiceProviderType serviceProviderType, TConfiguration configuration, string serviceKey, dynamic options = default)
+        private protected ServiceProvider WithIntegration<TConfiguration>(ServiceProviderType serviceProviderType, TConfiguration configuration, string serviceKey, dynamic options = default)
             where TConfiguration : Configuration, new()
         {
             if (configuration == default)

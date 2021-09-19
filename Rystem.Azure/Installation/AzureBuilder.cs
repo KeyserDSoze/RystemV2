@@ -1,57 +1,39 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Rystem.Azure.Integration.Cache;
 using Rystem.Azure.Integration.Message;
 using Rystem.Azure.Integration.Secrets;
 using Rystem.Azure.Integration.Storage;
 using Rystem.Azure.Integration.Cosmos;
-using System;
-using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Rystem.Azure
 {
     public class AzureBuilder
     {
+        internal static readonly AzureManager Manager = new();
         private readonly IServiceCollection Services;
-        internal readonly AzureFactory AzureFactory = new(new AzureManager());
         internal AzureBuilder(IServiceCollection services)
+            => Services = services;
+        public AzureBuilder AddStorage(StorageAccount account, string key = "")
+            => Add(account, AzureServiceProviderType.Storage, key);
+        public AzureBuilder AddCosmos(CosmosAccount account, string key = "")
+            => Add(account, AzureServiceProviderType.Cosmos, key);
+        public AzureBuilder AddEventHub(EventHubAccount account, string key = "")
+            => Add(account, AzureServiceProviderType.EventHub, key);
+        public AzureBuilder AddServiceBus(ServiceBusAccount account, string key = "")
+            => Add(account, AzureServiceProviderType.ServiceBus, key);
+        public AzureBuilder AddRedisCache(RedisCacheAccount account, string key = "")
+            => Add(account, AzureServiceProviderType.RedisCache, key);
+        public AzureBuilder AddKeyVault(KeyVaultAccount account, string key = "")
+            => Add(account, AzureServiceProviderType.KeyVault, key);
+        private AzureBuilder Add<T>(T account, AzureServiceProviderType service, string key)
+            where T : class
         {
-            Services = services.AddSingleton<RystemServices>();
-        }
-        /// <summary>
-        /// Add Azure storage service
-        /// </summary>
-        /// <param name="options">Use only account name if you want to connect through the managed identity.</param>
-        /// <param name="serviceKey">A specific key that you will use during your object configuration.</param>
-        /// <returns></returns>
-        public AzureBuilder AddStorage(StorageOptions options, string serviceKey = default)
-            => Add(AzureFactory.Manager.Storages, options, serviceKey);
-        public AzureBuilder AddCosmos(CosmosOptions options, string serviceKey = default)
-            => Add(AzureFactory.Manager.Cosmos, options, serviceKey);
-        public AzureBuilder AddMessage(EventHubOptions options, string serviceKey = default)
-            => Add(AzureFactory.Manager.EventHubs, options, serviceKey);
-        public AzureBuilder AddMessage(ServiceBusOptions options, string serviceKey = default)
-            => Add(AzureFactory.Manager.ServiceBuses, options, serviceKey);
-        public AzureBuilder AddCache(RedisCacheOptions options, string serviceKey = default)
-        {
-            Add(AzureFactory.Manager.RedisCaches, options, serviceKey);
+            Manager.AddAccount(account, service, key);
+            Services.TryAddSingleton(Manager);
             return this;
         }
-        public AzureBuilder AddKeyVault(KeyVaultOptions options, string serviceKey = default)
-        {
-            Add(AzureFactory.Manager.KeyVaults, options, serviceKey);
-            return this;
-        }
-        private AzureBuilder Add<T>(Dictionary<string, T> dictionary, T options, string serviceKey = default)
-        {
-            if (serviceKey == default)
-                serviceKey = string.Empty;
-            if (dictionary.ContainsKey(serviceKey))
-                throw new ArgumentException($"Key {serviceKey} already installed for {options.GetType().Name}.");
-            dictionary.Add(serviceKey, options);
-            return this;
-        }
-        public IServiceCollection Build()
+        public IServiceCollection EndConfiguration()
             => Services;
     }
 }

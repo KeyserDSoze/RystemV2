@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Rystem.Business
+﻿namespace Rystem.Business
 {
-    internal enum ServiceProviderType
+    public enum ServiceProviderType
     {
         InMemory,
         InMemory2,

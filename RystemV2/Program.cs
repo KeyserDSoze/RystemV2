@@ -1,7 +1,10 @@
-﻿using Rystem;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Rystem;
+using Rystem.Azure;
 using Rystem.Azure.Integration;
 using Rystem.Azure.Integration.Storage;
 using Rystem.Business;
+using Rystem.Business.Data;
 using Rystem.Business.Document;
 using Rystem.Text;
 using System;
@@ -23,12 +26,29 @@ namespace RystemV2
         static Program()
         {
             var settings = File.ReadAllText("appsettings.json").FromJson<AppSetting>();
-            RystemInstaller
+            var services = new ServiceCollection();
+            services
+                .AddAzureService()
+                .AddStorage(new StorageAccount(settings.Storage.Name, settings.Storage.Key))
+                .EndConfiguration();
+            services.UseCacheWithKey<KeyForge, Ola>()
+                .AndMemory()
+                .AndWithAzure()
+                .WithBlobStorage()
+                .Configure();
+            services.UseData<Ola>()
                 .WithAzure()
-                .AddStorage(new Rystem.Azure.Integration.Storage.StorageOptions(settings.Storage.Name, settings.Storage.Key))
-                .Build();
+                .WithBlockBlob()
+                .Configure();
         }
-       
+        public class Ola { }
+        public class KeyForge : ICacheKey<Ola>
+        {
+            public Task<Ola> FetchAsync()
+            {
+                throw new NotImplementedException();
+            }
+        }
         static async Task Main(string[] args)
         {
             //(new Sample() as IDocument).Build();
@@ -38,7 +58,8 @@ namespace RystemV2
             //await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.SendAsync().NoContext();
             //await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd3", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.SendAsync().NoContext();
             //var x = (await new Sample().ReadAsync().NoContext()).ToList();
-          
+            var data = ServiceLocator.GetService<Data<Ola>>();
+            await data.WriteAsync("", new byte[1]).NoContext();
         }
         public class Sample : IQueue
         {

@@ -4,44 +4,21 @@ using Azure.Messaging.EventHubs.Consumer;
 using Azure.Messaging.EventHubs.Processor;
 using Azure.Messaging.EventHubs.Producer;
 using Azure.Storage.Blobs;
-using Rystem.Azure.Integration.Secrets;
-using Rystem.Azure.Integration.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Message
 {
-    /// <summary>
-    /// Leave ConnectionString empty if you want to connect through the managed identity
-    /// </summary>
-    public sealed record EventHubOptions(string FullyQualifiedName, string AccessKey, StorageOptions StorageOptions = default, EventProcessorClientOptions ProcessorOptions = default) : IRystemOptions
-    {
-        public string ConnectionString => $"Endpoint=sb://{FullyQualifiedName}.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey={AccessKey}";
-        public bool UseKeyVault { get; }
-        public KeyVaultValue KeyVaultValue { get; }
-
-        public EventHubOptions(KeyVaultValue keyVaultValue, StorageOptions storageOptions = default, EventProcessorClientOptions processorOptions = default)
-            : this(string.Empty, string.Empty, storageOptions, processorOptions)
-        {
-            KeyVaultValue = keyVaultValue;
-            UseKeyVault = true;
-        }
-    }
-    public sealed record EventHubConfiguration(string Name, string ConsumerGroup = default) : Configuration(Name)
-    {
-        public EventHubConfiguration() : this(string.Empty) { }
-    }
     public sealed class EventHubIntegration
     {
         private readonly EventHubProducerClient Client;
         private readonly EventProcessorClient ClientReader;
         public EventHubConfiguration Configuration { get; }
         private readonly BlobContainerClient BlobContainerClient;
-        public EventHubIntegration(EventHubConfiguration configuration, EventHubOptions options)
+        public EventHubIntegration(EventHubConfiguration configuration, EventHubAccount options)
         {
             Configuration = configuration;
             if (string.IsNullOrWhiteSpace(options.AccessKey) && !options.UseKeyVault)

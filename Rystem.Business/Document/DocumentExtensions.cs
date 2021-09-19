@@ -1,22 +1,18 @@
-﻿using Rystem.Business;
+﻿using Rystem;
+using Rystem.Business;
 using Rystem.Business.Document;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace System
 {
     public static class DocumentExtensions
     {
-        private static dynamic GetDocumentManager<TEntity>(TEntity entity)
+        private static IDocumentManager<TEntity> Manager<TEntity>(this TEntity entity)
             where TEntity : IDocument, new()
-            => new DocumentManager<TEntity>(entity.BuildDocument());
-        private static DocumentManager<TEntity> Manager<TEntity>(this TEntity entity)
-            where TEntity : IDocument, new()
-            => entity.DefaultManager(nameof(DocumentExtensions), GetDocumentManager) as DocumentManager<TEntity>;
+            => ServiceLocator.GetService<IDocumentManager<TEntity>>();
 
         public static async Task<bool> UpdateAsync<TEntity>(this TEntity entity, Installation installation = Installation.Default)
             where TEntity : IDocument, new()
@@ -45,7 +41,7 @@ namespace System
            => await entity.Manager().ExistsAsync(entity, installation).NoContext();
         public static async Task<IEnumerable<TEntity>> GetAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, int? takeCount = default, Installation installation = Installation.Default)
             where TEntity : IDocument, new()
-           => await entity.Manager().GetAsync(entity, installation, expression, takeCount).NoContext();
+           => await entity.Manager().GetAsync(entity, expression, takeCount, installation).NoContext();
 
         public static bool Update<TEntity>(this TEntity entity, Installation installation = Installation.Default)
            where TEntity : IDocument, new()
@@ -68,21 +64,18 @@ namespace System
         public static string GetName<TEntity>(this TEntity entity, Installation installation = Installation.Default)
             where TEntity : IDocument, new()
         => entity.Manager().GetName(installation);
-    }
 
-    public static class NoSqlLinqExtensions
-    {
-        public static async Task<TEntity> FirstOrDefaultAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
+        public static Task<TEntity> FirstOrDefaultAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
             where TEntity : IDocument, new()
-           => (await entity.GetAsync(expression, 1, installation).NoContext()).FirstOrDefault();
-        public static async Task<IEnumerable<TEntity>> ToListAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
+           => entity.Manager().FirstOrDefaultAsync(entity, expression, installation);
+        public static Task<IEnumerable<TEntity>> ListAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
             where TEntity : IDocument, new()
-           => (await entity.GetAsync(expression, null, installation).NoContext());
-        public static async Task<IEnumerable<TEntity>> TakeAsync<TEntity>(this TEntity entity, int takeCount, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
+           => entity.Manager().ListAsync(entity, expression, installation);
+        public static Task<IEnumerable<TEntity>> TakeAsync<TEntity>(this TEntity entity, int takeCount, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
             where TEntity : IDocument, new()
-           => await entity.GetAsync(expression, takeCount, installation).NoContext();
-        public static async Task<int> CountAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
+           => entity.Manager().TakeAsync(entity, takeCount, expression, installation);
+        public static Task<int> CountAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
            where TEntity : IDocument, new()
-          => (await entity.GetAsync(expression, null, installation).NoContext()).Count();
+          => entity.Manager().CountAsync(entity, expression, installation);
     }
 }

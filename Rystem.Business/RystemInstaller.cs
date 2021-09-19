@@ -6,6 +6,6 @@ namespace Rystem.Business
     public sealed class RystemInstaller
     {
         public static AzureBuilder WithAzure()
-            => (null as IServiceCollection).WithAzure();
+            => (null as IServiceCollection).AddAzureService();
     }
 }

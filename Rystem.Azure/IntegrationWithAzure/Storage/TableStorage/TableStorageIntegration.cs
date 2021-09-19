@@ -1,28 +1,18 @@
-﻿using Azure;
-using Azure.Identity;
-using Microsoft.Azure.Cosmos.Table;
+﻿using Microsoft.Azure.Cosmos.Table;
 using Rystem.Concurrency;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Storage
 {
-    public sealed record TableStorageConfiguration(string Name) : Configuration(Name)
-    {
-        public TableStorageConfiguration() : this(string.Empty) { }
-    }
     public sealed class TableStorageIntegration : BaseStorageClient
     {
         private CloudTable Context;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
         public TableStorageConfiguration Configuration { get; }
-        public TableStorageIntegration(TableStorageConfiguration configuration, StorageOptions options) : base(options)
+        public TableStorageIntegration(TableStorageConfiguration configuration, StorageAccount options) : base(options)
             => Configuration = configuration;
         private async Task<CloudTable> GetContextAsync()
         {
@@ -31,7 +21,7 @@ namespace Rystem.Azure.Integration.Storage
                 {
                     if (Context == default)
                     {
-                        var storageAccount = CloudStorageAccount.Parse(await (Options as IRystemOptions).GetConnectionStringAsync().NoContext());
+                        var storageAccount = CloudStorageAccount.Parse(await (Account as IRystemOptions).GetConnectionStringAsync().NoContext());
                         var client = storageAccount.CreateCloudTableClient();
                         var tableClient = client.GetTableReference(Configuration.Name);
                         if (!await tableClient.ExistsAsync().NoContext())
@@ -106,7 +96,7 @@ namespace Rystem.Azure.Integration.Storage
             bool result = true;
             foreach (var groupedEntity in entities.GroupBy(x => x.PartitionKey))
             {
-                TableBatchOperation batch = new TableBatchOperation();
+                TableBatchOperation batch = new();
                 foreach (DynamicTableEntity entity in groupedEntity)
                 {
                     batch.Delete(entity);

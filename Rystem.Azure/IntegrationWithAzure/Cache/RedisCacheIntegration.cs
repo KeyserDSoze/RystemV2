@@ -1,5 +1,4 @@
-﻿using Rystem.Azure.Integration.Secrets;
-using Rystem.Concurrency;
+﻿using Rystem.Concurrency;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -8,22 +7,6 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Cache
 {
-    public sealed record RedisCacheOptions(string ConnectionString, TimeSpan ExpiringDefault, int NumberOfClients = 1) : IRystemOptions
-    {
-        public bool UseKeyVault { get; }
-        public KeyVaultValue KeyVaultValue { get; }
-
-        public RedisCacheOptions(KeyVaultValue keyVaultValue, TimeSpan expiringDefault, int numberOfClients = 1)
-            : this(string.Empty, expiringDefault, numberOfClients)
-        {
-            KeyVaultValue = keyVaultValue;
-            UseKeyVault = true;
-        }
-    }
-    public sealed record RedisCacheConfiguration(string Prefix, TimeSpan ExpiringDefault, int NumberOfClients = 1) : Configuration(Prefix)
-    {
-        public RedisCacheConfiguration() : this(string.Empty, default) { }
-    }
     public sealed class RedisCacheIntegration
     {
         private int RoundRobin = -1;
@@ -32,8 +15,8 @@ namespace Rystem.Azure.Integration.Cache
             get
             {
                 int value = 0;
-                if (Options.NumberOfClients > 1)
-                    value = this.RoundRobin = (this.RoundRobin + 1) % Options.NumberOfClients;
+                if (Account.NumberOfClients > 1)
+                    value = this.RoundRobin = (this.RoundRobin + 1) % Account.NumberOfClients;
                 return Connections[value].Value.GetDatabase();
             }
         }
@@ -45,15 +28,15 @@ namespace Rystem.Azure.Integration.Cache
         }
 
         private readonly List<Lazy<ConnectionMultiplexer>> Connections;
-        private readonly RedisCacheOptions Options;
-        public RedisCacheIntegration(RedisCacheOptions options)
+        private readonly RedisCacheAccount Account;
+        public RedisCacheIntegration(RedisCacheAccount account)
         {
-            Options = options;
+            Account = account;
             Connections = new List<Lazy<ConnectionMultiplexer>>();
-            for (int i = 0; i < options.NumberOfClients; i++)
+            for (int i = 0; i < account.NumberOfClients; i++)
                 Connections.Add(new Lazy<ConnectionMultiplexer>(() =>
                 {
-                    ConnectionMultiplexer connectionMultiplexer = ConnectionMultiplexer.Connect((Options as IRystemOptions).GetConnectionStringAsync().ToResult());
+                    ConnectionMultiplexer connectionMultiplexer = ConnectionMultiplexer.Connect((Account as IRystemOptions).GetConnectionStringAsync().ToResult());
                     return connectionMultiplexer;
                 }));
         }
@@ -66,7 +49,7 @@ namespace Rystem.Azure.Integration.Cache
         {
             bool code;
             if (expiringTime == default)
-                expiringTime = Options.ExpiringDefault;
+                expiringTime = Account.ExpiringDefault;
             if (expiringTime.Ticks > 0)
                 code = await Cache.StringSetAsync(key, value, expiringTime).NoContext();
             else

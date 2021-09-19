@@ -1,18 +1,13 @@
-﻿using Azure;
-using Azure.Identity;
+﻿using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Secrets;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Secrets
 {
-    public sealed record KeyVaultOptions(string Url, SecretClientOptions SecretOptions = default, CertificateClientOptions CertificateOptions = default, KeyClientOptions KeyOptions = default);
-
     /// <summary>
     /// Remember when using user assigned managed identity to set up the environment with the variable AZURE_CLIENT_ID and value of the client id (both, webapp and function). 
     /// </summary>
@@ -21,7 +16,7 @@ namespace Rystem.Azure.Integration.Secrets
         private readonly SecretClient SecretClient;
         private readonly CertificateClient CertificateClient;
         private readonly KeyClient KeyClient;
-        public KeyVaultIntegration(KeyVaultOptions options)
+        public KeyVaultIntegration(KeyVaultAccount options)
         {
             SecretClient = new SecretClient(vaultUri: new Uri(options.Url), credential: new DefaultAzureCredential(), options: options.SecretOptions);
             CertificateClient = new CertificateClient(vaultUri: new Uri(options.Url), credential: new DefaultAzureCredential(), options: options.CertificateOptions);

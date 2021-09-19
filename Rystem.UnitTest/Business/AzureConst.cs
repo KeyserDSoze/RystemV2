@@ -22,12 +22,12 @@ namespace Rystem.UnitTest
             var cosmos = config.GetSection("Cosmos");
             RystemInstaller
               .WithAzure()
-              .AddStorage(new Azure.Integration.Storage.StorageOptions(storage["Name"], storage["Key"]))
-              .AddMessage(new Azure.Integration.Message.EventHubOptions(eventHub["FullyQualifiedName"], eventHub["AccessKey"], new Azure.Integration.Storage.StorageOptions(storage["Name"], storage["Key"])))
-              .AddMessage(new Azure.Integration.Message.ServiceBusOptions(serviceBus["FullyQualifiedName"], serviceBus["AccessKey"]))
-              .AddCache(new Azure.Integration.Cache.RedisCacheOptions(redisCache["ConnectionString"], TimeSpan.FromHours(1), 4))
-              .AddCosmos(new Azure.Integration.Cosmos.CosmosOptions(cosmos["AccountName"], cosmos["AccountKey"]))
-              .Build();
+              .AddStorage(new Azure.Integration.Storage.StorageAccount(storage["Name"], storage["Key"]))
+              .AddEventHub(new Azure.Integration.Message.EventHubAccount(eventHub["FullyQualifiedName"], eventHub["AccessKey"], new Azure.Integration.Storage.StorageAccount(storage["Name"], storage["Key"])))
+              .AddServiceBus(new Azure.Integration.Message.ServiceBusAccount(serviceBus["FullyQualifiedName"], serviceBus["AccessKey"]))
+              .AddRedisCache(new Azure.Integration.Cache.RedisCacheAccount(redisCache["ConnectionString"], TimeSpan.FromHours(1), 4))
+              .AddCosmos(new Azure.Integration.Cosmos.CosmosAccount(cosmos["AccountName"], cosmos["AccountKey"]))
+              .EndConfiguration();
         }
     }
 }

@@ -39,7 +39,7 @@ namespace Rystem.Background
                         {
                             try
                             {
-                                entity = RystemManager.GetService<TEntity>();
+                                entity = ServiceLocator.GetService<TEntity>();
                                 if (entity != default)
                                     break;
                                 else

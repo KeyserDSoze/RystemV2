@@ -11,29 +11,30 @@ using System.Threading.Tasks;
 namespace Rystem.Business.Data.Implementantion
 {
     internal class BlockBlobStorageImplementation<TEntity> : IDataImplementation<TEntity>
-        where TEntity : IData
     {
-        private readonly Type EntityType;
         private readonly BlobStorageIntegration Integration;
-        internal BlockBlobStorageImplementation(BlobStorageIntegration integration, Type entityType)
+        public bool IsMultipleLines { get; }
+        public RystemDataServiceProviderOptions Options { get; }
+        internal BlockBlobStorageImplementation(BlobStorageIntegration integration, RystemDataServiceProviderOptions options)
         {
             Integration = integration;
-            this.EntityType = entityType;
+            Options = options;
+            IsMultipleLines = false;
         }
-        public Task<bool> DeleteAsync(TEntity entity)
-            => Integration.DeleteAsync(entity.Name);
-        public Task<bool> ExistsAsync(TEntity entity)
-            => Integration.ExistsAsync(entity.Name);
-        public async Task<Stream> ReadAsync(TEntity entity)
+        public Task<bool> DeleteAsync(string name)
+            => Integration.DeleteAsync(name);
+        public Task<bool> ExistsAsync(string name)
+            => Integration.ExistsAsync(name);
+        public async Task<Stream> ReadAsync(string name)
         {
-            var value = await Integration.ReadAsync(entity.Name, false).NoContext();
+            var value = await Integration.ReadAsync(name, false).NoContext();
             return value.Content;
         }
-        public async Task<IEnumerable<(string Name, Stream Value)>> ListAsync(string filter, int takeCount)
+        public async Task<IEnumerable<(string Name, Stream Value)>> ListAsync(string filter, int? takeCount = null)
             => (await Integration.ListAsync(filter, takeCount).NoContext()).Select(x => (x.Name, x.Content));
-        public Task<bool> WriteAsync(TEntity entity, Stream stream, dynamic options) 
-            => Integration.WriteBlockAsync(entity.Name, stream, options);
-        public Task<bool> SetPropertiesAsync(TEntity entity, dynamic properties)
-            => Integration.SetBlobPropertiesAsync(entity.Name, properties);
+        public Task<bool> WriteAsync(string name, Stream stream, dynamic options)
+            => Integration.WriteBlockAsync(name, stream, options);
+        public Task<bool> SetPropertiesAsync(string name, dynamic properties)
+            => Integration.SetBlobPropertiesAsync(name, properties);
     }
 }

@@ -10,13 +10,11 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business.Data
 {
-    internal sealed class DataManager<TEntity>
-        where TEntity : IData
+    internal sealed class DataManager<TEntity> : IDataManager<TEntity>
     {
         private readonly IDictionary<Installation, IDataImplementation<TEntity>> Implementations = new Dictionary<Installation, IDataImplementation<TEntity>>();
         private readonly IDictionary<Installation, ProvidedService> DataConfiguration;
         private readonly object TrafficLight = new();
-        private readonly RystemServices Services = new();
         private IDataImplementation<TEntity> Implementation(Installation installation)
         {
             if (!Implementations.ContainsKey(installation))
@@ -27,10 +25,10 @@ namespace Rystem.Business.Data
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new BlockBlobStorageImplementation<TEntity>(Services.AzureFactory.BlobStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new BlockBlobStorageImplementation<TEntity>(Manager.BlobStorage(configuration.Configurations, configuration.ServiceKey), configuration.Options));
                                 break;
                             case ServiceProviderType.AzureAppendBlobStorage:
-                                Implementations.Add(installation, new AppendBlobStorageImplementation<TEntity>(Services.AzureFactory.BlobStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new AppendBlobStorageImplementation<TEntity>(Manager.BlobStorage(configuration.Configurations, configuration.ServiceKey), configuration.Options));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
@@ -38,47 +36,53 @@ namespace Rystem.Business.Data
                     }
             return Implementations[installation];
         }
-        private readonly Type DefaultEntity;
-        public DataManager(RystemDataServiceProvider serviceProvider)
+        private readonly AzureManager Manager;
+        public DataManager(Options<DataManager<TEntity>> options, AzureManager manager)
         {
-            DataConfiguration = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
-            DefaultEntity = serviceProvider.InstanceType;
+            DataConfiguration = options.Services;
+            Manager = manager;
         }
-        public Task<bool> DeleteAsync(TEntity entity, Installation installation)
-          => Implementation(installation).DeleteAsync(entity);
-        public Task<bool> ExistsAsync(TEntity entity, Installation installation)
-            => Implementation(installation).ExistsAsync(entity);
-        public async Task<T> ReadAsync<T>(TEntity entity, Installation installation)
+        public Task<bool> DeleteAsync(string name, Installation installation = Installation.Default)
+          => Implementation(installation).DeleteAsync(name);
+        public Task<bool> ExistsAsync(string name, Installation installation = Installation.Default)
+            => Implementation(installation).ExistsAsync(name);
+        public async Task<TEntity> ReadAsync(string name, Installation installation = Installation.Default)
         {
-            var value = await ReadAsync(entity, installation);
-            return await value.FromJsonAsync<T>();
+            var value = await ReadStreamAsync(name, installation).NoContext();
+            return await value.FromJsonAsync<TEntity>().NoContext();
         }
-        public async Task<IEnumerable<T>> ReadAsync<T>(TEntity entity, bool breakLine = false, Installation installation = Installation.Default)
+        public async Task<List<TEntity>> ReadMultipleAsync(string name, Installation installation = Installation.Default)
         {
-            var value = await ReadAsync(entity, installation);
-            if (!breakLine)
-                return await value.FromJsonAsync<IEnumerable<T>>();
-            else
-                return (await value.ConvertToStringAsync()).Split('\n').Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.FromJson<T>());
+            var value = await ReadStreamAsync(name, installation).NoContext();
+            return await value.FromJsonAsync<List<TEntity>>().NoContext();
         }
-        public async Task<Stream> ReadAsync(TEntity entity, Installation installation)
+        public async Task<Stream> ReadStreamAsync(string name, Installation installation = Installation.Default)
         {
-            var value = await Implementation(installation).ReadAsync(entity).NoContext();
+            var value = await Implementation(installation).ReadAsync(name).NoContext();
             value.Position = 0;
             return value;
         }
-        public Task<IEnumerable<(string Name, Stream Value)>> ListAsync(TEntity entity, int takeCount, Installation installation)
-            => Implementation(installation).ListAsync(entity.Name, takeCount);
-        public Task<bool> WriteAsync(TEntity entity, Stream stream, dynamic options, Installation installation)
-            => Implementation(installation).WriteAsync(entity, stream, options);
-        public async Task<bool> WriteAsync(TEntity entity, string value, dynamic options, Installation installation) 
-            => await WriteAsync(entity, await value.ToStreamAsync().NoContext(), options, installation).ConfigureAwait(false);
+        public Task<IEnumerable<(string Name, Stream Value)>> ListStreamAsync(string startsWith, int? takeCount = null, Installation installation = Installation.Default)
+            => Implementation(installation).ListAsync(startsWith, takeCount);
 
-        public Task<bool> WriteAsync(TEntity entity, byte[] value, dynamic options, Installation installation)
-            => WriteAsync(entity, value.ToStream(), options, installation);
+        public async IAsyncEnumerable<(string Name, List<TEntity> Content)> ListAsync(string startsWith, int? takeCount = null, Installation installation = Installation.Default)
+        {
+            var implementation = Implementation(installation);
+            foreach (var (Name, Value) in await ListStreamAsync(startsWith, takeCount ?? int.MaxValue, installation).NoContext())
+                if (!implementation.IsMultipleLines)
+                    yield return (Name, new List<TEntity>() { await Value.FromJsonAsync<TEntity>().NoContext() });
+                else
+                    yield return (Name, (await Value.ConvertToStringAsync().NoContext()).Split('\n').Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.FromJson<TEntity>()).ToList());
+        }
+        public Task<bool> WriteAsync(string name, Stream stream, dynamic options, Installation installation = Installation.Default)
+            => Implementation(installation).WriteAsync(name, stream, options);
+        public async Task<bool> WriteAsync(string name, string value, dynamic options, Installation installation = Installation.Default)
+            => await WriteAsync(name, await value.ToStreamAsync().NoContext(), options, installation).NoContext();
+        public Task<bool> WriteAsync(string name, byte[] value, dynamic options, Installation installation = Installation.Default)
+            => WriteAsync(name, value.ToStream(), options, installation);
         private const string ApplicationJson = "application/json";
-        public async Task<bool> WriteAsync(TEntity entity, object value, bool breakLine, Installation installation)
-            => await WriteAsync(entity, await (breakLine ? $"{value.ToJson()}\n" : value.ToJson()).ToStreamAsync(),
+        public async Task<bool> WriteAsync(string name, TEntity value, Installation installation = Installation.Default)
+            => await WriteAsync(name, await (Implementation(installation).IsMultipleLines ? $"{value.ToJson()}\n" : value.ToJson()).ToStreamAsync(),
                 new BlobUploadOptions
                 {
                     HttpHeaders = new BlobHttpHeaders
@@ -86,7 +90,12 @@ namespace Rystem.Business.Data
                         ContentType = ApplicationJson
                     }
                 }, installation).NoContext();
-        public Task<bool> SetPropertiesAsync(TEntity entity, dynamic properties, Installation installation)
-            => Implementation(installation).SetPropertiesAsync(entity, properties);
+        public Task<bool> SetPropertiesAsync(string name, dynamic properties, Installation installation = Installation.Default)
+            => Implementation(installation).SetPropertiesAsync(name, properties);
+        public string GetName(TEntity entity, Installation installation = Installation.Default)
+        {
+            var implementation = Implementation(installation);
+            return implementation.Options.Name.GetValue(entity).ToString();
+        }
     }
 }

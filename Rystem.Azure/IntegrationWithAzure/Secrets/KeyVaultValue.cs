@@ -1,7 +1,4 @@
 ﻿namespace Rystem.Azure
 {
-    public sealed record KeyVaultValue(string Key, string ServiceKey = "")
-    {
-
-    }
+    public sealed record KeyVaultValue(string Key, string ServiceKey = "");
 }

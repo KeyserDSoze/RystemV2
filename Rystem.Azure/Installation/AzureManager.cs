@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Rystem.Azure.Integration.Cache;
+﻿using Rystem.Azure.Integration.Cache;
 using Rystem.Azure.Integration.Message;
 using Rystem.Azure.Integration.Secrets;
 using Rystem.Azure.Integration.Storage;
@@ -10,21 +7,26 @@ using System.Collections.Generic;
 
 namespace Rystem.Azure
 {
-    public sealed class AzureManager
+    public class AzureManager
     {
-        public AzureManager() { }
-        private AzureFactory factory;
-        public AzureFactory Factory => factory ??= new AzureFactory(this);
-        public Dictionary<string, RedisCacheOptions> RedisCaches { get; } = new();
-        public Dictionary<string, EventHubOptions> EventHubs { get; } = new();
-        public Dictionary<string, ServiceBusOptions> ServiceBuses { get; } = new();
-        public Dictionary<string, KeyVaultOptions> KeyVaults { get; } = new();
-        public Dictionary<string, StorageOptions> Storages { get; } = new();
-        public Dictionary<string, CosmosOptions> Cosmos { get; } = new();
-    }
-    public static class AzureManagerExtensions
-    {
-        public static AzureBuilder WithAzure(this IServiceCollection services)
-            => RystemServices.AzureBuilder = new(RystemManager.ServiceCollection = services ?? new ServiceCollection());
+        private readonly Dictionary<string, dynamic> Accounts = new();
+        internal void AddAccount<T>(T entity, AzureServiceProviderType service, string key) 
+            => Accounts.TryAdd($"{service}-{key}", entity);
+        public KeyVaultIntegration KeyVault(string key = "")
+         => new(Accounts[$"{AzureServiceProviderType.EventHub}-{key}"]);
+        public RedisCacheIntegration RedisCache(string key = "")
+           => new(Accounts[$"{AzureServiceProviderType.RedisCache}-{key}"]);
+        public BlobStorageIntegration BlobStorage(BlobStorageConfiguration configuration, string key = "")
+           => new(configuration, Accounts[$"{AzureServiceProviderType.Storage}-{key}"]);
+        public TableStorageIntegration TableStorage(TableStorageConfiguration configuration, string key = "")
+           => new(configuration, Accounts[$"{AzureServiceProviderType.Storage}-{key}"]);
+        public QueueStorageIntegration QueueStorage(QueueStorageConfiguration configuration, string key = "")
+           => new(configuration, Accounts[$"{AzureServiceProviderType.Storage}-{key}"]);
+        public EventHubIntegration EventHub(EventHubConfiguration configuration, string key = "")
+           => new(configuration, Accounts[$"{AzureServiceProviderType.EventHub}-{key}"]);
+        public ServiceBusIntegration ServiceBus(ServiceBusConfiguration configuration, string key = "")
+           => new(configuration, Accounts[$"{AzureServiceProviderType.ServiceBus}-{key}"]);
+        public CosmosNoSqlIntegration CosmosNoSql(CosmosConfiguration configuration, string key = "")
+           => new(configuration, Accounts[$"{AzureServiceProviderType.Cosmos}-{key}"]);
     }
 }

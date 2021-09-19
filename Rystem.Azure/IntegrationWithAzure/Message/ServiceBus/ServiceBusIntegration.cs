@@ -1,36 +1,12 @@
 ﻿using Azure.Identity;
 using Azure.Messaging.ServiceBus;
-using Rystem.Azure.Integration.Secrets;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Message
 {
-    //for instance something.servicebus.windows.net
-    /// <summary>
-    /// Leave ConnectionString empty if you want to connect through the managed identity
-    /// </summary>
-    public sealed record ServiceBusOptions(string FullyQualifiedName, string AccessKey, ServiceBusProcessorOptions Options = default) : IRystemOptions
-    {
-        public string ConnectionString => $"Endpoint=sb://{FullyQualifiedName}.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey={AccessKey}";
-        public bool UseKeyVault { get; }
-        public KeyVaultValue KeyVaultValue { get; }
-
-        public ServiceBusOptions(KeyVaultValue keyVaultValue, ServiceBusProcessorOptions options = default)
-            : this(string.Empty, string.Empty, options)
-        {
-            KeyVaultValue = keyVaultValue;
-            UseKeyVault = true;
-        }
-    }
-    public sealed record ServiceBusConfiguration(string Name) : Configuration(Name)
-    {
-        public ServiceBusConfiguration() : this(string.Empty) { }
-    }
 #warning AR - Missing dead lettering and defer
     /// <summary>
     /// https://github.com/Azure/azure-sdk-for-net/blob/Azure.Messaging.ServiceBus_7.1.2/sdk/servicebus/Azure.Messaging.ServiceBus/README.md
@@ -41,7 +17,7 @@ namespace Rystem.Azure.Integration.Message
         private readonly ServiceBusProcessor ClientReader;
         public ServiceBusConfiguration Configuration { get; }
 
-        public ServiceBusIntegration(ServiceBusConfiguration configuration, ServiceBusOptions options)
+        public ServiceBusIntegration(ServiceBusConfiguration configuration, ServiceBusAccount options)
         {
             Configuration = configuration;
             if (!string.IsNullOrWhiteSpace(options.AccessKey) || options.UseKeyVault)

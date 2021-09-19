@@ -1,5 +1,4 @@
-﻿using Rystem.Azure.Integration.Secrets;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Rystem.Azure
 {
@@ -13,7 +12,7 @@ namespace Rystem.Azure
             if (!UseKeyVault)
                 return ConnectionString;
             else
-                return (await RystemServices.AzureBuilder.AzureFactory.KeyVault(KeyVaultValue.ServiceKey).GetSecretAsync(KeyVaultValue.Key).NoContext()).Value;
+                return (await AzureBuilder.Manager.KeyVault(KeyVaultValue.ServiceKey).GetSecretAsync(KeyVaultValue.Key).NoContext()).Value;
         }
     }
 }

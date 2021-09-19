@@ -16,7 +16,6 @@ namespace Rystem.Business
         private readonly Dictionary<Installation, ProvidedService> CacheConfigurations;
         private bool MemoryIsActive { get; }
         private readonly object TrafficLight = new();
-        private readonly RystemServices Services = new();
         private ICacheImplementation<TCache> Implementation(Installation installation)
         {
             if (!Implementations.ContainsKey(installation))
@@ -27,7 +26,7 @@ namespace Rystem.Business
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new InBlobStorage<TCache>(Services.AzureFactory.BlobStorage(configuration.Configurations, configuration.ServiceKey), Name));
+                                Implementations.Add(installation, new InBlobStorage<TCache>(new BlobStorageIntegration(configuration.Configurations, ServiceLocator.GetService<StorageAccount>()), Name));
                                 break;
                             case ServiceProviderType.AzureTableStorage:
                                 Implementations.Add(installation, new InTableStorage<TCache>(Services.AzureFactory.TableStorage(configuration.Configurations, configuration.ServiceKey), Name));
@@ -49,11 +48,11 @@ namespace Rystem.Business
             return expiringTime;
         }
         private readonly string Name;
-        public CacheManager(RystemCacheServiceProvider serviceProvider, TCacheKey firstKey)
+        public CacheManager(bool memoryIsActive, Dictionary<Installation, ProvidedService> cacheConfigurations, string name)
         {
-            MemoryIsActive = serviceProvider.Services.ContainsKey(Installation.Memory);
-            CacheConfigurations = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
-            Name = firstKey.GetType().Name;
+            MemoryIsActive = memoryIsActive;
+            CacheConfigurations = cacheConfigurations;
+            Name = name;
         }
         private bool GetCloudIsActive(Installation installation)
             => CacheConfigurations.ContainsKey(installation) && CacheConfigurations[installation].Type != ServiceProviderType.InMemory;

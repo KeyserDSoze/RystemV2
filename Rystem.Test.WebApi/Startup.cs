@@ -36,7 +36,7 @@ namespace Rystem.Test.WebApi
             services.AddControllers();
             services
                 .WithAzure()
-                .AddStorage(new Azure.Integration.Storage.StorageOptions(storage["Name"], storage["Key"]))
+                .AddStorage(new Azure.Integration.Storage.StorageAccount(storage["Name"], storage["Key"]))
                 .Build();
             services.AddSwaggerGen(c =>
             {

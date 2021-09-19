@@ -9,25 +9,18 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Storage
 {
-    public sealed record BlobStorageConfiguration(string Name) : Configuration(Name)
-    {
-        public BlobStorageConfiguration() : this(string.Empty) { }
-    }
-    public sealed record BlobStorageProperties(BlobHttpHeaders Headers = default, Dictionary<string, string> Metadata = default, Dictionary<string, string> Tags = default, BlobRequestConditions HeadersConditions = default, BlobRequestConditions MetadataConditions = default, BlobRequestConditions TagConditions = default);
     public sealed class BlobStorageIntegration : BaseStorageClient
     {
         private BlobContainerClient Context;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
         private readonly string LockRaceId = Guid.NewGuid().ToString("N");
         public BlobStorageConfiguration Configuration { get; }
-        public BlobStorageIntegration(BlobStorageConfiguration configuration, StorageOptions options) : base(options)
+        public BlobStorageIntegration(BlobStorageConfiguration configuration, StorageAccount account) : base(account)
             => Configuration = configuration;
         private async Task<BlobContainerClient> GetContextAsync()
         {
@@ -37,15 +30,15 @@ namespace Rystem.Azure.Integration.Storage
                     if (Context == default)
                     {
                         BlobContainerClient blobClient = default;
-                        if (!string.IsNullOrWhiteSpace(Options.AccountKey) || Options.UseKeyVault)
+                        if (!string.IsNullOrWhiteSpace(Account.AccountKey) || Account.UseKeyVault)
                         {
-                            var client = new BlobServiceClient(await (Options as IRystemOptions).GetConnectionStringAsync().NoContext());
+                            var client = new BlobServiceClient(await (Account as IRystemOptions).GetConnectionStringAsync().NoContext());
                             blobClient = client.GetBlobContainerClient(Configuration.Name.ToLower());
                         }
                         else
                         {
                             blobClient = new BlobContainerClient(new Uri(string.Format("https://{0}.blob.core.windows.net/{1}",
-                                                Options.AccountName,
+                                                Account.AccountName,
                                                 Configuration.Name.ToLower())),
                                                 new DefaultAzureCredential());
                         }

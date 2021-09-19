@@ -2,14 +2,21 @@
 
 namespace Rystem.Business
 {
-    public class AzureDataServiceBuilder : ServiceBuilder<RystemDataServiceProvider>
+    public class AzureDataServiceBuilder<T> : ServiceBuilder
     {
-        public AzureDataServiceBuilder(Installation installation, ServiceProvider<RystemDataServiceProvider> rystemServiceProvider) : base(installation, rystemServiceProvider)
+        public AzureDataServiceBuilder(Installation installation, ServiceProvider rystemServiceProvider) : base(installation, rystemServiceProvider)
         {
         }
-        public RystemDataServiceProvider WithBlockBlob(BlobStorageConfiguration configuration = default, string serviceKey = default)
-            => (RystemDataServiceProvider)WithIntegration(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey);
-        public RystemDataServiceProvider WithAppendBlob(BlobStorageConfiguration configuration = default, string serviceKey = default)
-            => (RystemDataServiceProvider)WithIntegration(ServiceProviderType.AzureAppendBlobStorage, configuration, serviceKey);
+        public RystemDataServiceName<T> WithBlockBlob(BlobStorageConfiguration configuration = default, string serviceKey = default)
+        {
+            var option = new RystemDataServiceProviderOptions();
+            return new RystemDataServiceName<T>(WithIntegration(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey, option), option);
+        }
+
+        public RystemDataServiceName<T> WithAppendBlob(BlobStorageConfiguration configuration = default, string serviceKey = default)
+        {
+            var option = new RystemDataServiceProviderOptions();
+            return new RystemDataServiceName<T>(WithIntegration(ServiceProviderType.AzureAppendBlobStorage, configuration, serviceKey, option), option);
+        }
     }
 }

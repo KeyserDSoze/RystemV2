@@ -11,17 +11,19 @@ using System.Threading.Tasks;
 namespace Rystem.Business.Document.Implementantion
 {
     internal class CosmosNoSqlImplementation<TEntity> : IDocumentImplementation<TEntity>
-        where TEntity : IDocument, new()
+        where TEntity : new()
     {
         private readonly Type EntityType;
         private readonly CosmosNoSqlIntegration Integration;
         private readonly List<PropertyInfo> Properties = new();
         private readonly string PrimaryKeyName = "PrimaryKey";
         private static readonly Type NoDocumentAttribute = typeof(NoDocumentAttribute);
-        public CosmosNoSqlImplementation(CosmosNoSqlIntegration integration, Type entityType)
+        public RystemDocumentServiceProviderOptions Options { get; }
+        public CosmosNoSqlImplementation(CosmosNoSqlIntegration integration, RystemDocumentServiceProviderOptions options)
         {
             Integration = integration;
-            EntityType = entityType;
+            Options = options;
+            EntityType = typeof(TEntity);
             foreach (PropertyInfo pi in EntityType.GetProperties())
             {
                 if (pi.GetCustomAttribute(NoDocumentAttribute) != default || pi.Name == DocumentImplementationConst.PrimaryKey || pi.Name == DocumentImplementationConst.SecondaryKey || pi.Name == DocumentImplementationConst.Timestamp)
@@ -34,16 +36,17 @@ namespace Rystem.Business.Document.Implementantion
         }
 
         public Task<bool> DeleteAsync(TEntity entity)
-            => Integration.DeleteAsync<TEntity>(entity.SecondaryKey, new PartitionKey(entity.PrimaryKey), default);
+            => Integration.DeleteAsync<TEntity>(Options.SecondaryKey.GetValue(entity).ToString(), new PartitionKey(Options.PrimaryKey.GetValue(entity).ToString()), default);
 
         public Task<bool> ExistsAsync(TEntity entity)
-            => Integration.ExistAsync<TEntity>(entity.SecondaryKey, new PartitionKey(entity.PrimaryKey), default);
+            => Integration.ExistAsync<TEntity>(Options.SecondaryKey.GetValue(entity).ToString(), new PartitionKey(Options.PrimaryKey.GetValue(entity).ToString()), default);
 
         public async Task<IEnumerable<TEntity>> GetAsync(TEntity entity, Expression<Func<TEntity, bool>> expression = default, int? takeCount = default)
         {
             List<TEntity> entities = new();
+            var primaryKey = Options.PrimaryKey.GetValue(entity).ToString();
             await foreach (var value in Integration.ReadAsync(expression, takeCount,
-                entity.PrimaryKey != default ? new QueryRequestOptions { PartitionKey = new PartitionKey(entity.PrimaryKey) } : default,
+                primaryKey != default ? new QueryRequestOptions { PartitionKey = new PartitionKey(primaryKey) } : default,
                 default, default))
             {
                 entities.Add(value);
@@ -52,13 +55,13 @@ namespace Rystem.Business.Document.Implementantion
         }
         public Task<bool> UpdateAsync(TEntity entity)
         {
-            return Integration.UpdateAsync(new PartitionKey(entity.PrimaryKey), GetCosmosItem(entity), null);
+            return Integration.UpdateAsync(new PartitionKey(Options.PrimaryKey.GetValue(entity).ToString()), GetCosmosItem(entity), null);
         }
 
         public async Task<bool> UpdateBatchAsync(IEnumerable<TEntity> entities)
         {
             List<Task> tasks = new();
-            foreach (var entitiesByPartitionKey in entities.GroupBy(x => x.PrimaryKey))
+            foreach (var entitiesByPartitionKey in entities.GroupBy(x => Options.PrimaryKey.GetValue(x).ToString()))
             {
                 tasks.Add(Integration.UpdateBatchAsync(new PartitionKey(entitiesByPartitionKey.Key), entitiesByPartitionKey.Select(x => GetCosmosItem(x)), default));
             }
@@ -68,10 +71,10 @@ namespace Rystem.Business.Document.Implementantion
         private ExpandoObject GetCosmosItem(TEntity entity)
         {
             var flexible = new ExpandoObject();
-            flexible.TryAdd("id", entity.SecondaryKey);
-            flexible.TryAdd(PrimaryKeyName, entity.PrimaryKey);
-            flexible.TryAdd("SecondaryKey", entity.SecondaryKey);
-            flexible.TryAdd("Timestamp", entity.Timestamp);
+            flexible.TryAdd("id", Options.SecondaryKey.GetValue(entity).ToString());
+            flexible.TryAdd(PrimaryKeyName, Options.PrimaryKey.GetValue(entity).ToString());
+            flexible.TryAdd("SecondaryKey", Options.SecondaryKey.GetValue(entity).ToString());
+            flexible.TryAdd("Timestamp", Options.Timestamp.GetValue(entity));
             foreach (var property in Properties)
             {
                 flexible.TryAdd(property.Name, property.GetValue(entity));
@@ -82,9 +85,9 @@ namespace Rystem.Business.Document.Implementantion
         public async Task<bool> DeleteBatchAsync(IEnumerable<TEntity> entities)
         {
             List<Task> tasks = new();
-            foreach (var entitiesByPartitionKey in entities.GroupBy(x => x.PrimaryKey))
+            foreach (var entitiesByPartitionKey in entities.GroupBy(x => Options.PrimaryKey.GetValue(x).ToString()))
             {
-                tasks.Add(Integration.DeleteBatchAsync<TEntity>(entitiesByPartitionKey.Select(x => x.SecondaryKey), new PartitionKey(entitiesByPartitionKey.Key), default));
+                tasks.Add(Integration.DeleteBatchAsync<TEntity>(entitiesByPartitionKey.Select(x => Options.SecondaryKey.GetValue(x).ToString()), new PartitionKey(entitiesByPartitionKey.Key), default));
             }
             await Task.WhenAll(tasks).NoContext();
             return true;

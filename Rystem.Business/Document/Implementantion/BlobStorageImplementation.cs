@@ -16,18 +16,18 @@ using static Rystem.Azure.Integration.Storage.BlobStorageIntegration;
 namespace Rystem.Business.Document.Implementantion
 {
     internal class BlobStorageImplementation<TEntity> : IDocumentImplementation<TEntity>
-        where TEntity : IDocument, new()
+        where TEntity : new()
     {
         private static readonly Type NoDocumentProperty = typeof(NoDocumentAttribute);
-        private readonly Type EntityType;
         private readonly BlobStorageIntegration Integration;
-        internal BlobStorageImplementation(BlobStorageIntegration integration, Type entityType)
+        public RystemDocumentServiceProviderOptions Options { get; }
+        internal BlobStorageImplementation(BlobStorageIntegration integration, RystemDocumentServiceProviderOptions options)
         {
             Integration = integration;
-            this.EntityType = entityType;
+            Options = options;
         }
-        private static string GetBase(TEntity entity)
-            => $"{entity.PrimaryKey}/{entity.SecondaryKey}";
+        private string GetBase(TEntity entity)
+            => $"{Options.PrimaryKey.GetValue(entity)}/{Options.SecondaryKey.GetValue(entity)}";
         public Task<bool> DeleteAsync(TEntity entity)
             => Integration.DeleteAsync(GetBase(entity));
         public async Task<bool> ExistsAsync(TEntity entity)

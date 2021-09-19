@@ -10,36 +10,13 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Cosmos
 {
-    public sealed record CosmosConfiguration(ContainerProperties ContainerProperties = default, CosmosObjectConfiguration Database = default, CosmosObjectConfiguration Container = default, CosmosClientOptions ClientOptions = default, string DatabaseName = default) : Configuration(ContainerProperties?.Id ?? string.Empty)
-    {
-        public CosmosConfiguration() : this(default) { }
-    }
-
-    public sealed record CosmosObjectConfiguration(ThroughputProperties Throughput, RequestOptions RequestOptions = default);
-    /// <summary>
-    /// Leave AccountKey empty if you want to connect through the managed identity.
-    /// </summary>
-    public sealed record CosmosOptions(string AccountName, string AccountKey = default, string DatabaseName = default) : IRystemOptions
-    {
-        public string ConnectionString
-            => string.Format("AccountEndpoint=https://{0}.documents.azure.com:443/;AccountKey={1};", AccountName, AccountKey);
-        public bool UseKeyVault { get; }
-        public KeyVaultValue KeyVaultValue { get; }
-
-        public CosmosOptions(KeyVaultValue keyVaultValue)
-            : this(default, default)
-        {
-            KeyVaultValue = keyVaultValue;
-            UseKeyVault = true;
-        }
-    }
     public class CosmosNoSqlIntegration
     {
         public CosmosConfiguration Configuration { get; }
         private Container Context;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
-        private readonly CosmosOptions Options;
-        public CosmosNoSqlIntegration(CosmosConfiguration configuration, CosmosOptions options)
+        private readonly CosmosAccount Options;
+        public CosmosNoSqlIntegration(CosmosConfiguration configuration, CosmosAccount options)
         {
             Configuration = configuration;
             Options = options;
