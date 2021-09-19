@@ -4,7 +4,7 @@ namespace Rystem.Cache
 {
     public class CacheBuilder
     {
-        private readonly IServiceCollection Services;
+        public IServiceCollection Services { get; }
         public CacheBuilder(IServiceCollection services)
             => Services = services;
         public IServiceCollection Build() 

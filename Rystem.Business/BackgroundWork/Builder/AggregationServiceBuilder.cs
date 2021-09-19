@@ -2,15 +2,15 @@
 
 namespace Rystem.Background
 {
-    public class AggregationServiceBuilder : ServiceBuilder<RystemAggregationServiceProvider>
+    public class AggregationServiceBuilder<T> : ServiceBuilder
     {
-        public AggregationServiceBuilder(Installation installation, ServiceProvider<RystemAggregationServiceProvider> rystemServiceProvider) : base(installation, rystemServiceProvider)
+        public AggregationServiceBuilder(Installation installation, ServiceProvider rystemServiceProvider) : base(installation, rystemServiceProvider)
         {
 
         }
-        public RystemAggregationServiceProvider WithFirstInFirstOut<T>(SequenceProperty<T> configuration)
-            => (RystemAggregationServiceProvider)WithIntegration(ServiceProviderType.InMemory, configuration, default);
-        public RystemAggregationServiceProvider WithLastInFirstOut<T>(SequenceProperty<T> configuration)
-            => (RystemAggregationServiceProvider)WithIntegration(ServiceProviderType.InMemory2, configuration, default);
+        public RystemAggregationServiceProvider<T> WithFirstInFirstOut(SequenceProperty<T> configuration)
+            => (RystemAggregationServiceProvider<T>)WithIntegration(ServiceProviderType.InMemory, configuration, default);
+        public RystemAggregationServiceProvider<T> WithLastInFirstOut(SequenceProperty<T> configuration)
+            => (RystemAggregationServiceProvider<T>)WithIntegration(ServiceProviderType.InMemory2, configuration, default);
     }
 }

@@ -17,17 +17,6 @@ namespace Rystem.UnitTest.Business.Queue
         public string Ale3 { get; set; }
         public MiniSample Mini { get; set; }
         public DateTime Timestamp { get; set; }
-
-        public RystemQueueServiceProvider ConfigureQueue()
-        {
-            return RystemQueueServiceProvider
-                .WithAzure()
-                .WithQueueStorage()
-                .AndWithAzure(Installation.Inst00)
-                .WithEventHub(new Azure.Integration.Message.EventHubConfiguration() { Name = "Xyz" })
-                .AndWithAzure(Installation.Inst01)
-                .WithServiceBus(new Azure.Integration.Message.ServiceBusConfiguration() { Name = "Xyz" });
-        }
         public static async Task Run(Installation installation)
         {
             var elements = (await new Sample().ReadAsync(installation: installation).NoContext()).ToList();

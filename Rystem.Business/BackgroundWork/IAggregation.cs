@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Rystem.Background
+﻿namespace Rystem.Background
 {
-    public interface IAggregation<T>
+    public interface IAggregation
     {
-        RystemAggregationServiceProvider ConfigureSequence();
-        internal RystemAggregationServiceProvider BuildSequence()
-            => ConfigureSequence().AddInstance(this.GetType());
     }
 }

@@ -8,15 +8,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rystem.Business.Queue
+namespace Rystem.Business
 {
-    internal sealed class QueueManager<TEntity>
-        where TEntity : IQueue
+    internal sealed class QueueManager<TEntity> : IQueueManager<TEntity>
     {
         private readonly IDictionary<Installation, IQueueImplementation<TEntity>> Implementations = new Dictionary<Installation, IQueueImplementation<TEntity>>();
         private readonly IDictionary<Installation, ProvidedService> QueueConfiguration;
         private readonly object TrafficLight = new();
-        private readonly RystemServices Services = new();
         private IQueueImplementation<TEntity> Implementation(Installation installation)
         {
             if (!Implementations.ContainsKey(installation))
@@ -27,13 +25,13 @@ namespace Rystem.Business.Queue
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureQueueStorage:
-                                Implementations.Add(installation, new QueueStorageImplementation<TEntity>(Services.AzureFactory.QueueStorage(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new QueueStorageImplementation<TEntity>(Manager.QueueStorage(configuration.Configurations, configuration.ServiceKey)));
                                 break;
                             case ServiceProviderType.AzureEventHub:
-                                Implementations.Add(installation, new EventHubImplementation<TEntity>(Services.AzureFactory.EventHub(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new EventHubImplementation<TEntity>(Manager.EventHub(configuration.Configurations, configuration.ServiceKey)));
                                 break;
                             case ServiceProviderType.AzureServiceBus:
-                                Implementations.Add(installation, new ServiceBusImplementations<TEntity>(Services.AzureFactory.ServiceBus(configuration.Configurations, configuration.ServiceKey), DefaultEntity));
+                                Implementations.Add(installation, new ServiceBusImplementations<TEntity>(Manager.ServiceBus(configuration.Configurations, configuration.ServiceKey)));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
@@ -41,11 +39,11 @@ namespace Rystem.Business.Queue
                     }
             return Implementations[installation];
         }
-        private readonly Type DefaultEntity;
-        public QueueManager(RystemQueueServiceProvider serviceProvider)
+        private readonly AzureManager Manager;
+        public QueueManager(Options<IQueueManager<TEntity>> options, AzureManager manager)
         {
-            QueueConfiguration = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
-            DefaultEntity = serviceProvider.InstanceType;
+            QueueConfiguration = options.Services;
+            Manager = manager;
         }
         public async Task<bool> SendAsync(TEntity message, Installation installation, string partitionKey, string rowKey)
             => await Implementation(installation).SendAsync(message, partitionKey, rowKey).NoContext();

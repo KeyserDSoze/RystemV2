@@ -9,12 +9,10 @@ namespace Rystem.Business.Queue.Implementation
 {
     internal class ServiceBusImplementations<TEntity> : IQueueImplementation<TEntity>
     {
-        private readonly Type EntityType;
         private readonly ServiceBusIntegration Integration;
-        internal ServiceBusImplementations(ServiceBusIntegration integration, Type entityType)
+        internal ServiceBusImplementations(ServiceBusIntegration integration)
         {
             Integration = integration;
-            this.EntityType = entityType;
         }
         public string GetName()
          => this.Integration.Configuration.Name;

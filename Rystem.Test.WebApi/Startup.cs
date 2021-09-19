@@ -35,9 +35,9 @@ namespace Rystem.Test.WebApi
             services.AddApplicationInsightsTelemetry();
             services.AddControllers();
             services
-                .WithAzure()
+                .AddAzureService()
                 .AddStorage(new Azure.Integration.Storage.StorageAccount(storage["Name"], storage["Key"]))
-                .Build();
+                .EndConfiguration();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Rystem.Test.WebApi", Version = "v1" });
@@ -46,10 +46,10 @@ namespace Rystem.Test.WebApi
             {
                 x.AddPath(new StartingStringPathFinder(CachedHttpMethod.Get, "W"));
             })
-                .AddAzureCache(() => RystemCacheServiceProvider
-                    .WithAzure()
+                .AddAzureCache()
+                .WithAzure()
                     .WithBlobStorage(new Azure.Integration.Storage.BlobStorageConfiguration("MyOwnCache"))
-                    );
+                    .Configure();
             //new DailyImport()
             //{
             //    Options = new Background.BackgroundWorkOptions()

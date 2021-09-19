@@ -10,12 +10,10 @@ namespace Rystem.Business.Queue.Implementation
 {
     internal class QueueStorageImplementation<TEntity> : IQueueImplementation<TEntity>
     {
-        private readonly Type EntityType;
         private readonly QueueStorageIntegration Integration;
-        internal QueueStorageImplementation(QueueStorageIntegration integration, Type entityType)
+        internal QueueStorageImplementation(QueueStorageIntegration integration)
         {
             Integration = integration;
-            this.EntityType = entityType;
         }
 
         public Task<bool> CleanAsync()

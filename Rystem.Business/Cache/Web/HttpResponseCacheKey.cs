@@ -7,9 +7,7 @@ namespace Rystem.Cache
     public class HttpResponseCacheKey : ICacheKey<HttpResponseCache>
     {
         public string Key { get; set; }
-        internal static Func<RystemCacheServiceProvider> CacheServiceProvider;
-        public RystemCacheServiceProvider ConfigureCache() 
-            => CacheServiceProvider.Invoke();
+        internal static Func<RystemCacheServiceProvider<HttpResponseCacheKey, HttpResponseCache>> CacheServiceProvider;
         public Task<HttpResponseCache> FetchAsync() 
             => default;
     }

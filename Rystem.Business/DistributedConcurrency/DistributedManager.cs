@@ -1,24 +1,18 @@
 ﻿using Rystem.Azure;
-using Rystem.Azure.Integration.Cache;
-using Rystem.Azure.Integration.Storage;
 using Rystem.Business;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rystem.Concurrency
 {
-    internal class DistributedManager<TKey>
+    internal class DistributedManager<TKey> : IDistributedManager<TKey>
         where TKey : IDistributedConcurrencyKey
     {
         private readonly Dictionary<Installation, IDistributedImplementation> Implementations = new();
         private readonly Dictionary<Installation, ProvidedService> DistributedConfiguration;
         private bool MemoryIsActive { get; }
         private readonly object TrafficLight = new();
-        private readonly RystemServices Services = new();
         public IDistributedImplementation Implementation(Installation installation)
         {
             if (!Implementations.ContainsKey(installation))
@@ -29,10 +23,10 @@ namespace Rystem.Concurrency
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new BlobStorageImplementation(Services.AzureFactory.BlobStorage(configuration.Configurations, configuration.ServiceKey)));
+                                Implementations.Add(installation, new BlobStorageImplementation(Manager.BlobStorage(configuration.Configurations, configuration.ServiceKey)));
                                 break;
                             case ServiceProviderType.AzureRedisCache:
-                                Implementations.Add(installation, new RedisCacheImplementation(Services.AzureFactory.RedisCache(configuration.ServiceKey)));
+                                Implementations.Add(installation, new RedisCacheImplementation(Manager.RedisCache(configuration.ServiceKey)));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
@@ -40,7 +34,17 @@ namespace Rystem.Concurrency
                     }
             return Implementations[installation];
         }
-        public DistributedManager(RystemDistributedServiceProvider serviceProvider)
-            => DistributedConfiguration = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
+        private readonly AzureManager Manager;
+        public DistributedManager(Options<IDistributedManager<TKey>> options, AzureManager manager)
+        {
+            DistributedConfiguration = options.Services;
+            Manager = manager;
+        }
+
+        public Task<RaceConditionResponse> RunUnderRaceConditionAsync(TKey key, Func<Task> task, Installation installation = Installation.Default, TimeSpan timeWindow = default)
+            => task.RunUnderRaceConditionAsync(key.Key, timeWindow, Implementation(installation));
+
+        public Task<LockResponse> LockAsync(TKey key, Func<Task> task, Installation installation = Installation.Default)
+            => task.LockAsync(key.Key, Implementation(installation));
     }
 }

@@ -39,7 +39,7 @@ namespace Rystem.Business.Document
             return Implementations[installation];
         }
         private readonly AzureManager Manager;
-        public DocumentManager(Options<DocumentManager<TEntity>> options, AzureManager manager)
+        public DocumentManager(Options<IDocumentManager<TEntity>> options, AzureManager manager)
         {
             DocumentConfiguration = options.Services;
             Manager = manager;

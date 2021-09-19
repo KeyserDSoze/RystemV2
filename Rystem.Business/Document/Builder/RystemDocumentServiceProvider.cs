@@ -1,8 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Rystem.Business.Document;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Rystem.Business
 {
@@ -18,7 +15,7 @@ namespace Rystem.Business
           => new(installation, this);
         public IServiceCollection Configure()
         {
-            ServiceCollection.AddSingleton(new Options<DocumentManager<T>>(Services.ToDictionary(x => x.Key, x => x.Value)));
+            ServiceCollection.AddSingleton(new Options<IDocumentManager<T>>(Services));
             ServiceCollection.AddSingleton<IDocumentManager<T>, DocumentManager<T>>();
             return ServiceCollection;
         }

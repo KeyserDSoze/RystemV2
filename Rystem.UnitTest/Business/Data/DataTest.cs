@@ -15,7 +15,16 @@ namespace Rystem.UnitTest.Business.Data
     {
         static DataTest()
         {
-            AzureConst.Load();
+            new TestHost(AzureConst.Load()
+                .UseDataOn<Sample>()
+                .WithAzure()
+                .WithBlockBlob()
+                .WithName(x => x.Name)
+                .AndWithAzure(Installation.Inst00)
+                .WithAppendBlob()
+                .WithName(x => x.Name)
+                .Configure())
+                .WithRystem();
         }
         [Fact]
         public async Task BlockBlobStorage()

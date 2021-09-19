@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rystem.Business;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,15 @@ namespace Rystem.UnitTest.Business.DistributedConcurrency
     {
         static DistributedConcurrencyTest()
         {
-            AzureConst.Load();
+            new TestHost(AzureConst.Load()
+                .UseDistributedKey<DealingKey>()
+                .WithAzure()
+                .WithBlobStorage()
+                .AndWithAzure(Installation.Inst00)
+                .WithRedisCache()
+                .Configure())
+                .WithRystem();
+
         }
         [Fact]
         public async Task RunASingleTimeOnTwoLocksRedisCache()

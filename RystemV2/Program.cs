@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Rystem;
 using Rystem.Azure;
 using Rystem.Azure.Integration;
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RystemV2
@@ -36,12 +38,39 @@ namespace RystemV2
                 .AndWithAzure()
                 .WithBlobStorage()
                 .Configure();
-            services.UseData<Ola>()
+            services.UseDataOn<Ola>()
                 .WithAzure()
                 .WithBlockBlob()
+                .WithName(x => x.Name)
                 .Configure();
+            new Host(services).WithRystem();
         }
-        public class Ola { }
+        public class Host : IHost
+        {
+            public IServiceProvider Services { get; }
+            public Host(IServiceCollection services)
+                => Services = services.BuildServiceProvider();
+
+            public void Dispose()
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task StartAsync(CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task StopAsync(CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public class Ola
+        {
+            public string Name { get; set; }
+        }
         public class KeyForge : ICacheKey<Ola>
         {
             public Task<Ola> FetchAsync()
@@ -58,8 +87,8 @@ namespace RystemV2
             //await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.SendAsync().NoContext();
             //await new Sample() { Ale = "ddd", Ale1 = "dddd", Ale2 = "dddddddd3", Ale3 = "dddddddddddddddddd", Timestamp = DateTime.UtcNow }.SendAsync().NoContext();
             //var x = (await new Sample().ReadAsync().NoContext()).ToList();
-            var data = ServiceLocator.GetService<Data<Ola>>();
-            await data.WriteAsync("", new byte[1]).NoContext();
+            var data = ServiceLocator.GetService<IDataManager<Ola>>();
+            await data.WriteAsync("", new byte[1], null).NoContext();
         }
         public class Sample : IQueue
         {
@@ -69,12 +98,6 @@ namespace RystemV2
             public string Ale2 { get; set; }
             public string Ale3 { get; set; }
             public DateTime Timestamp { get; set; }
-            public RystemQueueServiceProvider ConfigureQueue()
-            {
-                return RystemQueueServiceProvider
-                    .WithAzure()
-                    .WithQueueStorage();
-            }
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Rystem.Business.Data;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Rystem.Business
@@ -16,9 +15,8 @@ namespace Rystem.Business
           => new(installation, this);
         public IServiceCollection Configure()
         {
-            ServiceCollection.AddSingleton(new Options<DataManager<T>>(Services.ToDictionary(x => x.Key, x => x.Value)));
-            ServiceCollection.AddSingleton<DataManager<T>>();
-            ServiceCollection.AddSingleton<Data<T>>();
+            ServiceCollection.AddSingleton(new Options<IDataManager<T>>(Services));
+            ServiceCollection.AddSingleton<IDataManager<T>, DataManager<T>>();
             return ServiceCollection;
         }
     }

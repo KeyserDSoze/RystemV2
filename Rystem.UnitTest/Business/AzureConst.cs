@@ -1,18 +1,21 @@
 ﻿using Azure.Messaging.EventHubs;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Rystem.Business;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rystem.UnitTest
 {
     internal static class AzureConst
     {
-        public static void Load()
+        public static IServiceCollection Load()
         {
             var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
             var storage = config.GetSection("Storage");
@@ -20,7 +23,7 @@ namespace Rystem.UnitTest
             var serviceBus = config.GetSection("ServiceBus");
             var redisCache = config.GetSection("RedisCache");
             var cosmos = config.GetSection("Cosmos");
-            RystemInstaller
+            return RystemInstaller
               .WithAzure()
               .AddStorage(new Azure.Integration.Storage.StorageAccount(storage["Name"], storage["Key"]))
               .AddEventHub(new Azure.Integration.Message.EventHubAccount(eventHub["FullyQualifiedName"], eventHub["AccessKey"], new Azure.Integration.Storage.StorageAccount(storage["Name"], storage["Key"])))
@@ -28,6 +31,27 @@ namespace Rystem.UnitTest
               .AddRedisCache(new Azure.Integration.Cache.RedisCacheAccount(redisCache["ConnectionString"], TimeSpan.FromHours(1), 4))
               .AddCosmos(new Azure.Integration.Cosmos.CosmosAccount(cosmos["AccountName"], cosmos["AccountKey"]))
               .EndConfiguration();
+        }
+    }
+    internal class TestHost : IHost
+    {
+        public IServiceProvider Services { get; }
+        public TestHost(IServiceCollection services)
+            => Services = services.BuildServiceProvider();
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }

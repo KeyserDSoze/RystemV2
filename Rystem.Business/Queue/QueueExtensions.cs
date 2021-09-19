@@ -1,4 +1,5 @@
-﻿using Rystem.Business;
+﻿using Rystem;
+using Rystem.Business;
 using Rystem.Business.Queue;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +10,9 @@ namespace System
 {
     public static partial class QueueExtensions
     {
-        private static dynamic GetQueueManager<TEntity>(TEntity entity)
-           where TEntity : IQueue
-           => new QueueManager<TEntity>(entity.BuildQueue());
-        private static QueueManager<TEntity> Manager<TEntity>(this TEntity entity)
+        private static IQueueManager<TEntity> Manager<TEntity>(this TEntity entity)
             where TEntity : IQueue
-            => entity.DefaultManager(nameof(QueueExtensions), GetQueueManager) as QueueManager<TEntity>;
+            => ServiceLocator.GetService<IQueueManager<TEntity>>();
 
         public static async Task<bool> SendAsync<TEntity>(this TEntity message, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue

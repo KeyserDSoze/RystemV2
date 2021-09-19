@@ -15,7 +15,16 @@ namespace Rystem.UnitTest.Business.Queue
     {
         static QueueTest()
         {
-            AzureConst.Load();
+            new TestHost(AzureConst.Load()
+                .UseQueueOn<Sample>()
+                .WithAzure()
+                .WithQueueStorage()
+                .AndWithAzure(Installation.Inst00)
+                .WithEventHub(new Azure.Integration.Message.EventHubConfiguration() { Name = "Xyz" })
+                .AndWithAzure(Installation.Inst01)
+                .WithServiceBus(new Azure.Integration.Message.ServiceBusConfiguration() { Name = "Xyz" })
+                .Configure())
+                .WithRystem();
         }
         [Fact]
         public async Task QueueStorage()

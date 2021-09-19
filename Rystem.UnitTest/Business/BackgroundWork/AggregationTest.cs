@@ -2,8 +2,6 @@
 using Rystem.Business;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -11,26 +9,27 @@ namespace Rystem.UnitTest.Business.BackgroundWork
 {
     public class AggregationTest
     {
-        private class Sequencer : IAggregation<FalseNueve>
+        static AggregationTest()
         {
-            public RystemAggregationServiceProvider ConfigureSequence()
-            {
-                return RystemAggregationServiceProvider.Configure(Installation.Default)
-                    .WithFirstInFirstOut(new SequenceProperty<FalseNueve>("FalseNueve", 500, TimeSpan.FromSeconds(2), Evaluate))
-                    .AndConfigure(Installation.Inst00)
-                    .WithLastInFirstOut(new SequenceProperty<FalseNueve>("FalseNueve", 500, TimeSpan.FromSeconds(2), Evaluate));
-            }
-            public int Counter;
-            private async Task Evaluate(IEnumerable<FalseNueve> falseNueves)
-            {
-                foreach (var _ in falseNueves)
-                {
-                    Counter++;
-                }
-                await Task.Delay(0);
-            }
+            new TestHost(AzureConst.Load()
+                .UseAggregationOn<FalseNueve>()
+                .With()
+                .WithFirstInFirstOut(new SequenceProperty<FalseNueve>("FalseNueve", 500, TimeSpan.FromSeconds(2), Evaluate))
+                    .AndWith(Installation.Inst00)
+                    .WithLastInFirstOut(new SequenceProperty<FalseNueve>("FalseNueve", 500, TimeSpan.FromSeconds(2), Evaluate))
+                    .Configure())
+                .WithRystem();
         }
 
+        private static int Counter;
+        private static async Task Evaluate(IEnumerable<FalseNueve> falseNueves)
+        {
+            foreach (var _ in falseNueves)
+            {
+                Counter++;
+            }
+            await Task.Delay(0);
+        }
         [Fact]
         public async Task SequenceFifo()
         {
@@ -43,7 +42,6 @@ namespace Rystem.UnitTest.Business.BackgroundWork
         }
         private async Task QueueSomething(Installation installation)
         {
-            var sequencer = new Sequencer();
             for (int i = 0; i < 510; i++)
             {
                 var falseNueve = new FalseNueve()
@@ -51,22 +49,22 @@ namespace Rystem.UnitTest.Business.BackgroundWork
                     Al = "a",
                     Ol = "b"
                 };
-                sequencer.Add(falseNueve, installation);
+                falseNueve.Add(falseNueve, installation);
                 if (i == 499)
                     await Task.Delay(100);
             }
             await Task.Delay(700);
-            Assert.Equal(500, sequencer.Counter);
-            sequencer.Flush(installation);
+            Assert.Equal(500, Counter);
+            new FalseNueve().Flush(installation);
             await Task.Delay(700);
-            Assert.Equal(510, sequencer.Counter);
+            Assert.Equal(510, Counter);
         }
         private interface IFalseNueve
         {
             string Al { get; set; }
             string Ol { get; set; }
         }
-        private class FalseNueve : IFalseNueve
+        private class FalseNueve : IAggregation, IFalseNueve
         {
             public string Al { get; set; }
             public string Ol { get; set; }

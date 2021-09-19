@@ -1,4 +1,5 @@
-﻿using Rystem.Azure.Integration.Cache;
+﻿using Rystem.Azure;
+using Rystem.Azure.Integration.Cache;
 using Rystem.Azure.Integration.Storage;
 using Rystem.Business;
 using System;
@@ -10,8 +11,12 @@ using System.Threading.Tasks;
 
 namespace Rystem.Background
 {
-    internal class SequenceManager<TSequence, T>
-        where TSequence : IAggregation<T>
+    public interface ISequenceManager<T>
+    {
+        void Add(T entity, Installation installation);
+        void Flush(Installation installation);
+    }
+    internal class SequenceManager<T> : ISequenceManager<T>
     {
         private readonly Dictionary<Installation, string> Implementations = new();
         private readonly Dictionary<Installation, ProvidedService> SequenceConfiguration;
@@ -41,8 +46,13 @@ namespace Rystem.Background
                     }
             return Implementations[installation];
         }
-        public SequenceManager(RystemAggregationServiceProvider serviceProvider)
-            => SequenceConfiguration = serviceProvider.Services.ToDictionary(x => x.Key, x => x.Value);
+        private readonly AzureManager Manager;
+        public SequenceManager(Options<ISequenceManager<T>> options, AzureManager manager)
+        {
+            SequenceConfiguration = options.Services;
+            Manager = manager;
+        }
+
         public void Add(T entity, Installation installation)
             => Sequence.Enqueue(entity, Implementation(installation));
         public void Flush(Installation installation)

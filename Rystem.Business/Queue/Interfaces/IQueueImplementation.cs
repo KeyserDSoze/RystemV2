@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rystem.Business.Queue
+namespace Rystem.Business
 {
     internal interface IQueueImplementation<TEntity>
     {

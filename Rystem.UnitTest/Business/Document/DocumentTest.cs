@@ -15,7 +15,30 @@ namespace Rystem.UnitTest.Business.Document
     {
         static DocumentTest()
         {
-            AzureConst.Load();
+            new TestHost(AzureConst.Load()
+                .UseDocumentOn<Sample>()
+                .WithAzure()
+                .WithTableStorage()
+                .WithPrimaryKey(x => x.PrimaryKey)
+                .WithSecondaryKey(x => x.SecondaryKey)
+                .WithTimestamp(x => x.Timestamp)
+                .AndWithAzure(Installation.Inst00)
+                .WithBlobStorage(new Azure.Integration.Storage.BlobStorageConfiguration
+                {
+                    Name = "coldwea"
+                })
+                .WithPrimaryKey(x => x.PrimaryKey)
+                .WithSecondaryKey(x => x.SecondaryKey)
+                .WithTimestamp(x => x.Timestamp)
+                .AndWithAzure(Installation.Inst01)
+                .WithCosmosNoSql(new Azure.Integration.Cosmos.CosmosConfiguration(DatabaseName: "Colon"))
+                .WithPrimaryKey(x => x.PrimaryKey)
+                .WithSecondaryKey(x => x.SecondaryKey)
+                .WithTimestamp(x => x.Timestamp)
+                .Configure())
+                .WithRystem();
+
+
         }
         [Fact]
         public async Task TableStorage()

@@ -3,20 +3,16 @@ using Rystem.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rystem.Business.Queue.Implementation
 {
     internal class EventHubImplementation<TEntity> : IQueueImplementation<TEntity>
     {
-        private readonly Type EntityType;
         private readonly EventHubIntegration Integration;
-        internal EventHubImplementation(EventHubIntegration integration, Type entityType)
+        internal EventHubImplementation(EventHubIntegration integration)
         {
             Integration = integration;
-            this.EntityType = entityType;
         }
 
         public Task<bool> CleanAsync()

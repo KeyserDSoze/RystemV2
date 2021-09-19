@@ -1,10 +1,7 @@
-﻿using Rystem.Azure.Integration;
-using Rystem.Business;
-using Rystem.Business.Document;
+﻿using Rystem.Business;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -19,19 +16,6 @@ namespace Rystem.UnitTest.Business.Document
         public string Ale3 { get; set; }
         public MiniSample Mini { get; set; }
         public DateTime Timestamp { get; set; }
-        public RystemDocumentServiceProvider ConfigureDocument()
-        {
-            return RystemDocumentServiceProvider
-                .WithAzure()
-                .WithTableStorage()
-                .AndWithAzure(Installation.Inst00)
-                .WithBlobStorage(new Azure.Integration.Storage.BlobStorageConfiguration
-                {
-                    Name = "coldwea"
-                })
-                .AndWithAzure(Installation.Inst01)
-                .WithCosmosNoSql(new Azure.Integration.Cosmos.CosmosConfiguration(DatabaseName: "Colon"));
-        }
         public static async Task Run(Installation installation)
         {
             var elements = (await new Sample().ListAsync(installation: installation).NoContext()).ToList();

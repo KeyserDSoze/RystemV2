@@ -14,24 +14,17 @@ namespace Rystem.UnitTest.Business.Data
     public class Sample : IData
     {
         public string Name { get; set; }
-        public RystemDataServiceProvider ConfigureData()
-        {
-            return RystemDataServiceProvider.WithAzure()
-                .WithBlockBlob()
-                .AndWithAzure(Installation.Inst00)
-                .WithAppendBlob();
-        }
         public static async Task Run(Installation installation)
         {
             bool check = installation == Installation.Inst00;
             Sample sample = new() { Name = "XXX" };
             MiniSample mini = new() { Ale3 = "dsadsadsa", X = 4444 };
-            await sample.WriteAsync(mini, check, installation: installation).NoContext();
-            await sample.WriteAsync(mini, check, installation: installation).NoContext();
-            await sample.WriteAsync(mini, check, installation: installation).NoContext();
+            await sample.WriteAsync(installation: installation).NoContext();
+            await sample.WriteAsync(installation: installation).NoContext();
+            await sample.WriteAsync(installation: installation).NoContext();
             if (check)
             {
-                await foreach (var item in sample.ListAsync<MiniSample>(breakLine: check, installation: installation))
+                await foreach (var item in sample.ListAsync<MiniSample>(installation: installation))
                 {
                     Assert.Equal("dsadsadsa", item.Content.First().Ale3);
                     Assert.Equal(3, item.Content.Count);

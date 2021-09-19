@@ -1,15 +1,13 @@
 ﻿using Rystem.Azure;
-using Rystem.Azure.Integration.Cache;
 using Rystem.Azure.Integration.Storage;
 using Rystem.Concurrency;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Rystem.Business
 {
-    internal class CacheManager<TCacheKey, TCache>
+    internal sealed class CacheManager<TCacheKey, TCache> : ICacheManager<TCacheKey, TCache>
         where TCacheKey : ICacheKey<TCache>
     {
         private readonly Dictionary<Installation, ICacheImplementation<TCache>> Implementations = new();
@@ -26,13 +24,13 @@ namespace Rystem.Business
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new InBlobStorage<TCache>(new BlobStorageIntegration(configuration.Configurations, ServiceLocator.GetService<StorageAccount>()), Name));
+                                Implementations.Add(installation, new InBlobStorage<TCache>(Manager.BlobStorage(configuration.Configurations, configuration.ServiceKey), Name));
                                 break;
                             case ServiceProviderType.AzureTableStorage:
-                                Implementations.Add(installation, new InTableStorage<TCache>(Services.AzureFactory.TableStorage(configuration.Configurations, configuration.ServiceKey), Name));
+                                Implementations.Add(installation, new InTableStorage<TCache>(Manager.TableStorage(configuration.Configurations, configuration.ServiceKey), Name));
                                 break;
                             case ServiceProviderType.AzureRedisCache:
-                                Implementations.Add(installation, new InRedisCache<TCache>(Services.AzureFactory.RedisCache(configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
+                                Implementations.Add(installation, new InRedisCache<TCache>(Manager.RedisCache(configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
@@ -48,11 +46,13 @@ namespace Rystem.Business
             return expiringTime;
         }
         private readonly string Name;
-        public CacheManager(bool memoryIsActive, Dictionary<Installation, ProvidedService> cacheConfigurations, string name)
+        private readonly AzureManager Manager;
+        public CacheManager(Options<ICacheManager<TCacheKey, TCache>> options, AzureManager manager)
         {
-            MemoryIsActive = memoryIsActive;
-            CacheConfigurations = cacheConfigurations;
-            Name = name;
+            Manager = manager;
+            MemoryIsActive = options.Services.ContainsKey(Installation.Memory);
+            CacheConfigurations = options.Services;
+            Name = typeof(TCache).Name;
         }
         private bool GetCloudIsActive(Installation installation)
             => CacheConfigurations.ContainsKey(installation) && CacheConfigurations[installation].Type != ServiceProviderType.InMemory;

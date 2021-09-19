@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Linq;
 
 namespace Rystem.Business
 {
@@ -22,11 +21,8 @@ namespace Rystem.Business
         }
         public IServiceCollection Configure()
         {
-            bool memoryIsActive = Services.ContainsKey(Installation.Memory);
-            var cacheConfigurations = Services.ToDictionary(x => x.Key, x => x.Value);
-            string name = typeof(TCacheKey).Name;
-            var manager = new CacheManager<TCacheKey, TCache>(memoryIsActive, cacheConfigurations, name);
-            ServiceCollection.AddSingleton(manager);
+            ServiceCollection.AddSingleton(new Options<ICacheManager<TCacheKey, TCache>>(Services));
+            ServiceCollection.AddSingleton<ICacheManager<TCacheKey, TCache>, CacheManager<TCacheKey, TCache>>();
             return ServiceCollection;
         }
     }
