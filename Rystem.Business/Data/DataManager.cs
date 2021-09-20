@@ -37,7 +37,7 @@ namespace Rystem.Business.Data
             return Implementations[installation];
         }
         private readonly AzureManager Manager;
-        public DataManager(Options<DataManager<TEntity>> options, AzureManager manager)
+        public DataManager(Options<IDataManager<TEntity>> options, AzureManager manager)
         {
             DataConfiguration = options.Services;
             Manager = manager;

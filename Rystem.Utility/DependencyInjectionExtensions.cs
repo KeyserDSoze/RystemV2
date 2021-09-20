@@ -10,7 +10,7 @@ namespace Rystem
         public static IHost WithRystem(this IHost host)
         {
             ServiceLocator.Services = host.Services;
-            AfterRystemIsFullyAdded.Invoke();
+            AfterRystemIsFullyAdded?.Invoke();
             return host;
         }
         public static IServiceCollection AddRystemFullyAddedCallback(this IServiceCollection services, Action action)
