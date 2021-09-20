@@ -8,6 +8,18 @@ namespace Rystem.UnitTest
 {
     public class DealWithThread
     {
+        static DealWithThread()
+        {
+            new TestHost(AzureConst.Load()
+              .AddBackgroundWork<MyFirstBackgroundWork>(x =>
+               {
+                   x.Cron = "* * * * * *";
+                   x.RunImmediately = true;
+                   x.Key = "The best of the keys";
+               })
+               .AddSingleton<MyDiTest>())
+                .WithRystem();
+        }
         [Fact]
         public async Task RunInBackground()
         {
@@ -28,15 +40,7 @@ namespace Rystem.UnitTest
         [Fact]
         public async Task RunInIServiceCollection()
         {
-            new ServiceCollection()
-                .AddBackgroundWork<MyFirstBackgroundWork>(x =>
-                {
-                    x.Cron = "* * * * * *";
-                    x.RunImmediately = true;
-                    x.Key = "The best of the keys";
-                })
-                .AddSingleton<MyDiTest>()
-                .WithRystem();
+
             await Task.Delay(2000);
             BackgroundWork.Stop();
             var myDi = ServiceLocator.GetService<MyDiTest>();

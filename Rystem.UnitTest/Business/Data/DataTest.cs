@@ -16,13 +16,13 @@ namespace Rystem.UnitTest.Business.Data
         static DataTest()
         {
             new TestHost(AzureConst.Load()
-                .UseDataOn<Sample>()
+                .UseDataOn<MiniContainer>()
                 .WithAzure()
                 .WithBlockBlob()
-                .WithName(x => x.Name)
+                .WithName(x => x.Cads)
                 .AndWithAzure(Installation.Inst00)
                 .WithAppendBlob()
-                .WithName(x => x.Name)
+                .WithName(x => x.Cads)
                 .Configure())
                 .WithRystem();
         }

@@ -1,11 +1,9 @@
-﻿using Rystem.Business;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Rystem;
+using Rystem.Business;
+using Rystem.Concurrency;
 using System.Threading.Tasks;
 
-namespace Rystem.Concurrency
+namespace System
 {
     public static class DistributedConcurrencyExtensions
     {

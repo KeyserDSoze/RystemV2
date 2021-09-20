@@ -3,18 +3,17 @@ using Rystem;
 using Rystem.Azure.Integration.Storage;
 using Rystem.Business;
 using Rystem.Business.Data;
-using Rystem.Text;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace System
 {
     public static partial class DataExtensions
     {
-        private static IDataManager<IData> Manager(this IData entity)
-            => ServiceLocator.GetService<IDataManager<IData>>();
+        private static IDataManager<T> Manager<T>(this T entity)
+            where T : IData
+            => ServiceLocator.GetService<IDataManager<T>>();
         /// <summary>
         /// Write a stream as Data on the right installation of IData.
         /// </summary>
@@ -23,7 +22,8 @@ namespace System
         /// <param name="blobUploadOptions">Options for Azure blob storage.</param>-
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>True if all goes ok.</returns>
-        public static Task<bool> WriteBlobAsync(this IData data, Stream stream, BlobUploadOptions blobUploadOptions = default, Installation installation = Installation.Default)
+        public static Task<bool> WriteBlobAsync<T>(this T data, Stream stream, BlobUploadOptions blobUploadOptions = default, Installation installation = Installation.Default)
+            where T : IData
         {
             var manager = data.Manager();
             stream.Position = 0;
@@ -37,7 +37,8 @@ namespace System
         /// <param name="blobUploadOptions">Options for Azure blob storage.</param>
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>True if all goes ok.</returns>
-        public static Task<bool> WriteBlobAsync(this IData data, string value, BlobUploadOptions blobUploadOptions = default, Installation installation = Installation.Default)
+        public static Task<bool> WriteBlobAsync<T>(this T data, string value, BlobUploadOptions blobUploadOptions = default, Installation installation = Installation.Default)
+            where T : IData
         {
             var manager = data.Manager();
             return manager.WriteAsync(manager.GetName(data, installation), value, blobUploadOptions, installation);
@@ -51,7 +52,8 @@ namespace System
         /// <param name="blobUploadOptions">Options for Azure blob storage.</param>
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>True if all goes ok.</returns>
-        public static Task<bool> WriteBlobAsync(this IData data, byte[] value, BlobUploadOptions blobUploadOptions = default, Installation installation = Installation.Default)
+        public static Task<bool> WriteBlobAsync<T>(this T data, byte[] value, BlobUploadOptions blobUploadOptions = default, Installation installation = Installation.Default)
+            where T : IData
         {
             var manager = data.Manager();
             return manager.WriteAsync(manager.GetName(data, installation), value, blobUploadOptions, installation);
@@ -64,7 +66,8 @@ namespace System
         /// <param name="value">Object that you want to write as json.</param>
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>True if all goes ok.</returns>
-        public static Task<bool> WriteAsync(this IData data, Installation installation = Installation.Default)
+        public static Task<bool> WriteAsync<T>(this T data, Installation installation = Installation.Default)
+            where T : IData
         {
             var manager = data.Manager();
             return manager.WriteAsync(manager.GetName(data, installation), data, installation);
@@ -77,7 +80,8 @@ namespace System
         /// <param name="data">IData object.</param>
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>Object that you wrote as json Data.</returns>
-        public static Task<IData> ReadAsync(this IData data, Installation installation = Installation.Default)
+        public static Task<T> ReadAsync<T>(this T data, Installation installation = Installation.Default)
+            where T : IData
         {
             var manager = data.Manager();
             return manager.ReadAsync(manager.GetName(data, installation), installation);
@@ -91,7 +95,8 @@ namespace System
         /// <param name="takeCount">Number of first "takeCount" elements to retrieve. If null retrieve all elements that matches the searched pattern.</param>
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>Object that you wrote as json Data.</returns>
-        public static IAsyncEnumerable<(string Name, List<IData> Content)> ReadAsync(this IData data, int? takeCount = null, Installation installation = Installation.Default)
+        public static IAsyncEnumerable<(string Name, List<T> Content)> ReadAsync<T>(this T data, int? takeCount = null, Installation installation = Installation.Default)
+            where T : IData
         {
             var manager = data.Manager();
             return manager.ListAsync(manager.GetName(data, installation), takeCount, installation);
@@ -103,7 +108,8 @@ namespace System
         /// <param name="data">IData object.</param>
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>Stream that you wrote as Data.</returns>
-        public static Task<Stream> ReadStreamAsync(this IData data, Installation installation = Installation.Default)
+        public static Task<Stream> ReadStreamAsync<T>(this T data, Installation installation = Installation.Default)
+            where T : IData
         {
             var manager = data.Manager();
             return manager.ReadStreamAsync(manager.GetName(data, installation), installation);
@@ -118,7 +124,8 @@ namespace System
         /// <param name="takeCount">Number of first "takeCount" elements to retrieve. If null retrieve all elements that matches the searched pattern.</param>
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>Get "takeCount" items with its Name and a list T objects.</returns>
-        public static IAsyncEnumerable<(string Name, List<IData> Content)> ListAsync<T>(this IData data, int? takeCount = null, Installation installation = Installation.Default)
+        public static IAsyncEnumerable<(string Name, List<T> Content)> ListAsync<T>(this T data, int? takeCount = null, Installation installation = Installation.Default)
+            where T : IData
         {
             var manager = data.Manager();
             return manager.ListAsync(manager.GetName(data), takeCount, installation);
@@ -131,7 +138,8 @@ namespace System
         /// <param name="takeCount">Number of first "takeCount" elements to retrieve. If null retrieve all elements that matches the searched pattern.</param>
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>Get "takeCount" items with its Name and Stream.</returns>
-        public static Task<IEnumerable<(string Name, Stream Content)>> ListAsync(this IData data, int? takeCount = null, Installation installation = Installation.Default)
+        public static Task<IEnumerable<(string Name, Stream Content)>> ListStreamAsync<T>(this T data, int? takeCount = null, Installation installation = Installation.Default)
+            where T : IData
         {
             var manager = data.Manager();
             return manager.ListStreamAsync(manager.GetName(data, installation), takeCount ?? int.MaxValue, installation);
@@ -143,7 +151,8 @@ namespace System
         /// <param name="data">IData object.</param>
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>True if all goes ok.</returns>
-        public static Task<bool> DeleteAsync(this IData data, Installation installation = Installation.Default)
+        public static Task<bool> DeleteAsync<T>(this T data, Installation installation = Installation.Default)
+            where T : IData
         {
             var manager = data.Manager();
             return manager.DeleteAsync(manager.GetName(data, installation), installation);
@@ -155,7 +164,8 @@ namespace System
         /// <param name="data">IData object.</param>
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>True if all goes ok.</returns>
-        public static Task<bool> ExistsAsync(this IData data, Installation installation = Installation.Default)
+        public static Task<bool> ExistsAsync<T>(this T data, Installation installation = Installation.Default)
+            where T : IData
         {
             var manager = data.Manager();
             return manager.ExistsAsync(manager.GetName(data, installation), installation);
@@ -168,7 +178,8 @@ namespace System
         /// <param name="properties">Properties for Azure blob storage.</param>
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>True if all goes ok.</returns>
-        public static Task<bool> SetPropertiesAsync(this IData data, BlobStorageProperties properties, Installation installation = Installation.Default)
+        public static Task<bool> SetPropertiesAsync<T>(this T data, BlobStorageProperties properties, Installation installation = Installation.Default)
+            where T : IData
         {
             var manager = data.Manager();
             return manager.SetPropertiesAsync(manager.GetName(data, installation), properties, installation);

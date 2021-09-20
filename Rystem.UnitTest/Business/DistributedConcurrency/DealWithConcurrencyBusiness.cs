@@ -37,7 +37,7 @@ namespace Rystem.UnitTest.Business.DistributedConcurrency
             List<Task> tasks = new();
             for (int i = 0; i < 20; i++)
             {
-                tasks.Add(dKey.RunUnderRaceConditionAsync(action, installation));
+                tasks.Add(dKey.RunUnderRaceConditionAsync(action, installation: installation));
             }
             await Task.WhenAll(tasks);
         }
@@ -48,7 +48,7 @@ namespace Rystem.UnitTest.Business.DistributedConcurrency
             List<Task> tasks = new();
             for (int i = 0; i < 20; i++)
             {
-                tasks.Add(dKey.RunUnderRaceConditionAsync(action, installation));
+                tasks.Add(dKey.RunUnderRaceConditionAsync(action, installation: installation));
             }
             await Task.WhenAll(tasks);
         }
