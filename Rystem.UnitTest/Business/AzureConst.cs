@@ -23,7 +23,7 @@ namespace Rystem.UnitTest
             var serviceBus = config.GetSection("ServiceBus");
             var redisCache = config.GetSection("RedisCache");
             var cosmos = config.GetSection("Cosmos");
-            return RystemInstaller
+            return RystemBusiness
               .WithAzure()
               .AddStorage(new Azure.Integration.Storage.StorageAccount(storage["Name"], storage["Key"]))
               .AddEventHub(new Azure.Integration.Message.EventHubAccount(eventHub["FullyQualifiedName"], eventHub["AccessKey"], new Azure.Integration.Storage.StorageAccount(storage["Name"], storage["Key"])))
@@ -31,27 +31,6 @@ namespace Rystem.UnitTest
               .AddRedisCache(new Azure.Integration.Cache.RedisCacheAccount(redisCache["ConnectionString"], TimeSpan.FromHours(1), 4))
               .AddCosmos(new Azure.Integration.Cosmos.CosmosAccount(cosmos["AccountName"], cosmos["AccountKey"]))
               .EndConfiguration();
-        }
-    }
-    internal class TestHost : IHost
-    {
-        public IServiceProvider Services { get; }
-        public TestHost(IServiceCollection services)
-            => Services = services.BuildServiceProvider();
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task StartAsync(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
         }
     }
 }

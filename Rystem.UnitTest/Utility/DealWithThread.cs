@@ -10,15 +10,15 @@ namespace Rystem.UnitTest
     {
         static DealWithThread()
         {
-            new TestHost(AzureConst.Load()
+            AzureConst.Load()
               .AddBackgroundWork<MyFirstBackgroundWork>(x =>
                {
                    x.Cron = "* * * * * *";
                    x.RunImmediately = true;
                    x.Key = "The best of the keys";
                })
-               .AddSingleton<MyDiTest>())
-                .WithRystem();
+               .AddSingleton<MyDiTest>()
+               .FinalizeWithoutDependencyInjection();
         }
         [Fact]
         public async Task RunInBackground()

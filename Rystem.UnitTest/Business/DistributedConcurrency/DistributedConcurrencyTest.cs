@@ -12,15 +12,14 @@ namespace Rystem.UnitTest.Business.DistributedConcurrency
     {
         static DistributedConcurrencyTest()
         {
-            new TestHost(AzureConst.Load()
+            AzureConst.Load()
                 .UseDistributedKey<DealingKey>()
                 .WithAzure()
                 .WithBlobStorage()
                 .AndWithAzure(Installation.Inst00)
                 .WithRedisCache()
-                .Configure())
-                .WithRystem();
-
+                .Configure()
+                .FinalizeWithoutDependencyInjection();
         }
         [Fact]
         public async Task RunASingleTimeOnTwoLocksRedisCache()

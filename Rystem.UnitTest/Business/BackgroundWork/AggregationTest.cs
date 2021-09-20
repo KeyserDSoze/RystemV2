@@ -11,14 +11,14 @@ namespace Rystem.UnitTest.Business.BackgroundWork
     {
         static AggregationTest()
         {
-            new TestHost(AzureConst.Load()
+            AzureConst.Load()
                 .UseAggregationOn<FalseNueve>()
                 .With()
                 .WithFirstInFirstOut(new SequenceProperty<FalseNueve>("FalseNueve", 500, TimeSpan.FromSeconds(2), Evaluate))
                     .AndWith(Installation.Inst00)
                     .WithLastInFirstOut(new SequenceProperty<FalseNueve>("FalseNueve", 500, TimeSpan.FromSeconds(2), Evaluate))
-                    .Configure())
-                .WithRystem();
+                    .Configure()
+                .FinalizeWithoutDependencyInjection();
         }
 
         private static int Counter;

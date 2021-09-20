@@ -15,7 +15,7 @@ namespace Rystem.UnitTest.Business.Cache
     {
         static CacheTest()
         {
-            new TestHost(AzureConst.Load()
+            AzureConst.Load()
                 .UseCacheWithKey<SampleKey, Sample>()
                 .WithAzure(new CacheConfiguration(TimeSpan.FromMinutes(5)), Installation.Default)
                 .WithTableStorage()
@@ -24,8 +24,8 @@ namespace Rystem.UnitTest.Business.Cache
                 .AndWithAzure(new CacheConfiguration(TimeSpan.FromMinutes(5)), Installation.Inst01)
                 .WithRedisCache()
                 .AndMemory(new CacheConfiguration(TimeSpan.FromSeconds(1)))
-                .Configure())
-                .WithRystem();
+                .Configure()
+                .FinalizeWithoutDependencyInjection();
         }
         [Fact]
         public async Task TableStorage()

@@ -15,7 +15,7 @@ namespace Rystem.UnitTest.Business.Document
     {
         static DocumentTest()
         {
-            new TestHost(AzureConst.Load()
+            AzureConst.Load()
                 .UseDocumentOn<Sample>()
                 .WithAzure()
                 .WithTableStorage()
@@ -35,10 +35,8 @@ namespace Rystem.UnitTest.Business.Document
                 .WithPrimaryKey(x => x.PrimaryKey)
                 .WithSecondaryKey(x => x.SecondaryKey)
                 .WithTimestamp(x => x.Timestamp)
-                .Configure())
-                .WithRystem();
-
-
+                .Configure()
+                .FinalizeWithoutDependencyInjection();
         }
         [Fact]
         public async Task TableStorage()
