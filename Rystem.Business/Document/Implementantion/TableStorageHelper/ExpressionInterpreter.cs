@@ -32,12 +32,12 @@ namespace Rystem.Business.Document.Implementantion
     }
     internal class QueryStrategy
     {
-        internal static string Create(Expression expression)
+        internal static string Create(Expression expression, string partitionKey, string rowKey, string timestamp)
         {
-            IExpressionStrategy expressionFactory = new BinaryExpressionStrategy();
+            IExpressionStrategy expressionFactory = new BinaryExpressionStrategy(partitionKey, rowKey, timestamp);
             if (expression is MethodCallExpression)
             {
-                expressionFactory = new MethodCallerExpressionStrategy();
+                expressionFactory = new MethodCallerExpressionStrategy(partitionKey, rowKey, timestamp);
             }
             else if (expression is UnaryExpression)
             {
@@ -73,9 +73,19 @@ namespace Rystem.Business.Document.Implementantion
         string Convert(Expression expression);
         public const string PartitionKey = "PartitionKey";
         public const string RowKey = "RowKey";
+        public const string Timestamp = "Timestamp";
     }
     internal class BinaryExpressionStrategy : IExpressionStrategy
     {
+        private readonly string PartitionKey;
+        private readonly string RowKey;
+        private readonly string Timestamp;
+        public BinaryExpressionStrategy(string partitionKey, string rowKey, string timestamp)
+        {
+            PartitionKey = partitionKey;
+            RowKey = rowKey;
+            Timestamp = timestamp;
+        }
         public string Convert(Expression expression)
         {
             BinaryExpression binaryExpression = (BinaryExpression)expression;
@@ -83,10 +93,12 @@ namespace Rystem.Business.Document.Implementantion
             {
                 dynamic leftPart = binaryExpression.Left;
                 string name = leftPart.Member.Name;
-                if (name == DocumentImplementationConst.PrimaryKey)
+                if (name == PartitionKey)
                     name = IExpressionStrategy.PartitionKey;
-                else if (name == DocumentImplementationConst.SecondaryKey)
+                else if (name == RowKey)
                     name = IExpressionStrategy.RowKey;
+                else if (name == Timestamp)
+                    name = IExpressionStrategy.Timestamp;
                 object rightPart = Expression.Lambda(binaryExpression.Right).Compile().DynamicInvoke();
                 return name + binaryExpression.NodeType.MakeLogic() + QueryStrategy.ValueToString(rightPart);
             }
@@ -106,6 +118,15 @@ namespace Rystem.Business.Document.Implementantion
     }
     internal class MethodCallerExpressionStrategy : IExpressionStrategy
     {
+        private readonly string PartitionKey;
+        private readonly string RowKey;
+        private readonly string Timestamp;
+        public MethodCallerExpressionStrategy(string partitionKey, string rowKey, string timestamp)
+        {
+            PartitionKey = partitionKey;
+            RowKey = rowKey;
+            Timestamp = timestamp;
+        }
         public string Convert(Expression expression)
         {
             MethodCallExpression methodCallExpression = (MethodCallExpression)expression;
@@ -113,10 +134,12 @@ namespace Rystem.Business.Document.Implementantion
             {
                 dynamic argument = methodCallExpression.Arguments[0];
                 string name = argument.Member.Name;
-                if (name == DocumentImplementationConst.PrimaryKey)
+                if (name == PartitionKey)
                     name = IExpressionStrategy.PartitionKey;
-                else if (name == DocumentImplementationConst.SecondaryKey)
+                else if (name == RowKey)
                     name = IExpressionStrategy.RowKey;
+                else if (name == Timestamp)
+                    name = IExpressionStrategy.Timestamp;
                 object value = Expression.Lambda(methodCallExpression.Arguments[1]).Compile().DynamicInvoke();
                 return name + ((ExpressionType)Enum.Parse(typeof(ExpressionType), methodCallExpression.Method.Name)).MakeLogic() + QueryStrategy.ValueToString(value);
             }

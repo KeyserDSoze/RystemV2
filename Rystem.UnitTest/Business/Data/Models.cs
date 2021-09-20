@@ -17,6 +17,8 @@ namespace Rystem.UnitTest.Business.Data
         {
             bool check = installation == Installation.Inst00;
             MiniContainer mini = new() { Cads = "XXX", Samples = new List<MiniSample>() { new MiniSample() { Ale3 = "dsadsadsa", X = 4444 } } };
+            if (await mini.ExistsAsync().NoContext())
+                await mini.DeleteAsync().NoContext();
             await mini.WriteAsync(installation: installation).NoContext();
             await mini.WriteAsync(installation: installation).NoContext();
             await mini.WriteAsync(installation: installation).NoContext();
@@ -24,25 +26,19 @@ namespace Rystem.UnitTest.Business.Data
             {
                 await foreach (var item in mini.ListAsync(installation: installation))
                 {
-                    Assert.Equal("dsadsadsa", item.Content.First().Samples.First().Ale3);
-                    Assert.Equal(3, item.Content.Count);
+                    Assert.Equal("dsadsadsa", item.Content.Samples.First().Ale3);
                 }
             }
             else
             {
                 await foreach (var item in mini.ListAsync(10, installation))
                 {
-                    Assert.Equal("dsadsadsa", item.Content.First().Samples.First().Ale3);
+                    Assert.Equal("dsadsadsa", item.Content.Samples.First().Ale3);
                 }
             }
             if (check)
             {
-                var counter = 0;
-                await foreach (var t in mini.ListAsync(installation: installation))
-                {
-                    counter++;
-                }
-                Assert.Equal(3, counter);
+                Assert.Equal(3, (await mini.ListAsync(installation: installation).ToListAsync()).Count);
             }
             else
             {

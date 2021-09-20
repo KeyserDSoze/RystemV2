@@ -9,9 +9,9 @@ namespace System
 {
     public static partial class CacheExtensions
     {
-        private static CacheManager<TCacheKey, TCache> Manager<TCacheKey, TCache>(this TCacheKey entity)
+        private static ICacheManager<TCacheKey, TCache> Manager<TCacheKey, TCache>(this TCacheKey entity)
             where TCacheKey : ICacheKey<TCache>
-            => ServiceLocator.GetService<CacheManager<TCacheKey, TCache>>();
+            => ServiceLocator.GetService<ICacheManager<TCacheKey, TCache>>();
 
         public static async Task<TEntry> InstanceAsync<TEntry>(this ICacheKey<TEntry> entry, TimeSpan expiringTime = default, Installation installation = Installation.Default, bool withConsistency = false)
             => await entry.Manager<ICacheKey<TEntry>, TEntry>().InstanceAsync(entry, withConsistency, expiringTime, installation).NoContext();

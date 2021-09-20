@@ -50,7 +50,7 @@ namespace Rystem.Business.Document
             if (options.PrimaryKey.GetValue(entity) == default)
                 options.PrimaryKey.SetValue(entity, DateTime.UtcNow.ToString(DateTimeStringForPrimaryKey));
             if (options.SecondaryKey.GetValue(entity) == default)
-                options.PrimaryKey.SetValue(entity, Alea.GetTimedKey());
+                options.SecondaryKey.SetValue(entity, Alea.GetTimedKey());
             return entity;
         }
         public Task<bool> DeleteAsync(TEntity entity, Installation installation = Installation.Default)

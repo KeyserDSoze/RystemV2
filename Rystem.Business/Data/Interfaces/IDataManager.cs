@@ -59,7 +59,7 @@ namespace Rystem.Business.Data
         /// <param name="breakLine">If the content contains a break line pattern (usually used in append configuration).</param>
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>Get "takeCount" items with its Name and a list T objects.</returns>
-        IAsyncEnumerable<(string Name, List<TEntity> Content)> ListAsync(string startsWith, int? takeCount = null, Installation installation = Installation.Default);
+        IAsyncEnumerable<(string Name, TEntity Content)> ListAsync(string startsWith, int? takeCount = null, Installation installation = Installation.Default);
         /// <summary>
         /// Write a stream as Data on the right installation of IData.
         /// </summary>

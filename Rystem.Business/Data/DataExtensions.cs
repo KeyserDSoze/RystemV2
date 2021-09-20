@@ -88,21 +88,6 @@ namespace System
         }
 
         /// <summary>
-        /// Read a json Data object.
-        /// </summary>
-        /// <typeparam name="T">Type of the object that you wrote as json Data.</typeparam>
-        /// <param name="data">IData object.</param>
-        /// <param name="takeCount">Number of first "takeCount" elements to retrieve. If null retrieve all elements that matches the searched pattern.</param>
-        /// <param name="installation">Rystem installation value.</param>
-        /// <returns>Object that you wrote as json Data.</returns>
-        public static IAsyncEnumerable<(string Name, List<T> Content)> ReadAsync<T>(this T data, int? takeCount = null, Installation installation = Installation.Default)
-            where T : IData
-        {
-            var manager = data.Manager();
-            return manager.ListAsync(manager.GetName(data, installation), takeCount, installation);
-        }
-
-        /// <summary>
         /// Read a Stream from Data.
         /// </summary>
         /// <param name="data">IData object.</param>
@@ -124,7 +109,7 @@ namespace System
         /// <param name="takeCount">Number of first "takeCount" elements to retrieve. If null retrieve all elements that matches the searched pattern.</param>
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>Get "takeCount" items with its Name and a list T objects.</returns>
-        public static IAsyncEnumerable<(string Name, List<T> Content)> ListAsync<T>(this T data, int? takeCount = null, Installation installation = Installation.Default)
+        public static IAsyncEnumerable<(string Name, T Content)> ListAsync<T>(this T data, int? takeCount = null, Installation installation = Installation.Default)
             where T : IData
         {
             var manager = data.Manager();

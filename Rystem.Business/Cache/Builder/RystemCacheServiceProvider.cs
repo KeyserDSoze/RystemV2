@@ -21,8 +21,8 @@ namespace Rystem.Business
         }
         public IServiceCollection Configure()
         {
-            ServiceCollection.AddSingleton(new Options<ICacheManager<TCacheKey, TCache>>(Services));
-            ServiceCollection.AddSingleton<ICacheManager<TCacheKey, TCache>, CacheManager<TCacheKey, TCache>>();
+            ServiceCollection.AddSingleton(new Options<ICacheManager<ICacheKey<TCache>, TCache>>(Services));
+            ServiceCollection.AddSingleton<ICacheManager<ICacheKey<TCache>, TCache>, CacheManager<ICacheKey<TCache>, TCache>>();
             return ServiceCollection;
         }
     }

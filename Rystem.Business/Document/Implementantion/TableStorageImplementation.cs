@@ -31,7 +31,7 @@ namespace Rystem.Business.Document.Implementantion
             EntityType = typeof(TEntity);
             foreach (PropertyInfo pi in EntityType.GetProperties())
             {
-                if (pi.GetCustomAttribute(NoDocumentAttribute) != default || pi.Name == DocumentImplementationConst.PrimaryKey || pi.Name == DocumentImplementationConst.SecondaryKey || pi.Name == DocumentImplementationConst.Timestamp)
+                if (pi.GetCustomAttribute(NoDocumentAttribute) != default || pi.Name == options.PrimaryKey.Name || pi.Name == options.SecondaryKey.Name || pi.Name == options.Timestamp.Name)
                     continue;
                 else if (pi.PropertyType == typeof(int) || pi.PropertyType == typeof(long) ||
                     pi.PropertyType == typeof(double) || pi.PropertyType == typeof(string) ||
@@ -69,7 +69,7 @@ namespace Rystem.Business.Document.Implementantion
             {
                 if (expressionAsExpression == default)
                     return string.Empty;
-                string result = QueryStrategy.Create(expressionAsExpression);
+                string result = QueryStrategy.Create(expressionAsExpression, Options.PrimaryKey.Name, Options.SecondaryKey.Name, Options.Timestamp.Name);
                 if (!string.IsNullOrWhiteSpace(result))
                     return result;
                 BinaryExpression binaryExpression = (BinaryExpression)expressionAsExpression;

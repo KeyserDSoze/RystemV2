@@ -65,14 +65,15 @@ namespace Rystem.Business.Data
         public Task<IEnumerable<(string Name, Stream Value)>> ListStreamAsync(string startsWith, int? takeCount = null, Installation installation = Installation.Default)
             => Implementation(installation).ListAsync(startsWith, takeCount);
 
-        public async IAsyncEnumerable<(string Name, List<TEntity> Content)> ListAsync(string startsWith, int? takeCount = null, Installation installation = Installation.Default)
+        public async IAsyncEnumerable<(string Name, TEntity Content)> ListAsync(string startsWith, int? takeCount = null, Installation installation = Installation.Default)
         {
             var implementation = Implementation(installation);
             foreach (var (Name, Value) in await ListStreamAsync(startsWith, takeCount ?? int.MaxValue, installation).NoContext())
                 if (!implementation.IsMultipleLines)
-                    yield return (Name, new List<TEntity>() { await Value.FromJsonAsync<TEntity>().NoContext() });
+                    yield return (Name, await Value.FromJsonAsync<TEntity>().NoContext());
                 else
-                    yield return (Name, (await Value.ConvertToStringAsync().NoContext()).Split('\n').Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.FromJson<TEntity>()).ToList());
+                    foreach (var entity in (await Value.ConvertToStringAsync().NoContext()).Split('\n').Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.FromJson<TEntity>()))
+                        yield return (Name, entity);
         }
         public Task<bool> WriteAsync(string name, Stream stream, dynamic options, Installation installation = Installation.Default)
             => Implementation(installation).WriteAsync(name, stream, options);

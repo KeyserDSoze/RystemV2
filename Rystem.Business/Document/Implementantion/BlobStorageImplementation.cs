@@ -40,12 +40,12 @@ namespace Rystem.Business.Document.Implementantion
             {
                 var bExpr = expression.Body as BinaryExpression;
                 dynamic expr = bExpr.Left;
-                if (expr.Member.Name == DocumentImplementationConst.PrimaryKey)
+                if (expr.Member.Name == Options.PrimaryKey.Name)
                 {
                     object rightPart = Expression.Lambda(bExpr.Right).Compile().DynamicInvoke();
                     query = $"{rightPart}/";
                 }
-                else if (expr.Left.Member.Name == DocumentImplementationConst.SecondaryKey)
+                else if (expr.Left.Member.Name == Options.SecondaryKey.Name)
                 {
                     object rightPart = Expression.Lambda(bExpr.Right).Compile().DynamicInvoke();
                     secondaryKey = rightPart.ToString();

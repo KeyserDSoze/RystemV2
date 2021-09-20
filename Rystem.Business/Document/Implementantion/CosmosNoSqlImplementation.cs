@@ -26,7 +26,7 @@ namespace Rystem.Business.Document.Implementantion
             EntityType = typeof(TEntity);
             foreach (PropertyInfo pi in EntityType.GetProperties())
             {
-                if (pi.GetCustomAttribute(NoDocumentAttribute) != default || pi.Name == DocumentImplementationConst.PrimaryKey || pi.Name == DocumentImplementationConst.SecondaryKey || pi.Name == DocumentImplementationConst.Timestamp)
+                if (pi.GetCustomAttribute(NoDocumentAttribute) != default || pi.Name == options.PrimaryKey.Name || pi.Name == options.SecondaryKey.Name || pi.Name == options.Timestamp.Name)
                     continue;
                 else
                     Properties.Add(pi);
@@ -44,9 +44,9 @@ namespace Rystem.Business.Document.Implementantion
         public async Task<IEnumerable<TEntity>> GetAsync(TEntity entity, Expression<Func<TEntity, bool>> expression = default, int? takeCount = default)
         {
             List<TEntity> entities = new();
-            var primaryKey = Options.PrimaryKey.GetValue(entity).ToString();
+            var primaryKey = Options.PrimaryKey.GetValue(entity);
             await foreach (var value in Integration.ReadAsync(expression, takeCount,
-                primaryKey != default ? new QueryRequestOptions { PartitionKey = new PartitionKey(primaryKey) } : default,
+                primaryKey != default ? new QueryRequestOptions { PartitionKey = new PartitionKey(primaryKey.ToString()) } : default,
                 default, default))
             {
                 entities.Add(value);

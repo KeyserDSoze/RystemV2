@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace System.Threading.Tasks
 {
@@ -12,6 +13,13 @@ namespace System.Threading.Tasks
           => task.ConfigureAwait(false);
         public static ConfiguredValueTaskAwaitable<T> NoContext<T>(this ValueTask<T> task)
             => task.ConfigureAwait(false);
+        public static async Task<List<T>> ToListAsync<T>(this IAsyncEnumerable<T> items)
+        {
+            List<T> entities = new();
+            await foreach (var item in items)
+                entities.Add(item);
+            return entities;
+        }
         public static void ToResult(this Task task)
             => task.NoContext().GetAwaiter().GetResult();
         public static T ToResult<T>(this Task<T> task)
