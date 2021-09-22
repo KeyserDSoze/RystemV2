@@ -10,7 +10,7 @@
       - your tags,
       - your metrics.
       The only things you need is an AAD app registration with global reader role. #enjoyrystem</Description>
-    <Copyright>2021</Copyright>
+    <Copyright>2022</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>rystem.png</PackageIcon>
     <RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>

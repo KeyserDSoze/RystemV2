@@ -18,7 +18,7 @@
 - added a fast Lock and RaceCondition dealing for your task.
 - added a fast method to run a task in background continuously
 - added a fast method to schedule a batch operation in background with FIFO or LIFO queue.</Description>
-    <Copyright>2021</Copyright>
+    <Copyright>2022</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>rystem.png</PackageIcon>
     <RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>

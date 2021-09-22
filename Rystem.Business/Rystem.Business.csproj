@@ -11,7 +11,7 @@ It allows you to deal with multi-instances problem with IoC as central point:
 - Race condition and lock for multi-instances with redis cache or blob storage.</Description>
     <Authors>Alessandro Rapiti</Authors>
     <Company>Rystem</Company>
-    <Copyright>2021</Copyright>
+    <Copyright>2022</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>
     <PackageIcon>rystem.png</PackageIcon>
