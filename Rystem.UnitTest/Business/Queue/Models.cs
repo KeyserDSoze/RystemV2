@@ -24,7 +24,7 @@ namespace Rystem.UnitTest.Business.Queue
             elements = (await new Sample().ReadAsync(installation: installation).NoContext()).ToList();
             await CreateNewSample(1).SendAsync(installation: installation).NoContext();
             await CreateNewSample(1).SendAsync(installation: installation).NoContext();
-            await Task.Delay(2000);
+            await Task.Delay(3000);
             elements = (await new Sample().ReadAsync(installation: installation).NoContext()).ToList();
             if (installation == Installation.Inst00)
                 Assert.True(elements.Count >= 2);
