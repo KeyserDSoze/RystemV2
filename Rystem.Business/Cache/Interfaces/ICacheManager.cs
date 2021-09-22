@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business
 {
-    public interface ICacheManager<TCacheKey, TCache>
+    public interface ICacheManager<TCacheKey, TCache> : IWarmUp
         where TCacheKey : ICacheKey<TCache>
     {
         Task<TCache> InstanceAsync(TCacheKey key, bool withConsistency, TimeSpan expiringTime, Installation installation = Installation.Default);

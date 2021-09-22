@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Rystem.Background
 {
-    public static partial class BackgroundWorkExtensions
+    public static partial class BackgroundJobExtensions
     {
-        public static IServiceCollection AddBackgroundWork<TEntity>(this IServiceCollection services, Action<BackgroundWorkOptions> options)
-            where TEntity : class, IBackgroundWork
+        public static IServiceCollection AddBackgroundJob<TEntity>(this IServiceCollection services, Action<BackgroundJobOptions> options)
+            where TEntity : class, IBackgroundJob
         {
             services.AddTransient<TEntity>();
-            var bOptions = new BackgroundWorkOptions()
+            var bOptions = new BackgroundJobOptions()
             {
                 Key = Guid.NewGuid().ToString(),
                 Cron = "0 1 * * *",
@@ -23,16 +23,16 @@ namespace Rystem.Background
             return services;
         }
         private static string GetKey<TEntity>(string key)
-            where TEntity : class, IBackgroundWork
+            where TEntity : class, IBackgroundJob
             => $"BackgroundWork_{key}_{typeof(TEntity).FullName}";
-        private static void Start<TEntity>(TEntity entity, BackgroundWorkOptions options)
-            where TEntity : class, IBackgroundWork
+        private static void Start<TEntity>(TEntity entity, BackgroundJobOptions options)
+            where TEntity : class, IBackgroundJob
         {
             string key = GetKey<TEntity>(options.Key);
-            if (!BackgroundWork.IsRunning(key))
+            if (!BackgroundJob.IsRunning(key))
             {
                 var expression = CronExpression.Parse(options.Cron, options.Cron.Split(' ').Length > 5 ? CronFormat.IncludeSeconds : CronFormat.Standard);
-                BackgroundWork.Run(async () =>
+                BackgroundJob.Run(async () =>
                     {
                         int attempt = 0;
                         while (entity == default && attempt < 30)
@@ -69,13 +69,13 @@ namespace Rystem.Background
             }
         }
         public static void Run<T>(this T entity)
-            where T : class, IBackgroundOptionedWork
+            where T : class, IBackgroundOptionedJob
             => Start(entity, entity.Options);
         public static void Stop<T>(this T entity)
-            where T : class, IBackgroundOptionedWork
-            => BackgroundWork.Stop(GetKey<T>(entity.Options.Key));
+            where T : class, IBackgroundOptionedJob
+            => BackgroundJob.Stop(GetKey<T>(entity.Options.Key));
         public static void Stop<T>(this T entity, string key)
-           where T : class, IBackgroundWork
-            => BackgroundWork.Stop(GetKey<T>(key));
+           where T : class, IBackgroundJob
+            => BackgroundJob.Stop(GetKey<T>(key));
     }
 }

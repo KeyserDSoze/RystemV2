@@ -47,7 +47,7 @@ namespace Rystem.UnitTest
             List<Task> tasks = new List<Task>();
             for (int i = 0; i < 20; i++)
             {
-                tasks.Add(RaceCondition.RunAsync(action, key));
+                tasks.Add(RaceConditionExtensions.RunAsync(action, key));
             }
             await Task.WhenAll(tasks);
         }

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business.Document
 {
-    public interface IDocumentManager<TEntity>
+    public interface IDocumentManager<TEntity> : IWarmUp
         where TEntity : new()
     {
         Task<bool> DeleteAsync(TEntity entity, Installation installation = Installation.Default);

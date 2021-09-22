@@ -14,6 +14,7 @@ namespace Rystem.Background
         {
             ServiceCollection.AddSingleton(new Options<ISequenceManager<T>>(Services));
             ServiceCollection.AddSingleton<ISequenceManager<T>, SequenceManager<T>>();
+            ServiceCollection.AddRystemFullyAddedCallback(() => ServiceLocator.GetService<ISequenceManager<T>>().WarmUpAsync());
             return ServiceCollection;
         }
     }

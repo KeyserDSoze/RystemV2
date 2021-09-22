@@ -11,7 +11,7 @@ namespace Rystem.Azure.Integration.Message
     /// <summary>
     /// https://github.com/Azure/azure-sdk-for-net/blob/Azure.Messaging.ServiceBus_7.1.2/sdk/servicebus/Azure.Messaging.ServiceBus/README.md
     /// </summary>
-    public sealed class ServiceBusIntegration
+    public sealed class ServiceBusIntegration : IWarmUp
     {
         private readonly ServiceBusSender Client;
         private readonly ServiceBusProcessor ClientReader;
@@ -72,5 +72,8 @@ namespace Rystem.Azure.Integration.Message
         {
             await Client.CancelScheduledMessageAsync(messageId, cancellationToken).NoContext();
         }
+
+        public Task<bool> WarmUpAsync() 
+            => Task.FromResult(true);
     }
 }

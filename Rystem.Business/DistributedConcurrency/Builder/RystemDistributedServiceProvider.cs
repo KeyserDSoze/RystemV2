@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Rystem.Business;
-using System.Linq;
 
 namespace Rystem.Concurrency
 {
@@ -18,6 +17,7 @@ namespace Rystem.Concurrency
         {
             ServiceCollection.AddSingleton(new Options<IDistributedManager<T>>(Services));
             ServiceCollection.AddSingleton<IDistributedManager<T>, DistributedManager<T>>();
+            ServiceCollection.AddRystemFullyAddedCallback(() => ServiceLocator.GetService<IDistributedManager<T>>().WarmUpAsync());
             return ServiceCollection;
         }
     }

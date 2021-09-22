@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Background
 {
-    internal sealed class BackgroundWorkThread
+    internal sealed class BackgroundJobThread
     {
         private static readonly Dictionary<string, System.Timers.Timer> Actions = new();
         private static readonly object Semaphore = new();

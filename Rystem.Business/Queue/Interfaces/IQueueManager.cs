@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business
 {
-    public interface IQueueManager<TEntity>
+    public interface IQueueManager<TEntity> : IWarmUp
     {
         Task<bool> SendAsync(TEntity message, Installation installation, string partitionKey, string rowKey);
         Task<long> SendScheduledAsync(TEntity message, int delayInSeconds, Installation installation, string partitionKey, string rowKey);

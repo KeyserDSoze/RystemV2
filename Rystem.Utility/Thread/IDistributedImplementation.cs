@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Rystem.Concurrency
 {
-    public interface IDistributedImplementation
+    public interface IDistributedImplementation: IWarmUp
     {
         Task<bool> AcquireAsync(string key);
         Task<bool> IsAcquiredAsync(string key);

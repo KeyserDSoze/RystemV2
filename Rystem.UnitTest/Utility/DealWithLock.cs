@@ -63,7 +63,7 @@ namespace Rystem.UnitTest
             await Task.WhenAll(tasks);
             async Task Execute()
             {
-                var x = await Lock.RunAsync(action, key);
+                var x = await LockExtensions.RunAsync(action, key);
                 if (x.InException)
                     Error++;
             };

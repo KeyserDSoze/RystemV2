@@ -12,7 +12,6 @@ namespace Rystem.Business
             var option = new RystemDataServiceProviderOptions();
             return new RystemDataServiceName<T>(WithIntegration(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey, option), option);
         }
-
         public RystemDataServiceName<T> WithAppendBlob(BlobStorageConfiguration configuration = default, string serviceKey = default)
         {
             var option = new RystemDataServiceProviderOptions();

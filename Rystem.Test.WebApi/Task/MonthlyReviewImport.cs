@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Rystem.Test.WebApi
 {
-    public class MonthlyReviewImport : IBackgroundOptionedWork
+    public class MonthlyReviewImport : IBackgroundOptionedJob
     {
-        public BackgroundWorkOptions Options { get; }
+        public BackgroundJobOptions Options { get; }
         public MonthlyReviewImport()
         {
         }

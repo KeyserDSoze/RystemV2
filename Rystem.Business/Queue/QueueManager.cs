@@ -1,11 +1,8 @@
 ﻿using Rystem.Azure;
-using Rystem.Azure.Integration.Message;
-using Rystem.Azure.Integration.Storage;
 using Rystem.Business.Queue.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Rystem.Business
@@ -13,7 +10,7 @@ namespace Rystem.Business
     internal sealed class QueueManager<TEntity> : IQueueManager<TEntity>
     {
         private readonly IDictionary<Installation, IQueueImplementation<TEntity>> Implementations = new Dictionary<Installation, IQueueImplementation<TEntity>>();
-        private readonly IDictionary<Installation, ProvidedService> QueueConfiguration;
+        private readonly IDictionary<Installation, ProvidedService> QueueConfigurations;
         private readonly object TrafficLight = new();
         private IQueueImplementation<TEntity> Implementation(Installation installation)
         {
@@ -21,7 +18,7 @@ namespace Rystem.Business
                 lock (TrafficLight)
                     if (!Implementations.ContainsKey(installation))
                     {
-                        ProvidedService configuration = QueueConfiguration[installation];
+                        ProvidedService configuration = QueueConfigurations[installation];
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureQueueStorage:
@@ -42,7 +39,7 @@ namespace Rystem.Business
         private readonly AzureManager Manager;
         public QueueManager(Options<IQueueManager<TEntity>> options, AzureManager manager)
         {
-            QueueConfiguration = options.Services;
+            QueueConfigurations = options.Services;
             Manager = manager;
         }
         public async Task<bool> SendAsync(TEntity message, Installation installation, string partitionKey, string rowKey)
@@ -64,5 +61,13 @@ namespace Rystem.Business
         public async Task<bool> CleanAsync(Installation installation)
             => await Implementation(installation).CleanAsync().NoContext();
         public string GetName(Installation installation) => Implementations[installation].GetName();
+        public async Task<bool> WarmUpAsync()
+        {
+            List<Task> tasks = new();
+            foreach (var configuration in QueueConfigurations)
+                tasks.Add(Implementation(configuration.Key).WarmUpAsync());
+            await Task.WhenAll(tasks).NoContext();
+            return true;
+        }
     }
 }

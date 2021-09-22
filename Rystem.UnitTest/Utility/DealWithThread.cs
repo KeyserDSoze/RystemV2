@@ -11,7 +11,7 @@ namespace Rystem.UnitTest
         static DealWithThread()
         {
             AzureConst.Load()
-              .AddBackgroundWork<MyFirstBackgroundWork>(x =>
+              .AddBackgroundJob<MyFirstBackgroundWork>(x =>
                {
                    x.Cron = "* * * * * *";
                    x.RunImmediately = true;
@@ -32,9 +32,9 @@ namespace Rystem.UnitTest
         [Fact]
         public async Task RunInBackground2()
         {
-            BackgroundWork.Run(async () => await CountAsync(2), nextRunningTime: () => 300, runImmediately: true);
+            BackgroundJob.Run(async () => await CountAsync(2), nextRunningTime: () => 300, runImmediately: true);
             await Task.Delay(1100);
-            BackgroundWork.Stop();
+            BackgroundJob.Stop();
             Assert.Equal(8, Counter);
         }
         [Fact]
@@ -42,7 +42,7 @@ namespace Rystem.UnitTest
         {
 
             await Task.Delay(2000);
-            BackgroundWork.Stop();
+            BackgroundJob.Stop();
             var myDi = ServiceLocator.GetService<MyDiTest>();
             Assert.Equal(6, myDi.Counter);
         }
@@ -50,7 +50,7 @@ namespace Rystem.UnitTest
         {
             public int Counter { get; set; }
         }
-        private class MyFirstBackgroundWork : IBackgroundWork
+        private class MyFirstBackgroundWork : IBackgroundJob
         {
             private readonly MyDiTest MyDiTest;
             public MyFirstBackgroundWork(MyDiTest myDiTest)

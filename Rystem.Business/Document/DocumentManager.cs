@@ -12,7 +12,7 @@ namespace Rystem.Business.Document
         where TEntity : new()
     {
         private readonly IDictionary<Installation, IDocumentImplementation<TEntity>> Implementations = new Dictionary<Installation, IDocumentImplementation<TEntity>>();
-        private readonly IDictionary<Installation, ProvidedService> DocumentConfiguration;
+        private readonly IDictionary<Installation, ProvidedService> DocumentConfigurations;
         private readonly object TrafficLight = new();
         private IDocumentImplementation<TEntity> Implementation(Installation installation)
         {
@@ -20,7 +20,7 @@ namespace Rystem.Business.Document
                 lock (TrafficLight)
                     if (!Implementations.ContainsKey(installation))
                     {
-                        ProvidedService configuration = DocumentConfiguration[installation];
+                        ProvidedService configuration = DocumentConfigurations[installation];
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureTableStorage:
@@ -41,7 +41,7 @@ namespace Rystem.Business.Document
         private readonly AzureManager Manager;
         public DocumentManager(Options<IDocumentManager<TEntity>> options, AzureManager manager)
         {
-            DocumentConfiguration = options.Services;
+            DocumentConfigurations = options.Services;
             Manager = manager;
         }
         private const string DateTimeStringForPrimaryKey = "yyyyMMdd";
@@ -66,7 +66,6 @@ namespace Rystem.Business.Document
             var implementation = Implementation(installation);
             return implementation.UpdateAsync(Normalize(entity, implementation.Options));
         }
-
         public Task<bool> UpdateBatchAsync(IEnumerable<TEntity> entity, Installation installation = Installation.Default)
         {
             var implementation = Implementation(installation);
@@ -82,5 +81,14 @@ namespace Rystem.Business.Document
           => (await GetAsync(entity, expression, null, installation).NoContext()).Count();
         public string GetName(Installation installation = Installation.Default)
             => Implementation(installation).GetName();
+
+        public async Task<bool> WarmUpAsync()
+        {
+            List<Task> tasks = new();
+            foreach (var configuration in DocumentConfigurations)
+                tasks.Add(Implementation(configuration.Key).WarmUpAsync());
+            await Task.WhenAll(tasks).NoContext();
+            return true;
+        }
     }
 }

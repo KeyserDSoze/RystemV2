@@ -1,9 +1,7 @@
 ﻿using Rystem;
 using Rystem.Business;
-using Rystem.Business.Queue;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace System
@@ -20,7 +18,6 @@ namespace System
         public static async Task<long> SendScheduledAsync<TEntity>(this TEntity message, int delayInSeconds, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
            => await message.Manager().SendScheduledAsync(message, delayInSeconds, installation, partitionKey, rowKey).NoContext();
-
         public static async Task<bool> DeleteScheduledAsync<TEntity>(this TEntity message, long messageId, Installation installation = Installation.Default)
             where TEntity : IQueue
             => await message.Manager().DeleteScheduledAsync(messageId, installation).NoContext();
@@ -32,7 +29,6 @@ namespace System
                 result &= await msgs.FirstOrDefault().Manager().SendBatchAsync(msgs, installation, partitionKey, rowKey).NoContext();
             return result;
         }
-
         public static async Task<IEnumerable<long>> SendScheduledBatchAsync<TEntity>(this IEnumerable<TEntity> messages, int delayInSeconds, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
         {
@@ -53,7 +49,6 @@ namespace System
         public static async Task StopAsync<TEntity>(this TEntity message, Installation installation = Installation.Default)
             where TEntity : IQueue
             => await message.Manager().StopListenAsync(installation).NoContext();
-
         public static bool Send<TEntity>(this TEntity message, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue
            => message.SendAsync(partitionKey, rowKey, installation).ToResult();

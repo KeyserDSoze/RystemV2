@@ -31,7 +31,7 @@ namespace System
                 IEnumerator<string> keyValues = PropertyValue(key);
                 if (!keyValues.MoveNext())
                     continue;
-                foreach (PropertyInfo property in keyType.FetchProperties(ICacheKey<TEntry>.CacheIgnore))
+                foreach (PropertyInfo property in keyType.FetchProperties(ICacheKey<TEntry>.CacheIgnoreKey))
                 {
                     property.SetValue(multitonKey, Convert.ChangeType(keyValues.Current, property.PropertyType));
                     if (!keyValues.MoveNext())

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business.Data
 {
-    public interface IDataManager<TEntity>
+    public interface IDataManager<TEntity> : IWarmUp
     {
         /// <summary>
         /// Delete the Data object.

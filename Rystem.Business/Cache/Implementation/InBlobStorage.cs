@@ -3,9 +3,7 @@ using Rystem.Azure.Integration.Storage;
 using Rystem.Text;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Rystem.Business
@@ -67,5 +65,8 @@ namespace Rystem.Business
         }
         public async Task<IEnumerable<string>> ListAsync()
             => (await Integration.ListAsync($"{Prefix}/").NoContext()).Select(x => x.Name);
+
+        public Task<bool> WarmUpAsync() 
+            => Integration.WarmUpAsync();
     }
 }

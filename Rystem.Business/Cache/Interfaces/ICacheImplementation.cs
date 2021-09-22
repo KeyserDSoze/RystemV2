@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business
 {
-    internal interface ICacheImplementation<T> 
+    internal interface ICacheImplementation<T> : IWarmUp
     {
         Task<T> InstanceAsync(string key);
         Task<bool> UpdateAsync(string key, T value, TimeSpan expiringTime);

@@ -1,6 +1,6 @@
 ﻿namespace Rystem.Background
 {
-    public class BackgroundWorkOptions
+    public class BackgroundJobOptions
     {
         public string Key { get; set; }
         public bool RunImmediately { get; set; }

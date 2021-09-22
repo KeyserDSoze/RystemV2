@@ -32,7 +32,6 @@ namespace Rystem.Business
             else
                 return instance.Properties[ValueColumn].StringValue.FromJson<T>();
         }
-
         public async Task<bool> UpdateAsync(string key, T value, TimeSpan expiringTime)
             => await Integration.UpdateAsync(new DynamicTableEntity
             {
@@ -66,8 +65,9 @@ namespace Rystem.Business
             var instance = await InstanceAsync(key).NoContext();
             return instance != null ? CacheStatus<T>.Ok(instance) : CacheStatus<T>.NotOk();
         }
-
         public async Task<IEnumerable<string>> ListAsync()
             => (await Integration.QueryAsync($"PartitionKey eq '{Prefix}'").NoContext()).Select(x => x.RowKey);
+        public Task<bool> WarmUpAsync()
+            => Integration.WarmUpAsync();
     }
 }

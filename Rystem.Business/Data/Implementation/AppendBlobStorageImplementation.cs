@@ -32,5 +32,7 @@ namespace Rystem.Business.Data.Implementantion
             => Integration.SetBlobPropertiesAsync(name, properties);
         public Task<bool> WriteAsync(string name, Stream stream, dynamic _)
             => Integration.WriteAppendAsync(name, stream);
+        public Task<bool> WarmUpAsync()
+           => Integration.WarmUpAsync();
     }
 }

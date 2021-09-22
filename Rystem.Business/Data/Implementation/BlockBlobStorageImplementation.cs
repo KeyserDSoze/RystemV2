@@ -1,8 +1,4 @@
-﻿using Microsoft.Azure.Cosmos.Table;
-using Rystem.Azure.Integration;
-using Rystem.Azure.Integration.Storage;
-using Rystem.Text;
-using System;
+﻿using Rystem.Azure.Integration.Storage;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -36,5 +32,7 @@ namespace Rystem.Business.Data.Implementantion
             => Integration.WriteBlockAsync(name, stream, options);
         public Task<bool> SetPropertiesAsync(string name, dynamic properties)
             => Integration.SetBlobPropertiesAsync(name, properties);
+        public Task<bool> WarmUpAsync()
+            => Integration.WarmUpAsync();
     }
 }

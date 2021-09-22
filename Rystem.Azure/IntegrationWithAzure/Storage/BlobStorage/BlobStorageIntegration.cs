@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Storage
 {
-    public sealed class BlobStorageIntegration : BaseStorageClient
+    public sealed class BlobStorageIntegration : BaseStorageClient, IWarmUp
     {
         private BlobContainerClient Context;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
@@ -25,7 +25,7 @@ namespace Rystem.Azure.Integration.Storage
         private async Task<BlobContainerClient> GetContextAsync()
         {
             if (Context == default)
-                await RaceCondition.RunAsync(async () =>
+                await RaceConditionExtensions.RunAsync(async () =>
                 {
                     if (Context == default)
                     {
@@ -215,7 +215,7 @@ namespace Rystem.Azure.Integration.Storage
         {
             if (!BlobLockClients.ContainsKey(name))
             {
-                await RaceCondition.RunAsync(async () =>
+                await RaceConditionExtensions.RunAsync(async () =>
                 {
                     if (!BlobLockClients.ContainsKey(name))
                     {
@@ -241,7 +241,7 @@ namespace Rystem.Azure.Integration.Storage
                 if (!this.TokenAcquireds.ContainsKey(normalizedKey))
                 {
                     var blob = await this.GetBlobClientForLockAsync(normalizedKey).NoContext();
-                    RaceConditionResponse response = await RaceCondition.RunAsync(async () =>
+                    RaceConditionResponse response = await RaceConditionExtensions.RunAsync(async () =>
                     {
                         var lease = blob.Client.GetBlobLeaseClient(BlobLockClients[normalizedKey].LeaseId);
                         Response<BlobLease> response = await lease.AcquireAsync(new TimeSpan(0, 1, 0)).NoContext();
@@ -270,13 +270,20 @@ namespace Rystem.Azure.Integration.Storage
         {
             string normalizedKey = key ?? string.Empty;
             if (TokenAcquireds.ContainsKey(normalizedKey))
-                await RaceCondition.RunAsync(async () =>
+                await RaceConditionExtensions.RunAsync(async () =>
                 {
                     _ = await TokenAcquireds[normalizedKey].ReleaseAsync().NoContext();
                     TokenAcquireds.TryRemove(normalizedKey, out _);
                 }, BlobLockClients[normalizedKey].ReleaseLockId).NoContext();
             return true;
         }
+
+        public async Task<bool> WarmUpAsync()
+        {
+            await GetContextAsync().NoContext();
+            return true;
+        }
+
         public class BlobPropertyWrapper
         {
             public string Name { get; init; }

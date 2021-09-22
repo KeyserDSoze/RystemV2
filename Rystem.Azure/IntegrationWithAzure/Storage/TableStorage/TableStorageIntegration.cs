@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Storage
 {
-    public sealed class TableStorageIntegration : BaseStorageClient
+    public sealed class TableStorageIntegration : BaseStorageClient, IWarmUp
     {
         private CloudTable Context;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
@@ -17,7 +17,7 @@ namespace Rystem.Azure.Integration.Storage
         private async Task<CloudTable> GetContextAsync()
         {
             if (Context == default)
-                await RaceCondition.RunAsync(async () =>
+                await RaceConditionExtensions.RunAsync(async () =>
                 {
                     if (Context == default)
                     {
@@ -34,7 +34,7 @@ namespace Rystem.Azure.Integration.Storage
         private const string Asterisk = "*";
         public async Task<bool> DeleteAsync(DynamicTableEntity entity)
         {
-            var client = Context ?? await GetContextAsync();
+            var client = Context ?? await GetContextAsync().NoContext();
             if (string.IsNullOrWhiteSpace(entity.ETag))
                 entity.ETag = Asterisk;
             TableOperation operation = TableOperation.Delete(entity);
@@ -111,6 +111,12 @@ namespace Rystem.Azure.Integration.Storage
                     result &= (await client.ExecuteBatchAsync(batch).NoContext()).All(x => x.HttpStatusCode == 204);
             }
             return result;
+        }
+
+        public async Task<bool> WarmUpAsync()
+        {
+            await GetContextAsync().NoContext();
+            return true;
         }
     }
 }

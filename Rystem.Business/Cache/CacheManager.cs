@@ -87,7 +87,7 @@ namespace Rystem.Business
             else
             {
                 TCache cache = default;
-                await RaceCondition.RunAsync(async () => cache = await InstanceWithoutConsistencyAsync(key, keyString, expiringTime, installation).NoContext(), keyString).NoContext();
+                await RaceConditionExtensions.RunAsync(async () => cache = await InstanceWithoutConsistencyAsync(key, keyString, expiringTime, installation).NoContext(), keyString).NoContext();
                 return cache;
             }
         }
@@ -132,6 +132,14 @@ namespace Rystem.Business
             if (MemoryIsActive)
                 return new Key(string.Empty).List<TCache>();
             return null;
+        }
+        public async Task<bool> WarmUpAsync()
+        {
+            List<Task> tasks = new();
+            foreach (var configuration in CacheConfigurations)
+                tasks.Add(Implementation(configuration.Key).WarmUpAsync());
+            await Task.WhenAll(tasks).NoContext();
+            return true;
         }
     }
 }

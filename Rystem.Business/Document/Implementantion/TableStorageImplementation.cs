@@ -148,5 +148,7 @@ namespace Rystem.Business.Document.Implementantion
                 }
             }
         }
+        public Task<bool> WarmUpAsync()
+           => Integration.WarmUpAsync();
     }
 }

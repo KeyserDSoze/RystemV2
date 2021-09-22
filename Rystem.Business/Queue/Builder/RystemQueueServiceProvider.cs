@@ -13,6 +13,7 @@ namespace Rystem.Business
         {
             ServiceCollection.AddSingleton(new Options<IQueueManager<T>>(Services));
             ServiceCollection.AddSingleton<IQueueManager<T>, QueueManager<T>>();
+            ServiceCollection.AddRystemFullyAddedCallback(() => ServiceLocator.GetService<IQueueManager<T>>().WarmUpAsync());
             return ServiceCollection;
         }
     }

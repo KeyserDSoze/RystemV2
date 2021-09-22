@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Message
 {
-    public sealed class EventHubIntegration
+    public sealed class EventHubIntegration : IWarmUp
     {
         private readonly EventHubProducerClient Client;
         private readonly EventProcessorClient ClientReader;
@@ -76,5 +76,8 @@ namespace Rystem.Azure.Integration.Message
                 },
                 cancellationToken).NoContext();
         }
+
+        public Task<bool> WarmUpAsync() 
+            => Task.FromResult(true);
     }
 }

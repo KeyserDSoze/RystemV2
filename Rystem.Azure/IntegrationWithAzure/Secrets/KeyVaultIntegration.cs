@@ -11,7 +11,7 @@ namespace Rystem.Azure.Integration.Secrets
     /// <summary>
     /// Remember when using user assigned managed identity to set up the environment with the variable AZURE_CLIENT_ID and value of the client id (both, webapp and function). 
     /// </summary>
-    public sealed class KeyVaultIntegration
+    public sealed class KeyVaultIntegration : IWarmUp
     {
         private readonly SecretClient SecretClient;
         private readonly CertificateClient CertificateClient;
@@ -53,5 +53,8 @@ namespace Rystem.Azure.Integration.Secrets
                 keys.Add(keyProperty);
             return keys;
         }
+
+        public Task<bool> WarmUpAsync() 
+            => Task.FromResult(true);
     }
 }

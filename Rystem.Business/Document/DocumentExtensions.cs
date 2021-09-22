@@ -13,7 +13,6 @@ namespace System
         private static IDocumentManager<TEntity> Manager<TEntity>(this TEntity entity)
             where TEntity : IDocument, new()
             => ServiceLocator.GetService<IDocumentManager<TEntity>>();
-
         public static async Task<bool> UpdateAsync<TEntity>(this TEntity entity, Installation installation = Installation.Default)
             where TEntity : IDocument, new()
            => await entity.Manager().UpdateAsync(entity, installation).NoContext();
@@ -42,7 +41,6 @@ namespace System
         public static async Task<IEnumerable<TEntity>> GetAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, int? takeCount = default, Installation installation = Installation.Default)
             where TEntity : IDocument, new()
            => await entity.Manager().GetAsync(entity, expression, takeCount, installation).NoContext();
-
         public static bool Update<TEntity>(this TEntity entity, Installation installation = Installation.Default)
            where TEntity : IDocument, new()
           => UpdateAsync(entity, installation).ToResult();
@@ -64,7 +62,6 @@ namespace System
         public static string GetName<TEntity>(this TEntity entity, Installation installation = Installation.Default)
             where TEntity : IDocument, new()
         => entity.Manager().GetName(installation);
-
         public static Task<TEntity> FirstOrDefaultAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
             where TEntity : IDocument, new()
            => entity.Manager().FirstOrDefaultAsync(entity, expression, installation);

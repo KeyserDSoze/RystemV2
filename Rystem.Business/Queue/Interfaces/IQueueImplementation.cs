@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Rystem.Business
 {
-    internal interface IQueueImplementation<TEntity>
+    internal interface IQueueImplementation<TEntity> : IWarmUp
     {
         Task<bool> SendAsync(TEntity message, string partitionKey, string rowKey);
         Task<long> SendScheduledAsync(TEntity message, int delayInSeconds, string partitionKey, string rowKey);

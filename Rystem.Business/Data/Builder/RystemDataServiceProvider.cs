@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Rystem.Business.Data;
-using System.Linq;
 
 namespace Rystem.Business
 {
@@ -17,6 +16,7 @@ namespace Rystem.Business
         {
             ServiceCollection.AddSingleton(new Options<IDataManager<T>>(Services));
             ServiceCollection.AddSingleton<IDataManager<T>, DataManager<T>>();
+            ServiceCollection.AddRystemFullyAddedCallback(() => ServiceLocator.GetService<IDataManager<T>>().WarmUpAsync());
             return ServiceCollection;
         }
     }

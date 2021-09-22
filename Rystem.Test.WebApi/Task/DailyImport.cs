@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Rystem.Test.WebApi
 {
-    public class DailyImport : IBackgroundOptionedWork
+    public class DailyImport : IBackgroundOptionedJob
     {
-        public BackgroundWorkOptions Options { get; init; }
+        public BackgroundJobOptions Options { get; init; }
         public DailyImport()
         {
 

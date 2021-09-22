@@ -1,15 +1,9 @@
 ﻿using Azure.Storage.Blobs.Models;
-using Microsoft.Azure.Cosmos.Table;
-using Rystem.Azure.Integration;
 using Rystem.Azure.Integration.Storage;
 using Rystem.Text;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using static Rystem.Azure.Integration.Storage.BlobStorageIntegration;
 
@@ -89,5 +83,8 @@ namespace Rystem.Business.Document.Implementantion
             => Integration.Configuration.Name;
         private static Task<TEntity> ReadEntity(BlobWrapper wrapper)
             => wrapper.Content.FromJsonAsync<TEntity>();
+
+        public Task<bool> WarmUpAsync()
+            => Integration.WarmUpAsync();
     }
 }

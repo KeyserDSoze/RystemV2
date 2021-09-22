@@ -14,6 +14,5 @@ namespace Rystem.Concurrency
             => (RystemDistributedServiceProvider<T>)WithIntegration(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey);
         public RystemDistributedServiceProvider<T> WithRedisCache(RedisCacheConfiguration configuration = default, string serviceKey = default)
             => (RystemDistributedServiceProvider<T>)WithIntegration(ServiceProviderType.AzureRedisCache, configuration, serviceKey);
-
     }
 }

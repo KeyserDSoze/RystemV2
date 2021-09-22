@@ -10,27 +10,27 @@ namespace Rystem
     public static class RystemBusiness
     {
         public static AzureBuilder WithAzure()
-            => (null as IServiceCollection).AddAzureService();
+            => new ServiceCollection().AddAzureService();
         public static IHost FinalizeWithoutDependencyInjection(this IServiceCollection services)
             => new RystemHost(services)
                 .WithRystem();
-    }
-    internal sealed class RystemHost : IHost
-    {
-        public IServiceProvider Services { get; }
-        public RystemHost(IServiceCollection services)
-            => Services = services.BuildServiceProvider();
-        public void Dispose()
+        private sealed class RystemHost : IHost
         {
-            throw new NotImplementedException();
-        }
-        public Task StartAsync(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-        public Task StopAsync(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
+            public IServiceProvider Services { get; }
+            public RystemHost(IServiceCollection services)
+                => Services = services.BuildServiceProvider();
+            public void Dispose()
+            {
+                throw new NotImplementedException();
+            }
+            public Task StartAsync(CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+            public Task StopAsync(CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Rystem.Background
+﻿namespace Rystem.Background
 {
-    public static class Sequence
+    public static class Queue
     {
         /// <summary>
         /// Create a queue with a T object to allow a batch operation after a maximum buffer elements or a maximum retention of time.

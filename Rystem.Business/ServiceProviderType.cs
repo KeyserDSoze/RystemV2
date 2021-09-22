@@ -3,7 +3,6 @@
     public enum ServiceProviderType
     {
         InMemory,
-        InMemory2,
         AzureKeyVault,
         AzureTableStorage,
         AzureBlockBlobStorage,

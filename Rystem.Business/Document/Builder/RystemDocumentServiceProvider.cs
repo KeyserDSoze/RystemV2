@@ -17,6 +17,7 @@ namespace Rystem.Business
         {
             ServiceCollection.AddSingleton(new Options<IDocumentManager<T>>(Services));
             ServiceCollection.AddSingleton<IDocumentManager<T>, DocumentManager<T>>();
+            ServiceCollection.AddRystemFullyAddedCallback(() => ServiceLocator.GetService<IDocumentManager<T>>().WarmUpAsync());
             return ServiceCollection;
         }
     }

@@ -23,7 +23,7 @@ namespace Rystem.UnitTest
         [Fact]
         public async Task QueueSomething()
         {
-            Sequence.Create<IFalseNueve>(new SequenceProperty<IFalseNueve>(QueueName, 500, TimeSpan.FromSeconds(2), Evaluate), QueueType.FirstInFirstOut);
+            Queue.Create<IFalseNueve>(new SequenceProperty<IFalseNueve>(QueueName, 500, TimeSpan.FromSeconds(2), Evaluate), QueueType.FirstInFirstOut);
             for (int i = 0; i < 510; i++)
             {
                 var falseNueve = new FalseNueve()
@@ -37,7 +37,7 @@ namespace Rystem.UnitTest
             }
             await Task.Delay(700);
             Assert.Equal(500, Counter);
-            Sequence.Flush(QueueName, true);
+            Queue.Flush(QueueName, true);
             await Task.Delay(700);
             Assert.Equal(510, Counter);
         }

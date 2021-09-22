@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Cosmos
 {
-    public class CosmosNoSqlIntegration
+    public class CosmosNoSqlIntegration : IWarmUp
     {
         public CosmosConfiguration Configuration { get; }
         private Container Context;
@@ -24,7 +24,7 @@ namespace Rystem.Azure.Integration.Cosmos
         private async Task<Container> GetContextAsync()
         {
             if (Context == default)
-                await RaceCondition.RunAsync(async () =>
+                await RaceConditionExtensions.RunAsync(async () =>
                 {
                     if (Context == default)
                     {
@@ -61,7 +61,7 @@ namespace Rystem.Azure.Integration.Cosmos
         }
         public async Task<bool> DeleteAsync<T>(string id, PartitionKey partitionKey, ItemRequestOptions requestOptions)
         {
-            var client = Context ?? await GetContextAsync();
+            var client = Context ?? await GetContextAsync().NoContext();
             var response = await client.DeleteItemAsync<T>(id, partitionKey, requestOptions, default).NoContext();
             return response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == System.Net.HttpStatusCode.Created || response.StatusCode == System.Net.HttpStatusCode.Accepted;
         }
@@ -81,7 +81,7 @@ namespace Rystem.Azure.Integration.Cosmos
         }
         public async IAsyncEnumerable<T> ReadAsync<T>(Expression<Func<T, bool>> expression = default, int? takeCount = default, QueryRequestOptions requestOptions = default, bool allowSyncrhonousQueryExecution = false, CosmosLinqSerializerOptions cosmosLinqSerializerOptions = default)
         {
-            var client = Context ?? await GetContextAsync();
+            var client = Context ?? await GetContextAsync().NoContext();
 
             string continuationToken = default;
             int counter = 0;
@@ -104,19 +104,19 @@ namespace Rystem.Azure.Integration.Cosmos
         }
         public async Task<T> ReadAsync<T>(string id, PartitionKey partitionKey, ItemRequestOptions requestOptions)
         {
-            var client = Context ?? await GetContextAsync();
+            var client = Context ?? await GetContextAsync().NoContext();
             var response = await client.ReadItemAsync<T>(id, partitionKey, requestOptions).NoContext();
             return response.Resource;
         }
         public async Task<bool> ExistAsync<T>(string id, PartitionKey partitionKey, ItemRequestOptions requestOptions)
         {
-            var client = Context ?? await GetContextAsync();
+            var client = Context ?? await GetContextAsync().NoContext();
             var response = await client.ReadItemAsync<T>(id, partitionKey, requestOptions).NoContext();
             return response.StatusCode != System.Net.HttpStatusCode.NotFound;
         }
         public async Task<bool> UpdateAsync<T>(PartitionKey partitionKey, T entity, ItemRequestOptions itemRequestOptions)
         {
-            var client = Context ?? await GetContextAsync();
+            var client = Context ?? await GetContextAsync().NoContext();
             var response = await client.UpsertItemAsync(entity, partitionKey, itemRequestOptions).NoContext();
             return response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == System.Net.HttpStatusCode.Created || response.StatusCode == System.Net.HttpStatusCode.Accepted;
         }
@@ -134,6 +134,12 @@ namespace Rystem.Azure.Integration.Cosmos
             }
             await Task.WhenAll(executions).NoContext();
             return allIsDone;
+        }
+
+        public async Task<bool> WarmUpAsync()
+        {
+            await GetContextAsync().NoContext();
+            return true;
         }
     }
 }

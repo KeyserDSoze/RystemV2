@@ -13,7 +13,7 @@ namespace Rystem.Business.Data
     internal sealed class DataManager<TEntity> : IDataManager<TEntity>
     {
         private readonly IDictionary<Installation, IDataImplementation<TEntity>> Implementations = new Dictionary<Installation, IDataImplementation<TEntity>>();
-        private readonly IDictionary<Installation, ProvidedService> DataConfiguration;
+        private readonly IDictionary<Installation, ProvidedService> DataConfigurations;
         private readonly object TrafficLight = new();
         private IDataImplementation<TEntity> Implementation(Installation installation)
         {
@@ -21,7 +21,7 @@ namespace Rystem.Business.Data
                 lock (TrafficLight)
                     if (!Implementations.ContainsKey(installation))
                     {
-                        ProvidedService configuration = DataConfiguration[installation];
+                        ProvidedService configuration = DataConfigurations[installation];
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.AzureBlockBlobStorage:
@@ -39,7 +39,7 @@ namespace Rystem.Business.Data
         private readonly AzureManager Manager;
         public DataManager(Options<IDataManager<TEntity>> options, AzureManager manager)
         {
-            DataConfiguration = options.Services;
+            DataConfigurations = options.Services;
             Manager = manager;
         }
         public Task<bool> DeleteAsync(string name, Installation installation = Installation.Default)
@@ -97,6 +97,14 @@ namespace Rystem.Business.Data
         {
             var implementation = Implementation(installation);
             return implementation.Options.Name.GetValue(entity).ToString();
+        }
+        public async Task<bool> WarmUpAsync()
+        {
+            List<Task> tasks = new();
+            foreach (var configuration in DataConfigurations)
+                tasks.Add(Implementation(configuration.Key).WarmUpAsync());
+            await Task.WhenAll(tasks);
+            return true;
         }
     }
 }

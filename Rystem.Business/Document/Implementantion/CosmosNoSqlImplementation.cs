@@ -92,8 +92,9 @@ namespace Rystem.Business.Document.Implementantion
             await Task.WhenAll(tasks).NoContext();
             return true;
         }
-
         public string GetName()
             => this.Integration.Configuration.Name;
+        public Task<bool> WarmUpAsync()
+           => Integration.WarmUpAsync();
     }
 }

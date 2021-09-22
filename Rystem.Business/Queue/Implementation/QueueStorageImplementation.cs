@@ -15,13 +15,10 @@ namespace Rystem.Business.Queue.Implementation
         {
             Integration = integration;
         }
-
         public Task<bool> CleanAsync()
             => throw new NotImplementedException("Queue storage doesn't allow this operation.");
-
         public Task<bool> DeleteScheduledAsync(long messageId)
             => throw new NotImplementedException("Queue storage doesn't allow this operation.");
-
         public string GetName()
            => this.Integration.Configuration.Name;
         private readonly string ListenerId = $"{nameof(QueueStorageImplementation<TEntity>)}{Guid.NewGuid():N}";
@@ -31,7 +28,7 @@ namespace Rystem.Business.Queue.Implementation
             if (!IsListening)
             {
                 IsListening = true;
-                BackgroundWork.Run(async () =>
+                BackgroundJob.Run(async () =>
                 {
                     try
                     {
@@ -57,15 +54,13 @@ namespace Rystem.Business.Queue.Implementation
         public Task StopListenAsync()
         {
             IsListening = false;
-            BackgroundWork.Stop(ListenerId);
+            BackgroundJob.Stop(ListenerId);
             return Task.CompletedTask;
         }
         public async Task<IEnumerable<TEntity>> ReadAsync(string partitionKey, string rowKey)
             => (await Integration.ReadAsync().NoContext()).Select(x => x.Message.FromJson<TEntity>());
-
         public async Task<bool> SendAsync(TEntity message, string partitionKey, string rowKey)
             => await Integration.SendAsync(message.ToJson());
-
         public async Task<bool> SendBatchAsync(IEnumerable<TEntity> messages, string partitionKey, string rowKey)
         {
             List<Task> sents = new();
@@ -74,10 +69,8 @@ namespace Rystem.Business.Queue.Implementation
             await Task.WhenAll(sents).NoContext();
             return true;
         }
-
         public async Task<long> SendScheduledAsync(TEntity message, int delayInSeconds, string partitionKey, string rowKey)
             => await Integration.SendScheduledAsync(message.ToJson(), delayInSeconds);
-
         public async Task<IEnumerable<long>> SendScheduledBatchAsync(IEnumerable<TEntity> messages, int delayInSeconds, string partitionKey, string rowKey)
         {
             List<Task<long>> sents = new();
@@ -86,5 +79,7 @@ namespace Rystem.Business.Queue.Implementation
             await Task.WhenAll(sents).NoContext();
             return sents.Select(x => x.Result);
         }
+        public Task<bool> WarmUpAsync()
+          => Integration.WarmUpAsync();
     }
 }

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business.Data
 {
-    internal interface IDataImplementation<TEntity>
+    internal interface IDataImplementation<TEntity> : IWarmUp
     {
         Task<bool> WriteAsync(string name, Stream stream, dynamic options);
         Task<Stream> ReadAsync(string name);

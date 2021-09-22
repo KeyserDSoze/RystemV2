@@ -2,7 +2,7 @@
 
 namespace Rystem.Business
 {
-    public static partial class IServiceCollectionExtensions
+    public static partial class ServiceCollectionExtensions
     {
         public static RystemCacheServiceProvider<TKey, TInstance> UseCacheWithKey<TKey, TInstance>(this IServiceCollection services)
             where TKey : ICacheKey<TInstance> 

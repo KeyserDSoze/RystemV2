@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Rystem.Concurrency
 {
@@ -23,14 +19,14 @@ namespace Rystem.Concurrency
                 }
             return Task.FromResult(false);
         }
-
         public Task<bool> IsAcquiredAsync(string key)
             => Task.FromResult(IsLocked);
-
         public Task<bool> ReleaseAsync(string key)
         {
             IsLocked = false;
             return Task.FromResult(true);
         }
+        public Task<bool> WarmUpAsync() 
+            => Task.FromResult(true);
     }
 }

@@ -23,6 +23,7 @@ namespace Rystem.Business
         {
             ServiceCollection.AddSingleton(new Options<ICacheManager<ICacheKey<TCache>, TCache>>(Services));
             ServiceCollection.AddSingleton<ICacheManager<ICacheKey<TCache>, TCache>, CacheManager<ICacheKey<TCache>, TCache>>();
+            ServiceCollection.AddRystemFullyAddedCallback(() => ServiceLocator.GetService<ICacheManager<ICacheKey<TCache>, TCache>>().WarmUpAsync());
             return ServiceCollection;
         }
     }

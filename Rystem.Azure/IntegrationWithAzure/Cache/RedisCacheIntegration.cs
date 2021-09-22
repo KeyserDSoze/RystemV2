@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Cache
 {
-    public sealed class RedisCacheIntegration
+    public sealed class RedisCacheIntegration : IWarmUp
     {
         private int RoundRobin = -1;
         private IDatabase Cache
@@ -20,11 +20,11 @@ namespace Rystem.Azure.Integration.Cache
                 return Connections[value].Value.GetDatabase();
             }
         }
-        public Task WarmUp()
+        public Task<bool> WarmUpAsync()
         {
             foreach (var connection in Connections)
                 _ = connection.Value.GetDatabase();
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
 
         private readonly List<Lazy<ConnectionMultiplexer>> Connections;
@@ -73,7 +73,7 @@ namespace Rystem.Azure.Integration.Cache
             {
                 if (expiringTime == default)
                     expiringTime = TimeSpan.FromSeconds(10);
-                RaceConditionResponse response = await RaceCondition.RunAsync(async () =>
+                RaceConditionResponse response = await RaceConditionExtensions.RunAsync(async () =>
                 {
                     await Cache.LockTakeAsync(new RedisKey(key), new RedisValue(FixedValue), expiringTime);
                 }, key).NoContext();
@@ -91,7 +91,7 @@ namespace Rystem.Azure.Integration.Cache
         }
         public async Task<bool> ReleaseLockAsync(string key)
         {
-            await RaceCondition.RunAsync(async () =>
+            await RaceConditionExtensions.RunAsync(async () =>
             {
                 await Cache.LockReleaseAsync(new RedisKey(key), new RedisValue(FixedValue));
             }, key).NoContext();

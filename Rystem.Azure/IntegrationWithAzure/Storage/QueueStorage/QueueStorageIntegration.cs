@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Storage
 {
-    public sealed class QueueStorageIntegration : BaseStorageClient
+    public sealed class QueueStorageIntegration : BaseStorageClient, IWarmUp
     {
         private QueueClient Context;
         private readonly string RaceId = Guid.NewGuid().ToString("N");
@@ -17,7 +17,7 @@ namespace Rystem.Azure.Integration.Storage
         private async Task<QueueClient> GetContextAsync()
         {
             if (Context == default)
-                await RaceCondition.RunAsync(async () =>
+                await RaceConditionExtensions.RunAsync(async () =>
                 {
                     if (Context == default)
                     {
@@ -43,7 +43,7 @@ namespace Rystem.Azure.Integration.Storage
         }
         public async Task<List<(string Message, object Raw)>> ReadAsync(int max = 10)
         {
-            var client = Context ?? await GetContextAsync();
+            var client = Context ?? await GetContextAsync().NoContext();
             var messages = (await client.ReceiveMessagesAsync(max).NoContext()).Value;
             List<(string, object)> entities = new();
             foreach (var message in messages)
@@ -56,15 +56,21 @@ namespace Rystem.Azure.Integration.Storage
 
         public async Task<bool> SendAsync(string message)
         {
-            var client = Context ?? await GetContextAsync();
+            var client = Context ?? await GetContextAsync().NoContext();
             return !string.IsNullOrWhiteSpace((await client.SendMessageAsync(message).NoContext()).Value.MessageId);
         }
 
         public async Task<long> SendScheduledAsync(string message, int delayInSeconds)
         {
-            var client = Context ?? await GetContextAsync();
+            var client = Context ?? await GetContextAsync().NoContext();
             _ = await client.SendMessageAsync(message, new TimeSpan(0, 0, delayInSeconds)).NoContext();
             return 0;
+        }
+
+        public async Task<bool> WarmUpAsync()
+        {
+            await GetContextAsync().NoContext();
+            return true;
         }
     }
 }

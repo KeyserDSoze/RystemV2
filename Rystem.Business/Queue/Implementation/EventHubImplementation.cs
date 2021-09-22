@@ -14,12 +14,10 @@ namespace Rystem.Business.Queue.Implementation
         {
             Integration = integration;
         }
-
         public Task<bool> CleanAsync()
             => throw new NotImplementedException("Event hub doesn't allow this operation.");
         public Task<bool> DeleteScheduledAsync(long messageId)
             => throw new NotImplementedException("Event hub doesn't allow this operation.");
-
         public string GetName()
            => this.Integration.Configuration.Name;
         private bool IsListening = false;
@@ -89,5 +87,7 @@ namespace Rystem.Business.Queue.Implementation
             => throw new NotImplementedException("Event hub doesn't allow this operation.");
         public Task<IEnumerable<long>> SendScheduledBatchAsync(IEnumerable<TEntity> messages, int delayInSeconds, string partitionKey, string rowKey)
             => throw new NotImplementedException("Event hub doesn't allow this operation.");
+        public Task<bool> WarmUpAsync()
+          => Integration.WarmUpAsync();
     }
 }

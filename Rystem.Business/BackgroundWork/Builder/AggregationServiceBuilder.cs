@@ -9,8 +9,8 @@ namespace Rystem.Background
 
         }
         public RystemAggregationServiceProvider<T> WithFirstInFirstOut(SequenceProperty<T> configuration)
-            => (RystemAggregationServiceProvider<T>)WithIntegration(ServiceProviderType.InMemory, configuration, default);
+            => (RystemAggregationServiceProvider<T>)WithIntegration(ServiceProviderType.InMemory, configuration, string.Empty, new RystemAggregationServiceProviderOptions(true));
         public RystemAggregationServiceProvider<T> WithLastInFirstOut(SequenceProperty<T> configuration)
-            => (RystemAggregationServiceProvider<T>)WithIntegration(ServiceProviderType.InMemory2, configuration, default);
+            => (RystemAggregationServiceProvider<T>)WithIntegration(ServiceProviderType.InMemory, configuration, string.Empty, new RystemAggregationServiceProviderOptions(true));
     }
 }

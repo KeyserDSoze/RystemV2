@@ -1,26 +1,15 @@
 ﻿using Rystem.Azure;
-using Rystem.Azure.Integration.Cache;
-using Rystem.Azure.Integration.Storage;
 using Rystem.Business;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rystem.Background
 {
-    public interface ISequenceManager<T>
-    {
-        void Add(T entity, Installation installation);
-        void Flush(Installation installation);
-    }
     internal class SequenceManager<T> : ISequenceManager<T>
     {
         private readonly Dictionary<Installation, string> Implementations = new();
-        private readonly Dictionary<Installation, ProvidedService> SequenceConfiguration;
-        private bool MemoryIsActive { get; }
+        private readonly Dictionary<Installation, ProvidedService> SequenceConfigurations;
         private static readonly object TrafficLight = new();
         public string Implementation(Installation installation)
         {
@@ -28,17 +17,22 @@ namespace Rystem.Background
                 lock (TrafficLight)
                     if (!Implementations.ContainsKey(installation))
                     {
-                        ProvidedService configuration = SequenceConfiguration[installation];
+                        ProvidedService configuration = SequenceConfigurations[installation];
                         var property = (SequenceProperty<T>)configuration.Configurations;
+                        var options = (RystemAggregationServiceProviderOptions)configuration.Options;
                         switch (configuration.Type)
                         {
                             case ServiceProviderType.InMemory:
-                                Sequence.Create(property, QueueType.FirstInFirstOut);
-                                Implementations.Add(installation, property.Name);
-                                break;
-                            case ServiceProviderType.InMemory2:
-                                Sequence.Create(property, QueueType.LastInFirstOut);
-                                Implementations.Add(installation, property.Name);
+                                if (options.IsFirstInFirstOut)
+                                {
+                                    Queue.Create(property, QueueType.FirstInFirstOut);
+                                    Implementations.Add(installation, property.Name);
+                                }
+                                else
+                                {
+                                    Queue.Create(property, QueueType.LastInFirstOut);
+                                    Implementations.Add(installation, property.Name);
+                                }
                                 break;
                             default:
                                 throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
@@ -49,13 +43,20 @@ namespace Rystem.Background
         private readonly AzureManager Manager;
         public SequenceManager(Options<ISequenceManager<T>> options, AzureManager manager)
         {
-            SequenceConfiguration = options.Services;
+            SequenceConfigurations = options.Services;
             Manager = manager;
         }
 
         public void Add(T entity, Installation installation)
-            => Sequence.Enqueue(entity, Implementation(installation));
+            => Queue.Enqueue(entity, Implementation(installation));
         public void Flush(Installation installation)
-            => Sequence.Flush(Implementation(installation), true);
+            => Queue.Flush(Implementation(installation), true);
+
+        public Task<bool> WarmUpAsync()
+        {
+            foreach (var configuration in SequenceConfigurations)
+                _ = Implementation(configuration.Key);
+            return Task.FromResult(true);
+        }
     }
 }

@@ -3,7 +3,7 @@ using Rystem.Concurrency;
 
 namespace Rystem.Business
 {
-    public static partial class IServiceCollectionExtensions
+    public static partial class ServiceCollectionExtensions
     {
         public static RystemDistributedServiceProvider<TKey> UseDistributedKey<TKey>(this IServiceCollection services)
             where TKey : IDistributedConcurrencyKey

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Rystem.Business
+﻿namespace Rystem.Business
 {
     internal sealed class CacheStatus<TCache>
     {

@@ -96,5 +96,7 @@ namespace Rystem.Business.Queue.Implementation
             IsListening = false;
             return Integration.StopReadAsync();
         }
+        public Task<bool> WarmUpAsync()
+          => Integration.WarmUpAsync();
     }
 }

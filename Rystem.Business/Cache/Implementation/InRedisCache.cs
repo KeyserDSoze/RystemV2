@@ -2,7 +2,6 @@
 using Rystem.Text;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Rystem.Business
@@ -38,5 +37,7 @@ namespace Rystem.Business
                     keys.Add(key);
             return keys;
         }
+        public Task<bool> WarmUpAsync()
+            => Integration.WarmUpAsync();
     }
 }
