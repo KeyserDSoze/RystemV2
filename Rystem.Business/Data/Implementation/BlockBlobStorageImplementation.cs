@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business.Data.Implementantion
 {
-    internal class BlockBlobStorageImplementation<TEntity> : IDataImplementation<TEntity>
+    internal sealed class BlockBlobStorageImplementation<TEntity> : IDataImplementation<TEntity>
     {
         private readonly BlobStorageIntegration Integration;
         public bool IsMultipleLines { get; }

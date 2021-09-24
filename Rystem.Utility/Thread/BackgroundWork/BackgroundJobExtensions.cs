@@ -8,7 +8,7 @@ namespace Rystem.Background
 {
     public static partial class BackgroundJobExtensions
     {
-        public static IServiceCollection AddBackgroundJob<TEntity>(this IServiceCollection services, Action<BackgroundJobOptions> options)
+        public static IServiceCollection AddBackgroundJob<TEntity>(this IServiceCollection services, Action<BackgroundJobOptions> options, Action<Exception> onError = default)
             where TEntity : class, IBackgroundJob
         {
             services.AddTransient<TEntity>();

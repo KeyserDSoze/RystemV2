@@ -28,6 +28,13 @@ namespace Rystem.Business.Data
         /// <returns>Object that you wrote as json Data.</returns>
         Task<TEntity> ReadAsync(string name, Installation installation = Installation.Default);
         /// <summary>
+        /// Read a json Data object.
+        /// </summary>
+        /// <param name="name">name of the object. Use "/" in name to create virtual folder.</param>
+        /// <param name="installation">Rystem installation value.</param>
+        /// <returns>Object that you wrote as json Data.</returns>
+        Task<T> ReadAsync<T>(string name, Installation installation = Installation.Default);
+        /// <summary>
         /// Read a Stream from Data.
         /// </summary>
         /// <param name="name">name of the object. Use "/" in name to create virtual folder.</param>
@@ -95,6 +102,14 @@ namespace Rystem.Business.Data
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>True if all goes ok.</returns>
         Task<bool> WriteAsync(string name, TEntity value, Installation installation = Installation.Default);
+        /// <summary>
+        /// Write an object as Json Data on the right installation of IData.
+        /// </summary>
+        /// <param name="name">name of the object. Use "/" in name to create virtual folder.</param>
+        /// <param name="value">Object that you want to write as json.</param>
+        /// <param name="installation">Rystem installation value.</param>
+        /// <returns>True if all goes ok.</returns>
+        Task<bool> WriteAsync<T>(string name, T value, Installation installation = Installation.Default);
         Task<bool> SetPropertiesAsync(string name, dynamic properties, Installation installation = Installation.Default);
         string GetName(TEntity entity, Installation installation = Installation.Default);
     }

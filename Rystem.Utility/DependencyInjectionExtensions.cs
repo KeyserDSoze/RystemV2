@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Rystem
@@ -7,16 +7,19 @@ namespace Rystem
     public static class DependencyInjectionExtensions
     {
         private static event Action AfterRystemIsFullyAdded;
-        public static IHost WithRystem(this IHost host)
+        public static IApplicationBuilder UseRystem(this IApplicationBuilder applicationBuilder)
         {
-            ServiceLocator.Services = host.Services;
+            _ = ServiceLocator.Providers;
             AfterRystemIsFullyAdded?.Invoke();
-            return host;
+            return applicationBuilder;
         }
+
         public static IServiceCollection AddRystemFullyAddedCallback(this IServiceCollection services, Action action)
         {
             AfterRystemIsFullyAdded += action;
             return services;
         }
+        public static IServiceCollection AddRystem(this IServiceCollection services)
+            => ServiceLocator.Services = services;
     }
 }

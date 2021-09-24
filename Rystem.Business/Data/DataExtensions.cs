@@ -72,6 +72,20 @@ namespace System
             var manager = data.Manager();
             return manager.WriteAsync(manager.GetName(data, installation), data, installation);
         }
+        /// <summary>
+        /// Write an object as Json Data on the right installation of IData.
+        /// </summary>
+        /// <param name="data">IData object.</param>
+        /// <param name="data">IData object.</param>
+        /// <param name="value">Object that you want to write as json.</param>
+        /// <param name="installation">Rystem installation value.</param>
+        /// <returns>True if all goes ok.</returns>
+        public static Task<bool> WriteAsync<T, TEntity>(this T data, TEntity value, Installation installation = Installation.Default)
+            where T : IData
+        {
+            var manager = data.Manager();
+            return manager.WriteAsync(manager.GetName(data, installation), value, installation);
+        }
 
         /// <summary>
         /// Read a json Data object.
@@ -85,6 +99,19 @@ namespace System
         {
             var manager = data.Manager();
             return manager.ReadAsync(manager.GetName(data, installation), installation);
+        }
+        /// <summary>
+        /// Read a json Data object.
+        /// </summary>
+        /// <typeparam name="T">Type of the object that you wrote as json Data.</typeparam>
+        /// <param name="data">IData object.</param>
+        /// <param name="installation">Rystem installation value.</param>
+        /// <returns>Object that you wrote as json Data.</returns>
+        public static Task<TEntity> ReadAsync<T, TEntity>(this T data, Installation installation = Installation.Default)
+            where T : IData
+        {
+            var manager = data.Manager();
+            return manager.ReadAsync<TEntity>(manager.GetName(data, installation), installation);
         }
 
         /// <summary>

@@ -51,6 +51,11 @@ namespace Rystem.Business.Data
             var value = await ReadStreamAsync(name, installation).NoContext();
             return await value.FromJsonAsync<TEntity>().NoContext();
         }
+        public async Task<T> ReadAsync<T>(string name, Installation installation = Installation.Default)
+        {
+            var value = await ReadStreamAsync(name, installation).NoContext();
+            return await value.FromJsonAsync<T>().NoContext();
+        }
         public async Task<List<TEntity>> ReadMultipleAsync(string name, Installation installation = Installation.Default)
         {
             var value = await ReadStreamAsync(name, installation).NoContext();
@@ -81,16 +86,19 @@ namespace Rystem.Business.Data
             => await WriteAsync(name, await value.ToStreamAsync().NoContext(), options, installation).NoContext();
         public Task<bool> WriteAsync(string name, byte[] value, dynamic options, Installation installation = Installation.Default)
             => WriteAsync(name, value.ToStream(), options, installation);
-        private const string ApplicationJson = "application/json";
+        private static BlobUploadOptions JsonBlobUploadOptions = new BlobUploadOptions
+        {
+            HttpHeaders = new BlobHttpHeaders
+            {
+                ContentType = "application/json"
+            }
+        };
         public async Task<bool> WriteAsync(string name, TEntity value, Installation installation = Installation.Default)
             => await WriteAsync(name, await (Implementation(installation).IsMultipleLines ? $"{value.ToJson()}\n" : value.ToJson()).ToStreamAsync(),
-                new BlobUploadOptions
-                {
-                    HttpHeaders = new BlobHttpHeaders
-                    {
-                        ContentType = ApplicationJson
-                    }
-                }, installation).NoContext();
+                JsonBlobUploadOptions, installation).NoContext();
+        public async Task<bool> WriteAsync<T>(string name, T value, Installation installation = Installation.Default)
+           => await WriteAsync(name, await (Implementation(installation).IsMultipleLines ? $"{value.ToJson()}\n" : value.ToJson()).ToStreamAsync(),
+               JsonBlobUploadOptions, installation).NoContext();
         public Task<bool> SetPropertiesAsync(string name, dynamic properties, Installation installation = Installation.Default)
             => Implementation(installation).SetPropertiesAsync(name, properties);
         public string GetName(TEntity entity, Installation installation = Installation.Default)
