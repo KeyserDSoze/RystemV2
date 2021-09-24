@@ -43,7 +43,7 @@ namespace RystemV2
                 .WithBlockBlob()
                 .WithName(x => x.Name)
                 .Configure();
-            new Host(services).WithRystem();
+            services.FinalizeWithoutDependencyInjection();
         }
         public class Host : IHost
         {
