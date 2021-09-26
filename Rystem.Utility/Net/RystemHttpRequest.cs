@@ -1,95 +1,25 @@
 ﻿using Rystem.Text;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 
-namespace Rystem.Net
+namespace System.Net.Http
 {
-    public class RystemHttpRequestBuilder
+    public static class HttpClientExtensions
     {
-        public Uri Uri { get; }
-        public int Timeout { get; private set; } = 30_000;
-        public HttpMethod Method { get; private set; } = HttpMethod.Get;
-        public Dictionary<string, string> Headers { get; private set; } = new Dictionary<string, string>();
-        public bool KeepAlive { get; private set; } = true;
-        public byte[] Body { get; private set; }
-        public Stream BodyAsStream { get; private set; }
-        internal RystemHttpRequestBuilder(Uri uri) => Uri = uri;
-        private RystemHttpRequestBuilder ExecuteAction(Action action)
-        {
-            action.Invoke();
-            return this;
-        }
-        public RystemHttpRequestBuilder AddToHeaders(string key, string value)
-        {
-            if (!this.Headers.ContainsKey(key))
-                this.Headers.Add(key, value);
-            else
-                this.Headers[key] = value;
-            return this;
-        }
-        public RystemHttpRequestBuilder AddToHeaders((string Key, string Value) item)
-            => AddToHeaders(item.Key, item.Value);
-        public RystemHttpRequestBuilder AddContentType(string value)
-            => AddToHeaders("Content-Type", value);
-        public RystemHttpRequestBuilder RemoveFromHeaders(string key)
-        {
-            if (this.Headers.ContainsKey(key))
-                this.Headers.Remove(key);
-            return this;
-        }
-        public RystemHttpRequestBuilder SetTimeout(int timeout)
-            => ExecuteAction(() => this.Timeout = timeout);
-        public RystemHttpRequestBuilder WithMethod(HttpMethod method)
-            => ExecuteAction(() => this.Method = method);
-        public RystemHttpRequestBuilder WithKeepAlive()
-           => ExecuteAction(() => this.KeepAlive = true);
-        public RystemHttpRequestBuilder WithoutKeepAlive()
-           => ExecuteAction(() => this.KeepAlive = false);
-        public RystemHttpRequestBuilder SetUserAgent(string useragent)
-            => AddToHeaders("User-Agent", useragent);
-        public RystemHttpRequestBuilder WithContentType(string contentType)
-            => AddToHeaders("Content-Type", contentType);
-        public RystemHttpRequestBuilder AddBody<T>(T entity, JsonSerializerOptions serializerOptions = default, EncodingType encodingType = EncodingType.UTF8)
-            => ExecuteAction(() => { Body = entity.ToJson(serializerOptions).ToByteArray(encodingType); BodyAsStream = default; });
-        public RystemHttpRequestBuilder AddBody(string entity, EncodingType encodingType = EncodingType.UTF8)
-            => ExecuteAction(() => { Body = entity.ToByteArray(encodingType); BodyAsStream = default; });
-        public RystemHttpRequestBuilder AddBody(Stream entity)
-            => ExecuteAction(() => { BodyAsStream = entity; Body = default; });
-        public RystemHttpRequestBuilder AddBody(byte[] entity)
-           => ExecuteAction(() => { Body = entity; BodyAsStream = default; });
-        public RystemHttpRequest Build()
-            => new(this);
-    }
-    public class RystemHttpRequest
-    {
-        private readonly RystemHttpRequestBuilder Builder;
-        internal RystemHttpRequest(RystemHttpRequestBuilder rystemHttpRequestBuilder) => Builder = rystemHttpRequestBuilder;
-        public async Task<string> InvokeAsync()
-        {
-            HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(Builder.Uri);
-            httpWebRequest.Timeout = Builder.Timeout;
-            httpWebRequest.KeepAlive = Builder.KeepAlive;
-            if (Builder.Method != default)
-                httpWebRequest.Method = Builder.Method.ToString();
-            foreach (var header in Builder.Headers)
-                httpWebRequest.Headers.Add(header.Key, header.Value);
-            Stream body = Builder.Body?.ToStream() ?? Builder.BodyAsStream;
-            if (body != default)
-            {
-                using Stream requestStream = await httpWebRequest.GetRequestStreamAsync().NoContext();
-                await body.CopyToAsync(requestStream).NoContext();
-            }
-            using HttpWebResponse httpWebResponse = (HttpWebResponse)await httpWebRequest.GetResponseAsync().NoContext();
-            using StreamReader reader = new(httpWebResponse.GetResponseStream());
-            return await reader.ReadToEndAsync().NoContext();
-        }
-        public async Task<T> InvokeAsync<T>(JsonSerializerOptions options = default)
-            => (await InvokeAsync().NoContext()).FromJson<T>(options);
+        public static async Task<T> GetAsync<T>(this HttpClient httpClient, Uri requestUri = default, CancellationToken cancellationToken = default)
+            => (await httpClient.GetStringAsync(requestUri, cancellationToken).NoContext()).FromJson<T>();
+        public static async Task<T> GetAsync<T>(this HttpClient httpClient, string requestUri = default, CancellationToken cancellationToken = default)
+            => (await httpClient.GetStringAsync(requestUri, cancellationToken).NoContext()).FromJson<T>();
+        public static async Task<T> PostAsync<T>(this HttpClient httpClient, HttpContent httpContent, Uri requestUri = default, CancellationToken cancellationToken = default)
+            => (await (await httpClient.PostAsync(requestUri, httpContent, cancellationToken).NoContext()).Content.ReadAsStringAsync().NoContext()).FromJson<T>();
+        public static async Task<T> PostAsync<T>(this HttpClient httpClient, HttpContent httpContent, string requestUri = default, CancellationToken cancellationToken = default)
+            => (await (await httpClient.PostAsync(requestUri, httpContent, cancellationToken).NoContext()).Content.ReadAsStringAsync().NoContext()).FromJson<T>();
+        public static async Task<TOutput> PostAsync<TInput, TOutput>(this HttpClient httpClient, TInput value, Uri requestUri = default, JsonSerializerOptions options = default, CancellationToken cancellationToken = default)
+            => (await (await httpClient.PostAsync(requestUri, JsonContent.Create(value, options: options), cancellationToken).NoContext()).Content.ReadAsStringAsync(cancellationToken).NoContext()).FromJson<TOutput>();
+        public static async Task<TOutput> PostAsync<TInput, TOutput>(this HttpClient httpClient, TInput value, string requestUri = default, JsonSerializerOptions options = default, CancellationToken cancellationToken = default)
+            => (await (await httpClient.PostAsync(requestUri, JsonContent.Create(value, options: options), cancellationToken).NoContext()).Content.ReadAsStringAsync(cancellationToken).NoContext()).FromJson<TOutput>();
     }
 }
