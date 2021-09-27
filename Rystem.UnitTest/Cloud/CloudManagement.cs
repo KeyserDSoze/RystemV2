@@ -1,5 +1,4 @@
 ﻿using Rystem.Cloud;
-using Rystem.Cloud.Azure;
 using Rystem.Text;
 using System;
 using System.Threading.Tasks;
@@ -9,6 +8,7 @@ namespace Rystem.UnitTest.Cloud
 {
     public class CloudManagement
     {
+        private readonly ICloudManagement Manager = ServiceLocator.GetService<ICloudManagement>();
         static CloudManagement()
         {
             AppSettingsConst.Load();
@@ -16,17 +16,8 @@ namespace Rystem.UnitTest.Cloud
         [Fact]
         public async Task IsOk()
         {
-            MyCloud myCloud = new();
-            var tenant = await myCloud.GetPreviousMonthTenantAsync().NoContext();
+            var tenant = await Manager.GetTenantByMonthAsync(DateTime.UtcNow.AddMonths(-1), ManagementDeepRequest.Monitoring, false).NoContext();
             string value = tenant.ToJson();
-        }
-        public class MyCloud : ICloud
-        {
-            public CloudBuilder Configure()
-            {
-                return CloudBuilder.Create()
-                    .WithAzure(AppSettingsConst.AzureAadAppRegistration);
-            }
         }
     }
 }

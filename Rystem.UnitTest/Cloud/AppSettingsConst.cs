@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Rystem.Cloud;
 using Rystem.Cloud.Azure;
 
 namespace Rystem.UnitTest.Cloud
@@ -10,7 +11,11 @@ namespace Rystem.UnitTest.Cloud
         {
             var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
             var aad = config.GetSection("AzureAad");
-            AzureAadAppRegistration = new AzureAadAppRegistration(aad["ClientId"], aad["ClientSecret"], aad["TenantId"]);
+            RystemBusiness
+                .WithAzure()
+                .EndConfiguration()
+                .AddAzureManager(new AzureAadAppRegistration(aad["ClientId"], aad["ClientSecret"], aad["TenantId"]))
+                .FinalizeWithoutDependencyInjection();
         }
     }
 }

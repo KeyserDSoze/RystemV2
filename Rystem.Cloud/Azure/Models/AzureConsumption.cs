@@ -7,6 +7,8 @@ namespace Rystem.Cloud.Azure
     {
         [JsonPropertyName("value")]
         public AzureConsumption[] Value { get; set; }
+        [JsonPropertyName("nextLink")]
+        public string NextLink { get; set; }
     }
 
     public class AzureConsumption
