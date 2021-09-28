@@ -27,7 +27,7 @@ namespace Rystem.Business.Document.Implementantion
                 _ => true,
             };
     }
-    internal class QueryStrategy
+    internal sealed class QueryStrategy
     {
         internal static string Create(Expression expression, string partitionKey, string rowKey, string timestamp)
         {
@@ -72,7 +72,7 @@ namespace Rystem.Business.Document.Implementantion
         public const string RowKey = "RowKey";
         public const string Timestamp = "Timestamp";
     }
-    internal class BinaryExpressionStrategy : IExpressionStrategy
+    internal sealed class BinaryExpressionStrategy : IExpressionStrategy
     {
         private readonly string PartitionKey;
         private readonly string RowKey;
@@ -102,7 +102,7 @@ namespace Rystem.Business.Document.Implementantion
             return null;
         }
     }
-    internal class UnaryExpressionStrategy : IExpressionStrategy
+    internal sealed class UnaryExpressionStrategy : IExpressionStrategy
     {
         public string Convert(Expression expression)
         {
@@ -113,7 +113,7 @@ namespace Rystem.Business.Document.Implementantion
             return null;
         }
     }
-    internal class MethodCallerExpressionStrategy : IExpressionStrategy
+    internal sealed class MethodCallerExpressionStrategy : IExpressionStrategy
     {
         private readonly string PartitionKey;
         private readonly string RowKey;
@@ -143,7 +143,7 @@ namespace Rystem.Business.Document.Implementantion
             return null;
         }
     }
-    internal class MemberExpressionStrategy : IExpressionStrategy
+    internal sealed class MemberExpressionStrategy : IExpressionStrategy
     {
         public string Convert(Expression expression)
         {

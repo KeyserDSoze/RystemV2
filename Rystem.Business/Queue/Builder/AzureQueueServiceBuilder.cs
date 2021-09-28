@@ -3,7 +3,7 @@ using Rystem.Azure.Integration.Storage;
 
 namespace Rystem.Business
 {
-    public class AzureQueueServiceBuilder<T> : ServiceBuilder
+    public sealed class AzureQueueServiceBuilder<T> : ServiceBuilder
     {
         public AzureQueueServiceBuilder(Installation installation, ServiceProvider rystemServiceProvider) : base(installation, rystemServiceProvider)
         {

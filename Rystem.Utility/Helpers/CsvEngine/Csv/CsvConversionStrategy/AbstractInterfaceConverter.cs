@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Rystem.Text
 {
-    internal class AbstractInterfaceConverter : Converter, ICsvInterpreter
+    internal sealed class AbstractInterfaceConverter : Converter, ICsvInterpreter
     {
         public AbstractInterfaceConverter(int index, IDictionary<string, string> abstractionInterfaceMapping, IDictionary<string, string> headerMapping) : base(index, abstractionInterfaceMapping, headerMapping) { }
         public dynamic Deserialize(Type type, string value)

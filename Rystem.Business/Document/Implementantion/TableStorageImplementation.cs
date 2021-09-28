@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business.Document.Implementantion
 {
-    internal class TableStorageImplementation<TEntity> : IDocumentImplementation<TEntity>
+    internal sealed class TableStorageImplementation<TEntity> : IDocumentImplementation<TEntity>
         where TEntity : new()
     {
         private readonly List<PropertyInfo> Properties = new();

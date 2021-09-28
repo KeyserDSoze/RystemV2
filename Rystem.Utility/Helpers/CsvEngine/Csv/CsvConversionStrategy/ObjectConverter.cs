@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Rystem.Text
 {
-    internal class ObjectConverter : Converter, ICsvInterpreter
+    internal sealed class ObjectConverter : Converter, ICsvInterpreter
     {
         public ObjectConverter(int index, IDictionary<string, string> abstractionInterfaceMapping, IDictionary<string, string> headerMapping) : base(index, abstractionInterfaceMapping, headerMapping) { }
         private static readonly Type CsvIgnoreAttribute = typeof(CsvIgnore);

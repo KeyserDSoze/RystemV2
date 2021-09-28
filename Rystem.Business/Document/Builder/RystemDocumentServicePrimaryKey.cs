@@ -3,7 +3,7 @@ using System;
 
 namespace Rystem.Business
 {
-    public class RystemDocumentServicePrimaryKey<T> : DocumentServiceKey<T>
+    public sealed class RystemDocumentServicePrimaryKey<T> : DocumentServiceKey<T>
         where T : new()
     {
         public RystemDocumentServicePrimaryKey(ServiceProvider rystemServiceProvider, RystemDocumentServiceProviderOptions options) : base(rystemServiceProvider, options)

@@ -1,47 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Threading.Tasks;
 using Xunit;
+using Polly;
+using Polly.Registry;
 
 namespace Rystem.UnitTest
 {
     public class Trycatch
     {
+        private static string A = "";
+        static Trycatch()
+        {
+            new ServiceCollection()
+                .AddRystem()
+                .AddRetryPolicy<Exception>(x =>
+                {
+                    A = x.Message;
+                    return true;
+                })
+                .RetryAsync(3)
+                .AsAsyncPolicy<Exception>()
+                .Configure();
+        }
+        private static async Task<Exception> ErrorAsync()
+        {
+            await Task.Delay(10);
+            if (A == "")
+                throw new ArgumentException("aaaaa");
+            else
+                return default;
+        }
         [Fact]
         public async Task TryToCatch()
         {
-            string a = string.Empty;
-            await Try.Execute(async () =>
-            {
-                await Task.Delay(10);
-                throw new ArgumentException("aaaaa");
-            })
-                .Catch<ArgumentException>(async x =>
-                {
-                    await Task.Delay(10);
-                    a = x.ToString();
-                })
-                .InvokeAsync();
-            Assert.NotEqual(string.Empty, a);
-        }
-        [Fact]
-        public async Task TryToNotCatch()
-        {
-            string a = string.Empty;
-            await Try.Execute(async () =>
-            {
-                await Task.Delay(10);
-                throw new Exception("aaaaa");
-            })
-                .Catch<ArgumentException>(async x =>
-                {
-                    await Task.Delay(10);
-                    a = x.ToString();
-                })
-                .InvokeAsync();
-            Assert.Equal(string.Empty, a);
+            var registry = ServiceLocator.GetService<PolicyRegistry>();
+            await registry.Get<IAsyncPolicy<Exception>>("")
+                .ExecuteAsync(ErrorAsync).NoContext();
+            Assert.Equal("aaaaa", A);
         }
     }
 }

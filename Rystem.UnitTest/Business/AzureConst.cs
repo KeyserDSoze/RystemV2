@@ -3,6 +3,7 @@ using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Rystem.Azure;
 using Rystem.Business;
 using System;
 using System.Collections.Generic;
@@ -23,14 +24,15 @@ namespace Rystem.UnitTest
             var serviceBus = config.GetSection("ServiceBus");
             var redisCache = config.GetSection("RedisCache");
             var cosmos = config.GetSection("Cosmos");
-            return RystemBusiness
-              .WithAzure()
-              .AddStorage(new Azure.Integration.Storage.StorageAccount(storage["Name"], storage["Key"]))
-              .AddEventHub(new Azure.Integration.Message.EventHubAccount(eventHub["FullyQualifiedName"], eventHub["AccessKey"], new Azure.Integration.Storage.StorageAccount(storage["Name"], storage["Key"])))
-              .AddServiceBus(new Azure.Integration.Message.ServiceBusAccount(serviceBus["FullyQualifiedName"], serviceBus["AccessKey"]))
-              .AddRedisCache(new Azure.Integration.Cache.RedisCacheAccount(redisCache["ConnectionString"], TimeSpan.FromHours(1), 4))
-              .AddCosmos(new Azure.Integration.Cosmos.CosmosAccount(cosmos["AccountName"], cosmos["AccountKey"]))
-              .EndConfiguration();
+            return ServiceLocator
+                .Create()
+                .AddAzureService()
+                  .AddStorage(new Azure.Integration.Storage.StorageAccount(storage["Name"], storage["Key"]))
+                  .AddEventHub(new Azure.Integration.Message.EventHubAccount(eventHub["FullyQualifiedName"], eventHub["AccessKey"], new Azure.Integration.Storage.StorageAccount(storage["Name"], storage["Key"])))
+                  .AddServiceBus(new Azure.Integration.Message.ServiceBusAccount(serviceBus["FullyQualifiedName"], serviceBus["AccessKey"]))
+                  .AddRedisCache(new Azure.Integration.Cache.RedisCacheAccount(redisCache["ConnectionString"], TimeSpan.FromHours(1), 4))
+                  .AddCosmos(new Azure.Integration.Cosmos.CosmosAccount(cosmos["AccountName"], cosmos["AccountKey"]))
+                  .EndConfiguration();
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Rystem.Cloud
 {
-    public record Subscription(string Id, string TenantId, string DisplayName, string State, Dictionary<string, string> Tags, List<ResourceGroup> ResourceGroups)
+    public sealed record Subscription(string Id, string TenantId, string DisplayName, string State, Dictionary<string, string> Tags, List<ResourceGroup> ResourceGroups)
     {
         public decimal Billed => ResourceGroups.Sum(x => x.Billed);
         public decimal UsdBilled => ResourceGroups.Sum(x => x.UsdBilled);

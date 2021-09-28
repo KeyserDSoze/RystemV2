@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Background
 {
-    internal class SequenceManager<T> : ISequenceManager<T>
+    internal sealed class SequenceManager<T> : ISequenceManager<T>
     {
         private readonly Dictionary<Installation, string> Implementations = new();
         private readonly Dictionary<Installation, ProvidedService> SequenceConfigurations;

@@ -33,9 +33,14 @@ namespace Rystem.Concurrency
             Exception exception = default;
             if (isTheFirst && !isWaiting)
             {
-                var result = await Try.Execute(action).InvokeAsync().NoContext();
-                if (result.InException)
-                    exception = result.Exception;
+                try
+                {
+                    await action.Invoke().NoContext();
+                }
+                catch (Exception ex)
+                {
+                    exception = ex;
+                }
                 await implementation.ReleaseAsync(Key).NoContext();
             }
             return new RaceConditionResponse(isTheFirst && !isWaiting, exception != default ? new List<Exception>() { exception } : null);

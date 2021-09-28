@@ -2,7 +2,7 @@
 
 namespace Rystem.Background
 {
-    public class AggregationServiceBuilder<T> : ServiceBuilder
+    public sealed class AggregationServiceBuilder<T> : ServiceBuilder
     {
         public AggregationServiceBuilder(Installation installation, ServiceProvider rystemServiceProvider) : base(installation, rystemServiceProvider)
         {

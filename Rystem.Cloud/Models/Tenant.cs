@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Rystem.Cloud
 {
-    public record Tenant(string Name, List<Subscription> Subscriptions)
+    public sealed record Tenant(string Name, List<Subscription> Subscriptions)
     {
         public Dictionary<string, List<string>> PossibleMetrics => Subscriptions.SelectMany(x => x.PossibleMetrics).Where(x => x.Value.Count > 0).GroupBy(x => x.Key).ToDictionary(x => x.Key, x => x.Where(t => t.Key == x.Key).FirstOrDefault().Value);
         public IEnumerable<string> Types => Subscriptions.SelectMany(x => x.Types).Distinct();

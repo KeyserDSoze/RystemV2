@@ -3,7 +3,7 @@ using Rystem.Azure.Integration.Cosmos;
 
 namespace Rystem.Business
 {
-    public class AzureDocumentServiceBuilder<T> : ServiceBuilder
+    public sealed class AzureDocumentServiceBuilder<T> : ServiceBuilder
         where T : new()
     {
         public AzureDocumentServiceBuilder(Installation installation, ServiceProvider rystemServiceProvider) : base(installation, rystemServiceProvider)

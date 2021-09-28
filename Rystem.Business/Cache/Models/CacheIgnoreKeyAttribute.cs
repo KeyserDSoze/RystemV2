@@ -2,5 +2,5 @@
 
 namespace Rystem.Business
 {
-    public class CacheIgnoreKeyAttribute : Attribute { }
+    public sealed class CacheIgnoreKeyAttribute : Attribute { }
 }

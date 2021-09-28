@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Rystem.Text
 {
-    internal class EnumerableConverter : Converter, ICsvInterpreter
+    internal sealed class EnumerableConverter : Converter, ICsvInterpreter
     {
         public EnumerableConverter(int index, IDictionary<string, string> abstractionInterfaceMapping, IDictionary<string, string> headerMapping) : base(index, abstractionInterfaceMapping, headerMapping) { }
 

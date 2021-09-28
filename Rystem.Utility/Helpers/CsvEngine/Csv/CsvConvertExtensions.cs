@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-
-namespace Rystem.Text
+﻿namespace Rystem.Text
 {
     internal static class CsvConvertExtensions
     {

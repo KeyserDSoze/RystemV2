@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace Rystem.Business
 {
-    public sealed record CacheConfiguration(TimeSpan ExpiringDefault) : Configuration(string.Empty);
     public sealed class RystemCacheServiceProvider<TCacheKey, TCache> : ServiceProvider
         where TCacheKey : ICacheKey<TCache>
     {

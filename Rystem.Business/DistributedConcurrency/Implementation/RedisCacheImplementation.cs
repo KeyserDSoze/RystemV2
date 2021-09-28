@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Concurrency
 {
-    internal class RedisCacheImplementation : IDistributedImplementation
+    internal sealed class RedisCacheImplementation : IDistributedImplementation
     {
         private readonly RedisCacheIntegration Integration;
         public RedisCacheImplementation(RedisCacheIntegration integration) 

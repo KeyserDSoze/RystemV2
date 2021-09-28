@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Cache
 {
-    public class MemoryCacheService : ICacheService
+    public sealed class MemoryCacheService : ICacheService
     {
         public Task<bool> ExistsAsync(string key) 
             => Task.FromResult(new Key(key).Exists<HttpResponseCache>());

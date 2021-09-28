@@ -3,7 +3,7 @@ using Rystem.Business.Data;
 
 namespace Rystem.Business
 {
-    public class RystemDataServiceProvider<T> : ServiceProvider
+    public sealed class RystemDataServiceProvider<T> : ServiceProvider
     {
         public RystemDataServiceProvider(IServiceCollection services) : base(services)
         {

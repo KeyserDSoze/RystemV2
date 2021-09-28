@@ -3,7 +3,7 @@ using System;
 
 namespace Rystem.Business
 {
-    public class RystemDocumentServiceTimestamp<T> : DocumentServiceKey<T>
+    public sealed class RystemDocumentServiceTimestamp<T> : DocumentServiceKey<T>
         where T : new()
     {
         public RystemDocumentServiceTimestamp(ServiceProvider rystemServiceProvider, RystemDocumentServiceProviderOptions options) : base(rystemServiceProvider, options)

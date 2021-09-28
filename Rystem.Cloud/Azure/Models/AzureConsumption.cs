@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Rystem.Cloud.Azure
 {
-    public class AzureConsumptions
+    internal sealed class AzureConsumptions
     {
         [JsonPropertyName("value")]
         public AzureConsumption[] Value { get; set; }
@@ -11,7 +11,7 @@ namespace Rystem.Cloud.Azure
         public string NextLink { get; set; }
     }
 
-    public class AzureConsumption
+    internal sealed class AzureConsumption
     {
         [JsonPropertyName("kind")]
         public string Kind { get; set; }
@@ -27,7 +27,7 @@ namespace Rystem.Cloud.Azure
         public AzureConsumptionProperties Properties { get; set; }
     }
 
-    public class AzureConsumptionTags
+    internal sealed class AzureConsumptionTags
     {
         [JsonPropertyName("migration")]
         public string Migration { get; set; }
@@ -38,7 +38,7 @@ namespace Rystem.Cloud.Azure
         public string Test { get; set; }
     }
 
-    public class AzureConsumptionProperties
+    internal sealed class AzureConsumptionProperties
     {
         [JsonPropertyName("billingAccountId")]
         public string BillingAccountId { get; set; }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Rystem.Text
 {
-    internal class StartConversion : Converter, ICsvInterpreter
+    internal sealed class StartConversion : Converter, ICsvInterpreter
     {
         private static readonly Dictionary<string, string> Empty = new Dictionary<string, string>();
         public StartConversion() : base(0, new Dictionary<string, string>(), new Dictionary<string, string>())

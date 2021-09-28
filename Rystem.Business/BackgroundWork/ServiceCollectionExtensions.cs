@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Rystem.Background;
 
-namespace Rystem.Business
+namespace Rystem
 {
     public static partial class ServiceCollectionExtensions
     {

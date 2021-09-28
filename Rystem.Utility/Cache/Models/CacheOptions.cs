@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Rystem.Cache
 {
-    public class CacheOptions
+    public sealed class CacheOptions
     {
         public TimeSpan DefaultExpireAfter { get; set; }
         private List<(ICachePathFinder Finder, TimeSpan ExpireAfter)> PathFinders { get; } = new();

@@ -4,7 +4,7 @@ using Rystem.Business;
 
 namespace Rystem.Concurrency
 {
-    public class AzureDistributedServiceBuilder<T> : ServiceBuilder
+    public sealed class AzureDistributedServiceBuilder<T> : ServiceBuilder
         where T : IDistributedConcurrencyKey
     {
         public AzureDistributedServiceBuilder(Installation installation, ServiceProvider rystemServiceProvider) : base(installation, rystemServiceProvider)

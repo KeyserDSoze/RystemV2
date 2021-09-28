@@ -2,7 +2,7 @@
 
 namespace Rystem.Business
 {
-    public class RystemQueueServiceProvider<T> : ServiceProvider
+    public sealed class RystemQueueServiceProvider<T> : ServiceProvider
     {
         public RystemQueueServiceProvider(IServiceCollection services) : base(services) { }
         public AzureQueueServiceBuilder<T> WithAzure(Installation installation = Installation.Default)

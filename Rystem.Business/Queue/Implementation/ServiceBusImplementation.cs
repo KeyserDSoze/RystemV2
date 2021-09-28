@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business.Queue.Implementation
 {
-    internal class ServiceBusImplementations<TEntity> : IQueueImplementation<TEntity>
+    internal sealed class ServiceBusImplementations<TEntity> : IQueueImplementation<TEntity>
     {
         private readonly ServiceBusIntegration Integration;
         internal ServiceBusImplementations(ServiceBusIntegration integration)

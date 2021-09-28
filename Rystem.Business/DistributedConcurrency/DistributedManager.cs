@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Concurrency
 {
-    internal class DistributedManager<TKey> : IDistributedManager<TKey>
+    internal sealed class DistributedManager<TKey> : IDistributedManager<TKey>
         where TKey : IDistributedConcurrencyKey
     {
         private readonly Dictionary<Installation, IDistributedImplementation> Implementations = new();

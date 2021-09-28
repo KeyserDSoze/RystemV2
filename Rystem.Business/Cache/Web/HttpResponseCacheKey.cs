@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Cache
 {
-    public class HttpResponseCacheKey : ICacheKey<HttpResponseCache>
+    public sealed class HttpResponseCacheKey : ICacheKey<HttpResponseCache>
     {
         public string Key { get; set; }
         internal static Func<RystemCacheServiceProvider<HttpResponseCacheKey, HttpResponseCache>> CacheServiceProvider;

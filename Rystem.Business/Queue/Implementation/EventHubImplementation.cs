@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business.Queue.Implementation
 {
-    internal class EventHubImplementation<TEntity> : IQueueImplementation<TEntity>
+    internal sealed class EventHubImplementation<TEntity> : IQueueImplementation<TEntity>
     {
         private readonly EventHubIntegration Integration;
         internal EventHubImplementation(EventHubIntegration integration)

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Rystem.Text
 {
-    internal class DictionaryConverter : Converter, ICsvInterpreter
+    internal sealed class DictionaryConverter : Converter, ICsvInterpreter
     {
         public DictionaryConverter(int index, IDictionary<string, string> abstractionInterfaceMapping, IDictionary<string, string> headerMapping) : base(index, abstractionInterfaceMapping, headerMapping) { }
 

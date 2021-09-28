@@ -24,9 +24,14 @@ namespace Rystem.Concurrency
                 await Task.Delay(2).NoContext();
             }
             Exception exception = default;
-            var result = await Try.Execute(action).InvokeAsync().NoContext();
-            if (result.InException)
-                exception = result.Exception;
+            try
+            {
+                await action.Invoke().NoContext();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
             await implementation.ReleaseAsync(Key).NoContext();
             return new LockResponse(DateTime.UtcNow.Subtract(start), exception != default ? new List<Exception>() { exception } : null);
         }

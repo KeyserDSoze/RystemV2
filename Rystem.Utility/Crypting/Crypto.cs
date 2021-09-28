@@ -6,7 +6,6 @@ using System.Text;
 
 namespace Rystem.Security.Cryptography
 {
-    public record AesCryptoOptions(string Password, string SaltKey, string VIKey);
     public static class Crypto
     {
         public static class Aes

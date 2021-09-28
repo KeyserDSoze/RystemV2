@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace Rystem.Business
 {
-    public class RystemDataServiceName<T>
+    public sealed class RystemDataServiceName<T>
     {
         private readonly RystemDataServiceProvider<T> RystemDataServiceProvider;
         private readonly RystemDataServiceProviderOptions Options;

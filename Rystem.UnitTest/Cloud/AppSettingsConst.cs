@@ -11,9 +11,8 @@ namespace Rystem.UnitTest.Cloud
         {
             var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
             var aad = config.GetSection("AzureAad");
-            RystemBusiness
-                .WithAzure()
-                .EndConfiguration()
+            ServiceLocator
+                .Create()
                 .AddAzureManager(new AzureAadAppRegistration(aad["ClientId"], aad["ClientSecret"], aad["TenantId"]))
                 .FinalizeWithoutDependencyInjection();
         }

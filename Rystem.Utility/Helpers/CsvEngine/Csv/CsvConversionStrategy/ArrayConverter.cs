@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Rystem.Text
 {
-    internal class ArrayConverter : Converter, ICsvInterpreter
+    internal sealed class ArrayConverter : Converter, ICsvInterpreter
     {
         public ArrayConverter(int index, IDictionary<string, string> abstractionInterfaceMapping, IDictionary<string, string> headerMapping) : base(index, abstractionInterfaceMapping, headerMapping) { }
 

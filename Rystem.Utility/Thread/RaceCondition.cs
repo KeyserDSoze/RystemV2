@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Concurrency
 {
-    public static class RaceConditionExtensions
+    public static class RaceCondition
     {
         /// <summary>
         /// Deal with concurrency and allow only one method to run. Other concurrent task will be dropped.

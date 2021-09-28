@@ -8,7 +8,7 @@
     <Product>Rystem</Product>
     <Description>Library that allows to speed up the basic operations on system libraries like:
 - added directly to string the methods to transform to json, csv, bson, byte array, stream and viceversa.
-- added directly to Uri object the possibility to compose in fluid method the request.
+- added directly to Http client the possibility to compose a json post with json return.
 - added a different approach to catch the exceptions.
 - added a real random, and a guid with time-inverse approach.
 - added a NoContext() method to Task class to perform a quick ConfigureAwait(false)
@@ -23,15 +23,18 @@
     <PackageIcon>rystem.png</PackageIcon>
     <RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>
     <PackageId>Rystem</PackageId>
-    <Version>2.0.2</Version>
+    <Version>2.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Cronos" Version="0.7.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="5.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Polly" Version="7.2.2" />
+    <PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

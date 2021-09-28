@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace Rystem.Text
 {
-    internal class CsvDefaultConversion<TEntity>
+    internal sealed class CsvDefaultConversion<TEntity>
         where TEntity : new()
     {
         private readonly char SplittingChar;

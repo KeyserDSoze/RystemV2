@@ -87,7 +87,7 @@ namespace Rystem.Business
             else
             {
                 TCache cache = default;
-                await RaceConditionExtensions.RunAsync(async () => cache = await InstanceWithoutConsistencyAsync(key, keyString, expiringTime, installation).NoContext(), keyString).NoContext();
+                await RaceCondition.RunAsync(async () => cache = await InstanceWithoutConsistencyAsync(key, keyString, expiringTime, installation).NoContext(), keyString).NoContext();
                 return cache;
             }
         }

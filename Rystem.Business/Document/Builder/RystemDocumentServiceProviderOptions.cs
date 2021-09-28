@@ -2,7 +2,7 @@
 
 namespace Rystem.Business
 {
-    public class RystemDocumentServiceProviderOptions
+    public sealed class RystemDocumentServiceProviderOptions
     {
         public PropertyInfo PrimaryKey { get; set; }
         public PropertyInfo SecondaryKey { get; set; }

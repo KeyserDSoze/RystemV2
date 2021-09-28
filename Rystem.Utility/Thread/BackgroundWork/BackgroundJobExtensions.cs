@@ -1,10 +1,11 @@
 ﻿using Cronos;
 using Microsoft.Extensions.DependencyInjection;
+using Rystem.Background;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rystem.Background
+namespace Rystem
 {
     public static partial class BackgroundJobExtensions
     {

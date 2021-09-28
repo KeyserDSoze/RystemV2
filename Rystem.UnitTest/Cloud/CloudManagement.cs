@@ -8,7 +8,7 @@ namespace Rystem.UnitTest.Cloud
 {
     public class CloudManagement
     {
-        private readonly ICloudManagement Manager = ServiceLocator.GetService<ICloudManagement>();
+        private readonly CloudManager Manager = ServiceLocator.GetService<CloudManager>();
         static CloudManagement()
         {
             AppSettingsConst.Load();
@@ -16,7 +16,8 @@ namespace Rystem.UnitTest.Cloud
         [Fact]
         public async Task IsOk()
         {
-            var tenant = await Manager.GetTenantByMonthAsync(DateTime.UtcNow.AddMonths(-1), ManagementDeepRequest.Monitoring, false).NoContext();
+            var cloudManager = await Manager.GetManagerAsync().NoContext();
+            var tenant = await cloudManager.GetTenantByMonthAsync(DateTime.UtcNow.AddMonths(-1), ManagementDeepRequest.Monitoring, false).NoContext();
             string value = tenant.ToJson();
         }
     }

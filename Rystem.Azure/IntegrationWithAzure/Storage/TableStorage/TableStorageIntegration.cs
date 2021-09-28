@@ -17,7 +17,7 @@ namespace Rystem.Azure.Integration.Storage
         private async Task<CloudTable> GetContextAsync()
         {
             if (Context == default)
-                await RaceConditionExtensions.RunAsync(async () =>
+                await RaceCondition.RunAsync(async () =>
                 {
                     if (Context == default)
                     {

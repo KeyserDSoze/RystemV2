@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Net;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Linq;
 using System.Web;
-using System.IO;
 using System.Text.RegularExpressions;
 using Rystem.Text;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Net.Http.Json;
-using System.Net.Http.Headers;
 using System.Text;
+using System.Net.Http.Json;
 
 namespace Rystem.Cloud.Azure
 {
@@ -28,7 +25,6 @@ namespace Rystem.Cloud.Azure
             AppRegistration = appRegistration;
             HttpClient = httpClientFactory.CreateClient("rystem.cloud.azure");
         }
-
         private bool IsAuthenticated => AzureAccount != null && DateTime.UtcNow >= AzureAccount.StartTime && DateTime.UtcNow <= AzureAccount.EndTime;
         private static readonly JsonSerializerOptions Options = new()
         {
@@ -67,7 +63,7 @@ namespace Rystem.Cloud.Azure
         private static readonly object TrafficLight = new();
         public async Task<IEnumerable<Subscription>> ListSubscriptionsAsync()
             => (await (await GetAuthenticatedClientAsync().NoContext())
-                    .GetAsync<AzureSubscriptions>($"https://management.azure.com/subscriptions?api-version=2020-01-01", Options)
+                    .GetFromJsonAsync<AzureSubscriptions>($"https://management.azure.com/subscriptions?api-version=2020-01-01", Options)
                         .NoContext())
                     .Subscriptions.Select(x =>
                         new Subscription(x.SubscriptionId, x.TenantId, x.DisplayName, x.State, x.Tags, new())
@@ -78,7 +74,7 @@ namespace Rystem.Cloud.Azure
             try
             {
                 List<AzureSubscription> subscriptions = (await (await GetAuthenticatedClientAsync().NoContext())
-                    .GetAsync<AzureSubscriptions>($"https://management.azure.com/subscriptions?api-version=2020-01-01", Options)
+                    .GetFromJsonAsync<AzureSubscriptions>($"https://management.azure.com/subscriptions?api-version=2020-01-01", Options)
                         .NoContext())
                     .Subscriptions;
                 List<Task> subscriptionTasks = new();
@@ -110,7 +106,7 @@ namespace Rystem.Cloud.Azure
             try
             {
                 var tags = await (await GetAuthenticatedClientAsync().NoContext())
-                        .GetAsync<AzureTagObject>($"https://management.azure.com{subscription.Id}/tagNames?api-version=2021-04-01")
+                        .GetFromJsonAsync<AzureTagObject>($"https://management.azure.com{subscription.Id}/tagNames?api-version=2021-04-01")
                         .NoContext();
                 if (tags != default && tags.Value.Length > 0)
                 {
@@ -217,7 +213,7 @@ namespace Rystem.Cloud.Azure
         public async Task<(Subscription Subscription, List<CloudManagementError> Errors)> GetSubscriptionAsync(string subscriptionId, DateTime startTime, DateTime endTime, ManagementDeepRequest azureDeepRequest, bool executeRequestInParallel)
         {
             List<AzureSubscription> subscriptions = (await (await GetAuthenticatedClientAsync().NoContext())
-                .GetAsync<AzureSubscriptions>($"https://management.azure.com/subscriptions?api-version=2020-01-01", Options).NoContext())
+                .GetFromJsonAsync<AzureSubscriptions>($"https://management.azure.com/subscriptions?api-version=2020-01-01", Options).NoContext())
                 .Subscriptions;
             AzureSubscription subscription = subscriptions.FirstOrDefault(x => x.SubscriptionId == subscriptionId);
             if (subscription != default)
@@ -252,7 +248,7 @@ namespace Rystem.Cloud.Azure
             try
             {
                 return (await (await GetAuthenticatedClientAsync().NoContext())
-                        .GetAsync<AzureResourceGroups>($"https://management.azure.com/subscriptions/{subscriptionId}/resourcegroups?api-version=2020-06-01", Options)
+                        .GetFromJsonAsync<AzureResourceGroups>($"https://management.azure.com/subscriptions/{subscriptionId}/resourcegroups?api-version=2020-06-01", Options)
                             .NoContext())
                         .ResourceGroups;
             }
@@ -268,7 +264,7 @@ namespace Rystem.Cloud.Azure
             try
             {
                 return (await (await GetAuthenticatedClientAsync().NoContext())
-                            .GetAsync<AzureResources>($"https://management.azure.com/subscriptions/{subscriptionId}/resources?api-version=2020-06-01", Options)
+                            .GetFromJsonAsync<AzureResources>($"https://management.azure.com/subscriptions/{subscriptionId}/resources?api-version=2020-06-01", Options)
                         .NoContext()).Resources;
             }
             catch (Exception ex)
@@ -340,7 +336,7 @@ namespace Rystem.Cloud.Azure
                 while (!string.IsNullOrWhiteSpace(uri))
                 {
                     var consumptionResponse = await (await GetAuthenticatedClientAsync().NoContext())
-                        .GetAsync<AzureConsumptions>(uri, Options)
+                        .GetFromJsonAsync<AzureConsumptions>(uri, Options)
                         .NoContext();
                     consumptions.AddRange(consumptionResponse.Value);
                     uri = consumptionResponse.NextLink;

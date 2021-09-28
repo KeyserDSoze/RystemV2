@@ -2,7 +2,7 @@
 
 namespace Rystem.Business
 {
-    public class AzureDataServiceBuilder<T> : ServiceBuilder
+    public sealed class AzureDataServiceBuilder<T> : ServiceBuilder
     {
         public AzureDataServiceBuilder(Installation installation, ServiceProvider rystemServiceProvider) : base(installation, rystemServiceProvider)
         {

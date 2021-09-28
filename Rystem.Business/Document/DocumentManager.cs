@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business.Document
 {
-    internal class DocumentManager<TEntity> : IDocumentManager<TEntity>
+    internal sealed class DocumentManager<TEntity> : IDocumentManager<TEntity>
         where TEntity : new()
     {
         private readonly IDictionary<Installation, IDocumentImplementation<TEntity>> Implementations = new Dictionary<Installation, IDocumentImplementation<TEntity>>();

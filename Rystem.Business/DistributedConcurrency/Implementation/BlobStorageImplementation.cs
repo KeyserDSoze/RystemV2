@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Concurrency
 {
-    internal class BlobStorageImplementation : IDistributedImplementation
+    internal sealed class BlobStorageImplementation : IDistributedImplementation
     {
         private readonly BlobStorageIntegration Integration;
         internal BlobStorageImplementation(BlobStorageIntegration integration)

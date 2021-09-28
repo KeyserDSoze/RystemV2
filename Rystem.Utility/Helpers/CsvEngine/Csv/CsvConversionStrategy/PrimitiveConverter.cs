@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 
 namespace Rystem.Text
 {
-    internal class PrimitiveConverter : Converter, ICsvInterpreter
+    internal sealed class PrimitiveConverter : Converter, ICsvInterpreter
     {
         public PrimitiveConverter(int index, IDictionary<string, string> abstractionInterfaceMapping, IDictionary<string, string> headerMapping) : base(index, abstractionInterfaceMapping, headerMapping) { }
 

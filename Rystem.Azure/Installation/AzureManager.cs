@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Rystem.Azure
 {
-    public class AzureManager
+    public sealed class AzureManager
     {
         private readonly Dictionary<string, dynamic> Accounts = new();
         internal void AddAccount<T>(T entity, AzureServiceProviderType service, string key) 

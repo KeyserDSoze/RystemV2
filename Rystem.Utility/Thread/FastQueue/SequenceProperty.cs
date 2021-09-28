@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Background
 {
-    public record SequenceProperty<T>(string Name = "", int MaximumBuffer = 5000, TimeSpan MaximumRetention = default, params Func<IEnumerable<T>, Task>[] Actions) : Configuration(Name)
+    public sealed record SequenceProperty<T>(string Name = "", int MaximumBuffer = 5000, TimeSpan MaximumRetention = default, params Func<IEnumerable<T>, Task>[] Actions) : Configuration(Name)
     {
         public SequenceProperty() : this(default) { }
     }

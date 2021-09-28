@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace System
 {
-    public record Key(string Value = "");
     public static class InMemoryExtensions
     {
         public static T Instance<T>(this Key key)

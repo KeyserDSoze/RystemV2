@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Rystem.Concurrency;
 
-namespace Rystem.Business
+namespace Rystem
 {
     public static partial class ServiceCollectionExtensions
     {

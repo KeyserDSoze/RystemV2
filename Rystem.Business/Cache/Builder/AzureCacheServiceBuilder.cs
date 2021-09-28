@@ -3,7 +3,7 @@ using Rystem.Azure.Integration.Storage;
 
 namespace Rystem.Business
 {
-    public class AzureCacheServiceBuilder<TCacheKey, TCache> : ServiceBuilder
+    public sealed class AzureCacheServiceBuilder<TCacheKey, TCache> : ServiceBuilder
            where TCacheKey : ICacheKey<TCache>
     {
         private readonly CacheConfiguration Configuration;

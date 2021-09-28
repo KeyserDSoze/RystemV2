@@ -73,7 +73,7 @@ namespace Rystem.Azure.Integration.Cache
             {
                 if (expiringTime == default)
                     expiringTime = TimeSpan.FromSeconds(10);
-                RaceConditionResponse response = await RaceConditionExtensions.RunAsync(async () =>
+                RaceConditionResponse response = await RaceCondition.RunAsync(async () =>
                 {
                     await Cache.LockTakeAsync(new RedisKey(key), new RedisValue(FixedValue), expiringTime);
                 }, key).NoContext();
@@ -91,7 +91,7 @@ namespace Rystem.Azure.Integration.Cache
         }
         public async Task<bool> ReleaseLockAsync(string key)
         {
-            await RaceConditionExtensions.RunAsync(async () =>
+            await RaceCondition.RunAsync(async () =>
             {
                 await Cache.LockReleaseAsync(new RedisKey(key), new RedisValue(FixedValue));
             }, key).NoContext();

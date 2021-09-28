@@ -3,7 +3,7 @@ using Rystem.Business;
 
 namespace Rystem.Background
 {
-    public class RystemAggregationServiceProvider<T> : Business.ServiceProvider
+    public sealed class RystemAggregationServiceProvider<T> : Business.ServiceProvider
     {
         public RystemAggregationServiceProvider(IServiceCollection services) : base(services) { }
         public AggregationServiceBuilder<T> With(Installation installation = Installation.Default)

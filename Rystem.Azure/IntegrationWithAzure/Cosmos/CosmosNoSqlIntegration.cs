@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Azure.Integration.Cosmos
 {
-    public class CosmosNoSqlIntegration : IWarmUp
+    public sealed class CosmosNoSqlIntegration : IWarmUp
     {
         public CosmosConfiguration Configuration { get; }
         private Container Context;
@@ -24,7 +24,7 @@ namespace Rystem.Azure.Integration.Cosmos
         private async Task<Container> GetContextAsync()
         {
             if (Context == default)
-                await RaceConditionExtensions.RunAsync(async () =>
+                await RaceCondition.RunAsync(async () =>
                 {
                     if (Context == default)
                     {

@@ -43,19 +43,19 @@ namespace Rystem.Cloud.Azure
         public string SpendingLimit { get; set; }
     }
 
-    public class AzureTagObject
+    internal sealed class AzureTagObject
     {
         [JsonPropertyName("value")]
         public AzureTag[] Value { get; set; }
     }
-    public class AzureTag
+    internal sealed class AzureTag
     {
         [JsonPropertyName("tagName")]
         public string TagName { get; set; }
         [JsonPropertyName("values")]
         public AzureTagValue[] Values { get; set; }
     }
-    public class AzureTagValue
+    internal sealed class AzureTagValue
     {
         [JsonPropertyName("tagValue")]
         public string TagValue { get; set; }

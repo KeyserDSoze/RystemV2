@@ -2,7 +2,7 @@
 
 namespace Rystem.Cache
 {
-    public class CacheBuilder
+    public sealed class CacheBuilder
     {
         public IServiceCollection Services { get; }
         public CacheBuilder(IServiceCollection services)

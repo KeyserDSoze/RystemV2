@@ -2,7 +2,7 @@
 
 namespace Rystem.Background
 {
-    internal class BackgroundQueue<T> : IBackgroundQueue<T>
+    internal sealed class BackgroundQueue<T> : IBackgroundQueue<T>
     {
         private readonly Queue<T> Queues = new();
         private static readonly object Semaphore = new();

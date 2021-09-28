@@ -25,7 +25,7 @@ namespace Rystem.Azure.Integration.Storage
         private async Task<BlobContainerClient> GetContextAsync()
         {
             if (Context == default)
-                await RaceConditionExtensions.RunAsync(async () =>
+                await RaceCondition.RunAsync(async () =>
                 {
                     if (Context == default)
                     {
@@ -215,7 +215,7 @@ namespace Rystem.Azure.Integration.Storage
         {
             if (!BlobLockClients.ContainsKey(name))
             {
-                await RaceConditionExtensions.RunAsync(async () =>
+                await RaceCondition.RunAsync(async () =>
                 {
                     if (!BlobLockClients.ContainsKey(name))
                     {
@@ -241,7 +241,7 @@ namespace Rystem.Azure.Integration.Storage
                 if (!this.TokenAcquireds.ContainsKey(normalizedKey))
                 {
                     var blob = await this.GetBlobClientForLockAsync(normalizedKey).NoContext();
-                    RaceConditionResponse response = await RaceConditionExtensions.RunAsync(async () =>
+                    RaceConditionResponse response = await RaceCondition.RunAsync(async () =>
                     {
                         var lease = blob.Client.GetBlobLeaseClient(BlobLockClients[normalizedKey].LeaseId);
                         Response<BlobLease> response = await lease.AcquireAsync(new TimeSpan(0, 1, 0)).NoContext();
@@ -270,7 +270,7 @@ namespace Rystem.Azure.Integration.Storage
         {
             string normalizedKey = key ?? string.Empty;
             if (TokenAcquireds.ContainsKey(normalizedKey))
-                await RaceConditionExtensions.RunAsync(async () =>
+                await RaceCondition.RunAsync(async () =>
                 {
                     _ = await TokenAcquireds[normalizedKey].ReleaseAsync().NoContext();
                     TokenAcquireds.TryRemove(normalizedKey, out _);

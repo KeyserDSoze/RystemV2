@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Rystem.Security.Cryptography;
 
-namespace Rystem.Security.Cryptography
+namespace Rystem
 {
     public static class ServiceCollectionExtensions
     {

@@ -2,7 +2,7 @@
 
 namespace Rystem.Business
 {
-    public class RystemDataServiceProviderOptions
+    public sealed class RystemDataServiceProviderOptions
     {
         public PropertyInfo Name { get; set; }
     }

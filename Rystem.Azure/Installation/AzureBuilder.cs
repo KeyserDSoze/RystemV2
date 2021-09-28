@@ -8,9 +8,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Rystem.Azure
 {
-    public class AzureBuilder
+    public sealed class AzureBuilder
     {
-        internal static readonly AzureManager Manager = new();
+        private static readonly AzureManager Manager = new();
         private readonly IServiceCollection Services;
         internal AzureBuilder(IServiceCollection services)
             => Services = services;

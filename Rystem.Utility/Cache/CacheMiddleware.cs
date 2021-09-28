@@ -2,12 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Collections.Concurrent;
 using System.IO;
 
 namespace Rystem.Cache
 {
-    public class CacheMiddleware : IMiddleware
+    public sealed class CacheMiddleware : IMiddleware
     {
         private static readonly Type HttpMethodType = typeof(CachedHttpMethod);
         private readonly CacheOptions Options;

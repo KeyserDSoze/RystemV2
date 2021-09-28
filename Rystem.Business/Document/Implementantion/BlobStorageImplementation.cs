@@ -9,7 +9,7 @@ using static Rystem.Azure.Integration.Storage.BlobStorageIntegration;
 
 namespace Rystem.Business.Document.Implementantion
 {
-    internal class BlobStorageImplementation<TEntity> : IDocumentImplementation<TEntity>
+    internal sealed class BlobStorageImplementation<TEntity> : IDocumentImplementation<TEntity>
         where TEntity : new()
     {
         private static readonly Type NoDocumentProperty = typeof(NoDocumentAttribute);

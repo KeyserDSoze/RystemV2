@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rystem.Business.Queue.Implementation
 {
-    internal class QueueStorageImplementation<TEntity> : IQueueImplementation<TEntity>
+    internal sealed class QueueStorageImplementation<TEntity> : IQueueImplementation<TEntity>
     {
         private readonly QueueStorageIntegration Integration;
         internal QueueStorageImplementation(QueueStorageIntegration integration)

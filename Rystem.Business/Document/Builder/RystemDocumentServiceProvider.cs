@@ -3,7 +3,7 @@ using Rystem.Business.Document;
 
 namespace Rystem.Business
 {
-    public class RystemDocumentServiceProvider<T> : ServiceProvider
+    public sealed class RystemDocumentServiceProvider<T> : ServiceProvider
         where T : new()
     {
         public RystemDocumentServiceProvider(IServiceCollection services) : base(services)

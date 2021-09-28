@@ -1,4 +1,4 @@
 ﻿namespace Rystem.Background
 {
-    public record RystemAggregationServiceProviderOptions(bool IsFirstInFirstOut);
+    public sealed record RystemAggregationServiceProviderOptions(bool IsFirstInFirstOut);
 }

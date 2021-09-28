@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using Microsoft.AspNetCore.Builder;
+using Rystem.Cache;
 
-namespace Rystem.Cache
+namespace Rystem
 {
     public static class CacheExtensions
     {
