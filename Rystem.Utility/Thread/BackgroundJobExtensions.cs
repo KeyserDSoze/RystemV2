@@ -12,8 +12,8 @@ namespace Rystem.Background
         /// <param name="id">Task id that runs in background.</param>
         /// <param name="nextRunningTime">Function that has to return a value in milliseconds. Default time is 120ms.</param>
         /// <param name="runImmediately">Run immediately at the start.</param>
-        public static void RunInBackground(this Action task, string id = "", Func<double> nextRunningTime = default, bool runImmediately = false)
-            => BackgroundJobThread.AddTask(task, id, nextRunningTime, runImmediately);
+        public static Task RunInBackgroundAsync(this Action task, string id = "", Func<double> nextRunningTime = default, bool runImmediately = false)
+            => BackgroundJobThread.AddTaskAsync(task, id, nextRunningTime, runImmediately);
         /// <summary>
         /// Method that allows task to run continuously in background.
         /// </summary>
@@ -21,15 +21,15 @@ namespace Rystem.Background
         /// <param name="id">Task id that runs in background.</param>
         /// <param name="nextRunningTime">Function that has to return a value in milliseconds. Default time is 120ms.</param>
         /// <param name="runImmediately">Run immediately at the start.</param>
-        public static void RunInBackground(this Func<Task> task, string id = "", Func<double> nextRunningTime = default, bool runImmediately = false)
-            => BackgroundJobThread.AddTask(task, id, nextRunningTime, runImmediately);
+        public static Task RunInBackgroundAsync(this Func<Task> task, string id = "", Func<double> nextRunningTime = default, bool runImmediately = false)
+            => BackgroundJobThread.AddTaskAsync(task, id, nextRunningTime, runImmediately);
         /// <summary>
         /// Remove a task from the continuously running by its id.
         /// </summary>
         /// <param name="task"></param>
         /// <param name="id">Task id that runs in background.</param>
-        public static void StopRunningInBackground(this Action task, string id = "")
-            => BackgroundJobThread.RemoveTask(id);
+        public static Task StopRunningInBackgroundAsync(this Action task, string id = "")
+            => BackgroundJobThread.RemoveTaskAsync(id);
         /// <summary>
         /// Get if your task is running.
         /// </summary>

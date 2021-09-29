@@ -10,6 +10,13 @@ namespace Rystem.Concurrency
         private readonly Dictionary<string, LockExecutor> LockConditions = new();
         private Locks()
         {
+        }
+        public static Locks Instance { get; } = new();
+        private static readonly object Semaphore = new();
+        private bool IsBackgroundRunning;
+        private Task RunBackgroundManagerAsync()
+        {
+            IsBackgroundRunning = true;
             Action loop = () =>
             {
                 List<string> removeKeys = new();
@@ -22,12 +29,12 @@ namespace Rystem.Concurrency
                         Instance.LockConditions.Remove(keyToRemove);
                 }
             };
-            loop.RunInBackground("Rystem.Background.Locks", () => 1000 * 60 * 60);
+            return loop.RunInBackgroundAsync(typeof(Locks).FullName, () => 1000 * 60 * 60);
         }
-        public static Locks Instance { get; } = new();
-        private static readonly object Semaphore = new();
         public async Task<LockResponse> RunAsync(Func<Task> action, string id, IDistributedImplementation implementation)
         {
+            if (!IsBackgroundRunning)
+                _ = RunBackgroundManagerAsync();
             if (!LockConditions.ContainsKey(id))
                 lock (Semaphore)
                     if (!LockConditions.ContainsKey(id))

@@ -59,9 +59,9 @@ namespace System
         public static IEnumerable<TEntity> Get<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, int? takeCount = default, Installation installation = Installation.Default)
             where TEntity : IDocument, new()
            => GetAsync(entity, expression, takeCount, installation).ToResult();
-        public static string GetName<TEntity>(this TEntity entity, Installation installation = Installation.Default)
-            where TEntity : IDocument, new()
-        => entity.Manager().GetName(installation);
+        //public static string GetName<TEntity>(this TEntity entity, Installation installation = Installation.Default)
+        //    where TEntity : IDocument, new()
+        //=> entity.Manager().GetName(installation);
         public static Task<TEntity> FirstOrDefaultAsync<TEntity>(this TEntity entity, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
             where TEntity : IDocument, new()
            => entity.Manager().FirstOrDefaultAsync(entity, expression, installation);

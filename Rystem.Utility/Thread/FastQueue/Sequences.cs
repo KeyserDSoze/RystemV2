@@ -9,6 +9,13 @@ namespace Rystem.Background
         private readonly Dictionary<string, IQueueContainer> Queues = new();
         private Sequences()
         {
+        }
+        public static Sequences Instance { get; } = new();
+        private static readonly object Semaphore = new();
+        private bool IsBackgroundRunning;
+        private Task RunBackgroundManagerAsync()
+        {
+            IsBackgroundRunning = true;
             Action loop = () =>
             {
                 List<IQueueContainer> containersToRefresh = new();
@@ -21,12 +28,12 @@ namespace Rystem.Background
                 foreach (var toRefresh in containersToRefresh)
                     toRefresh.Invoke();
             };
-            loop.RunInBackground($"Rystem.Background.Sequences", () => 1000 * 60);
+            return loop.RunInBackgroundAsync(typeof(Sequences).FullName, () => 1000 * 60);
         }
-        public static Sequences Instance { get; } = new();
-        private static readonly object Semaphore = new();
         public void Create<T>(SequenceProperty<T> property, QueueType type)
         {
+            if (IsBackgroundRunning)
+                RunBackgroundManagerAsync();
             if (!Queues.ContainsKey(property.Name))
                 lock (Semaphore)
                     if (!Queues.ContainsKey(property.Name))

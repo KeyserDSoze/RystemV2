@@ -13,36 +13,29 @@ namespace Rystem.Business.Document
     {
         private readonly IDictionary<Installation, IDocumentImplementation<TEntity>> Implementations = new Dictionary<Installation, IDocumentImplementation<TEntity>>();
         private readonly IDictionary<Installation, ProvidedService> DocumentConfigurations;
-        private readonly object TrafficLight = new();
-        private IDocumentImplementation<TEntity> Implementation(Installation installation)
-        {
-            if (!Implementations.ContainsKey(installation))
-                lock (TrafficLight)
-                    if (!Implementations.ContainsKey(installation))
-                    {
-                        ProvidedService configuration = DocumentConfigurations[installation];
-                        switch (configuration.Type)
-                        {
-                            case ServiceProviderType.AzureTableStorage:
-                                Implementations.Add(installation, new TableStorageImplementation<TEntity>(Manager.TableStorage(configuration.Configurations, configuration.ServiceKey), configuration.Options));
-                                break;
-                            case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new BlobStorageImplementation<TEntity>(Manager.BlobStorage(configuration.Configurations, configuration.ServiceKey), configuration.Options));
-                                break;
-                            case ServiceProviderType.AzureCosmosNoSql:
-                                Implementations.Add(installation, new CosmosNoSqlImplementation<TEntity>(Manager.CosmosNoSql(configuration.Configurations, configuration.ServiceKey), configuration.Options));
-                                break;
-                            default:
-                                throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
-                        }
-                    }
-            return Implementations[installation];
-        }
         private readonly AzureManager Manager;
         public DocumentManager(Options<IDocumentManager<TEntity>> options, AzureManager manager)
         {
             DocumentConfigurations = options.Services;
             Manager = manager;
+            foreach(var conf in DocumentConfigurations)
+            {
+                ProvidedService configuration = DocumentConfigurations[conf.Key];
+                switch (configuration.Type)
+                {
+                    case ServiceProviderType.AzureTableStorage:
+                        Implementations.Add(conf.Key, new TableStorageImplementation<TEntity>(Manager.TableStorage(configuration.Configurations, configuration.ServiceKey), configuration.Options));
+                        break;
+                    case ServiceProviderType.AzureBlockBlobStorage:
+                        Implementations.Add(conf.Key, new BlobStorageImplementation<TEntity>(Manager.BlobStorage(configuration.Configurations, configuration.ServiceKey), configuration.Options));
+                        break;
+                    case ServiceProviderType.AzureCosmosNoSql:
+                        Implementations.Add(conf.Key, new CosmosNoSqlImplementation<TEntity>(Manager.CosmosNoSql(configuration.Configurations, configuration.ServiceKey), configuration.Options));
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
+                }
+            }
         }
         private const string DateTimeStringForPrimaryKey = "yyyyMMdd";
         private static TEntity Normalize(TEntity entity, RystemDocumentServiceProviderOptions options)
@@ -54,21 +47,21 @@ namespace Rystem.Business.Document
             return entity;
         }
         public Task<bool> DeleteAsync(TEntity entity, Installation installation = Installation.Default)
-            => Implementation(installation).DeleteAsync(entity);
+            => Implementations[installation].DeleteAsync(entity);
         public Task<bool> DeleteBatchAsync(IEnumerable<TEntity> entity, Installation installation = Installation.Default)
-             => Implementation(installation).DeleteBatchAsync(entity);
+             => Implementations[installation].DeleteBatchAsync(entity);
         public Task<bool> ExistsAsync(TEntity entity, Installation installation = Installation.Default)
-            => Implementation(installation).ExistsAsync(entity);
+            => Implementations[installation].ExistsAsync(entity);
         public Task<IEnumerable<TEntity>> GetAsync(TEntity entity, Expression<Func<TEntity, bool>> expression = default, int? takeCount = default, Installation installation = Installation.Default)
-            => Implementation(installation).GetAsync(entity, expression, takeCount);
+            => Implementations[installation].GetAsync(entity, expression, takeCount);
         public Task<bool> UpdateAsync(TEntity entity, Installation installation = Installation.Default)
         {
-            var implementation = Implementation(installation);
+            var implementation = Implementations[installation];
             return implementation.UpdateAsync(Normalize(entity, implementation.Options));
         }
         public Task<bool> UpdateBatchAsync(IEnumerable<TEntity> entity, Installation installation = Installation.Default)
         {
-            var implementation = Implementation(installation);
+            var implementation = Implementations[installation];
             return implementation.UpdateBatchAsync(entity.Select(x => Normalize(x, implementation.Options)));
         }
         public async Task<TEntity> FirstOrDefaultAsync(TEntity entity, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
@@ -80,13 +73,13 @@ namespace Rystem.Business.Document
         public async Task<int> CountAsync(TEntity entity, Expression<Func<TEntity, bool>> expression = default, Installation installation = Installation.Default)
           => (await GetAsync(entity, expression, null, installation).NoContext()).Count();
         public string GetName(Installation installation = Installation.Default)
-            => Implementation(installation).GetName();
+            => Implementations[installation].GetName();
 
         public async Task<bool> WarmUpAsync()
         {
             List<Task> tasks = new();
             foreach (var configuration in DocumentConfigurations)
-                tasks.Add(Implementation(configuration.Key).WarmUpAsync());
+                tasks.Add(Implementations[configuration.Key].WarmUpAsync());
             await Task.WhenAll(tasks).NoContext();
             return true;
         }

@@ -1,5 +1,4 @@
 ﻿using Rystem.Azure;
-using Rystem.Azure.Integration.Storage;
 using Rystem.Concurrency;
 using System;
 using System.Collections.Generic;
@@ -13,31 +12,6 @@ namespace Rystem.Business
         private readonly Dictionary<Installation, ICacheImplementation<TCache>> Implementations = new();
         private readonly Dictionary<Installation, ProvidedService> CacheConfigurations;
         private bool MemoryIsActive { get; }
-        private readonly object TrafficLight = new();
-        private ICacheImplementation<TCache> Implementation(Installation installation)
-        {
-            if (!Implementations.ContainsKey(installation))
-                lock (TrafficLight)
-                    if (!Implementations.ContainsKey(installation))
-                    {
-                        ProvidedService configuration = CacheConfigurations[installation];
-                        switch (configuration.Type)
-                        {
-                            case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new InBlobStorage<TCache>(Manager.BlobStorage(configuration.Configurations, configuration.ServiceKey), Name));
-                                break;
-                            case ServiceProviderType.AzureTableStorage:
-                                Implementations.Add(installation, new InTableStorage<TCache>(Manager.TableStorage(configuration.Configurations, configuration.ServiceKey), Name));
-                                break;
-                            case ServiceProviderType.AzureRedisCache:
-                                Implementations.Add(installation, new InRedisCache<TCache>(Manager.RedisCache(configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
-                                break;
-                            default:
-                                throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
-                        }
-                    }
-            return Implementations[installation];
-        }
         private TimeSpan GetCorrectTimespan(TimeSpan expiringTime, Installation installation)
         {
             var option = CacheConfigurations[installation].Options as CacheConfiguration;
@@ -50,9 +24,29 @@ namespace Rystem.Business
         public CacheManager(Options<ICacheManager<TCacheKey, TCache>> options, AzureManager manager)
         {
             Manager = manager;
-            MemoryIsActive = options.Services.ContainsKey(Installation.Memory);
             CacheConfigurations = options.Services;
             Name = typeof(TCache).Name;
+            foreach(var conf in CacheConfigurations)
+            {
+                ProvidedService configuration = CacheConfigurations[conf.Key];
+                switch (configuration.Type)
+                {
+                    case ServiceProviderType.AzureBlockBlobStorage:
+                        Implementations.Add(conf.Key, new InBlobStorage<TCache>(Manager.BlobStorage(configuration.Configurations, configuration.ServiceKey), Name));
+                        break;
+                    case ServiceProviderType.AzureTableStorage:
+                        Implementations.Add(conf.Key, new InTableStorage<TCache>(Manager.TableStorage(configuration.Configurations, configuration.ServiceKey), Name));
+                        break;
+                    case ServiceProviderType.AzureRedisCache:
+                        Implementations.Add(conf.Key, new InRedisCache<TCache>(Manager.RedisCache(configuration.ServiceKey), configuration.Configurations.Name ?? "Cache"));
+                        break;
+                    case ServiceProviderType.InMemory:
+                        MemoryIsActive = true;
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
+                }
+            }
         }
         private bool GetCloudIsActive(Installation installation)
             => CacheConfigurations.ContainsKey(installation) && CacheConfigurations[installation].Type != ServiceProviderType.InMemory;
@@ -62,7 +56,7 @@ namespace Rystem.Business
             if (MemoryIsActive)
                 new Key(keyString).Update(cache, GetCorrectTimespan(expiringTime, Installation.Memory));
             if (GetCloudIsActive(installation))
-                await Implementation(installation).UpdateAsync(keyString, cache, GetCorrectTimespan(expiringTime, installation)).NoContext();
+                await Implementations[installation].UpdateAsync(keyString, cache, GetCorrectTimespan(expiringTime, installation)).NoContext();
             return cache;
         }
         public async Task<TCache> InstanceAsync(TCacheKey key, bool withConsistency, TimeSpan expiringTime, Installation installation)
@@ -73,10 +67,10 @@ namespace Rystem.Business
                     return new Key(keyString).Instance<TCache>();
             if (GetCloudIsActive(installation))
             {
-                CacheStatus<TCache> responseFromCloud = await Implementation(installation).ExistsAsync(keyString).NoContext();
+                CacheStatus<TCache> responseFromCloud = await Implementations[installation].ExistsAsync(keyString).NoContext();
                 if (responseFromCloud.IsOk)
                 {
-                    TCache cache = responseFromCloud.Cache != null ? responseFromCloud.Cache : await Implementation(installation).InstanceAsync(keyString).NoContext();
+                    TCache cache = responseFromCloud.Cache != null ? responseFromCloud.Cache : await Implementations[installation].InstanceAsync(keyString).NoContext();
                     if (MemoryIsActive)
                         new Key(keyString).Update(cache, default);
                     return cache;
@@ -103,7 +97,7 @@ namespace Rystem.Business
                 result = true;
             }
             if (GetCloudIsActive(installation))
-                result |= await Implementation(installation).UpdateAsync(keyString, value, GetCorrectTimespan(expiringTime, installation)).NoContext();
+                result |= await Implementations[installation].UpdateAsync(keyString, value, GetCorrectTimespan(expiringTime, installation)).NoContext();
             return result;
         }
         public async Task<bool> ExistsAsync(TCacheKey key, Installation installation)
@@ -112,7 +106,7 @@ namespace Rystem.Business
             if (MemoryIsActive)
                 return new Key(keyString).Exists<TCache>();
             else if (GetCloudIsActive(installation))
-                return (await Implementation(installation).ExistsAsync(keyString).NoContext()).IsOk;
+                return (await Implementations[installation].ExistsAsync(keyString).NoContext()).IsOk;
             return false;
         }
         public async Task<bool> DeleteAsync(TCacheKey key, Installation installation)
@@ -122,13 +116,13 @@ namespace Rystem.Business
             if (MemoryIsActive)
                 result |= new Key(keyString).Remove<TCache>() != null;
             if (GetCloudIsActive(installation))
-                result |= await Implementation(installation).DeleteAsync(keyString).NoContext();
+                result |= await Implementations[installation].DeleteAsync(keyString).NoContext();
             return result;
         }
         public async Task<IEnumerable<string>> ListAsync(Installation installation)
         {
             if (GetCloudIsActive(installation))
-                return await Implementation(installation).ListAsync().NoContext();
+                return await Implementations[installation].ListAsync().NoContext();
             if (MemoryIsActive)
                 return new Key(string.Empty).List<TCache>();
             return null;
@@ -137,7 +131,7 @@ namespace Rystem.Business
         {
             List<Task> tasks = new();
             foreach (var configuration in CacheConfigurations)
-                tasks.Add(Implementation(configuration.Key).WarmUpAsync());
+                tasks.Add(Implementations[configuration.Key].WarmUpAsync());
             await Task.WhenAll(tasks).NoContext();
             return true;
         }

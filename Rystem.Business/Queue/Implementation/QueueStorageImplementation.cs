@@ -28,7 +28,7 @@ namespace Rystem.Business.Queue.Implementation
             if (!IsListening)
             {
                 IsListening = true;
-                BackgroundJob.Run(async () =>
+                BackgroundJob.RunAsync(async () =>
                 {
                     try
                     {
@@ -54,7 +54,7 @@ namespace Rystem.Business.Queue.Implementation
         public Task StopListenAsync()
         {
             IsListening = false;
-            BackgroundJob.Stop(ListenerId);
+            BackgroundJob.StopAsync(ListenerId);
             return Task.CompletedTask;
         }
         public async Task<IEnumerable<TEntity>> ReadAsync(string partitionKey, string rowKey)

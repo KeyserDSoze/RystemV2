@@ -2,7 +2,7 @@
 
 namespace Rystem.Concurrency
 {
-    internal sealed class MemoryImplementation : IDistributedImplementation
+    public sealed class MemoryImplementation : IDistributedImplementation
     {
         private readonly object Semaphore = new();
         private bool IsLocked { get; set; }

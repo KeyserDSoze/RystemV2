@@ -10,6 +10,14 @@ namespace Rystem.Concurrency
         private readonly Dictionary<string, RaceConditionExecutor> RaceConditions = new();
         private Races()
         {
+
+        }
+        public static Races Instance { get; } = new();
+        private static readonly object Semaphore = new();
+        private bool IsBackgroundRunning;
+        private Task RunBackgroundManagerAsync()
+        {
+            IsBackgroundRunning = true;
             Action loop = () =>
             {
                 List<string> removeKeys = new();
@@ -22,12 +30,12 @@ namespace Rystem.Concurrency
                         Instance.RaceConditions.Remove(keyToRemove);
                 }
             };
-            loop.RunInBackground("Rystem.Background.Races", () => 1000 * 60 * 60);
+            return loop.RunInBackgroundAsync(typeof(Races).FullName, () => 1000 * 60 * 60);
         }
-        public static Races Instance { get; } = new();
-        private static readonly object Semaphore = new();
         public async Task<RaceConditionResponse> RunAsync(Func<Task> action, string id, TimeSpan timeWindow, IDistributedImplementation distributedImplementation)
         {
+            if (!IsBackgroundRunning)
+                _ = RunBackgroundManagerAsync();
             if (!RaceConditions.ContainsKey(id))
                 lock (Semaphore)
                     if (!RaceConditions.ContainsKey(id))

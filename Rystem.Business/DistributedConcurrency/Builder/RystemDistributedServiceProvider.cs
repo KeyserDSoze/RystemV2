@@ -13,6 +13,13 @@ namespace Rystem.Concurrency
           => AndWithAzure(installation);
         public AzureDistributedServiceBuilder<T> AndWithAzure(Installation installation = Installation.Default)
           => new(installation, this);
+        public RystemDistributedServiceProvider<T> WithMemory()
+          => AndMemory();
+        public RystemDistributedServiceProvider<T> AndMemory()
+        {
+            Services.Add(Installation.Memory, new ProvidedService(ServiceProviderType.InMemory, default, string.Empty, default));
+            return this;
+        }
         public IServiceCollection Configure()
         {
             ServiceCollection.AddSingleton(new Options<IDistributedManager<T>>(Services));

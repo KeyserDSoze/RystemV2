@@ -24,25 +24,24 @@ namespace Rystem.UnitTest
         public async Task RunInBackground()
         {
             Action action = async () => await CountAsync(2);
-            action.RunInBackground("3", () => 300);
+            await action.RunInBackgroundAsync("3", () => 300).NoContext();
             await Task.Delay(1400);
-            action.StopRunningInBackground("3");
+            await action.StopRunningInBackgroundAsync("3").NoContext();
             Assert.Equal(8, Counter);
         }
         [Fact]
         public async Task RunInBackground2()
         {
-            BackgroundJob.Run(async () => await CountAsync(2), nextRunningTime: () => 300, runImmediately: true);
+            await BackgroundJob.RunAsync(async () => await CountAsync(2), nextRunningTime: () => 300, runImmediately: true).NoContext();
             await Task.Delay(1100);
-            BackgroundJob.Stop();
+            await BackgroundJob.StopAsync().NoContext();
             Assert.Equal(8, Counter);
         }
         [Fact]
         public async Task RunInIServiceCollection()
         {
-
             await Task.Delay(2000);
-            BackgroundJob.Stop();
+            await BackgroundJob.StopAsync().NoContext();
             var myDi = ServiceLocator.GetService<MyDiTest>();
             Assert.Equal(6, myDi.Counter);
         }

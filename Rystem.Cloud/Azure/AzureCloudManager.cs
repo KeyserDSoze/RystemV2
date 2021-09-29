@@ -108,6 +108,8 @@ namespace Rystem.Cloud.Azure
                 var tags = await (await GetAuthenticatedClientAsync().NoContext())
                         .GetFromJsonAsync<AzureTagObject>($"https://management.azure.com{subscription.Id}/tagNames?api-version=2021-04-01")
                         .NoContext();
+                if (subscription.Tags == default)
+                    subscription.Tags = new();
                 if (tags != default && tags.Value.Length > 0)
                 {
                     foreach (var tag in tags.Value)

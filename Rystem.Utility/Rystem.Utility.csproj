@@ -23,7 +23,7 @@
     <PackageIcon>rystem.png</PackageIcon>
     <RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>
     <PackageId>Rystem</PackageId>
-    <Version>2.0.3</Version>
+    <Version>2.0.4</Version>
   </PropertyGroup>
 
   <ItemGroup>

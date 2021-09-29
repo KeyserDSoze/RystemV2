@@ -33,7 +33,7 @@ namespace Rystem
             if (!BackgroundJob.IsRunning(key))
             {
                 var expression = CronExpression.Parse(options.Cron, options.Cron.Split(' ').Length > 5 ? CronFormat.IncludeSeconds : CronFormat.Standard);
-                BackgroundJob.Run(async () =>
+                BackgroundJob.RunAsync(async () =>
                     {
                         int attempt = 0;
                         while (entity == default && attempt < 30)
@@ -74,9 +74,9 @@ namespace Rystem
             => Start(entity, entity.Options);
         public static void Stop<T>(this T entity)
             where T : class, IBackgroundOptionedJob
-            => BackgroundJob.Stop(GetKey<T>(entity.Options.Key));
+            => BackgroundJob.StopAsync(GetKey<T>(entity.Options.Key));
         public static void Stop<T>(this T entity, string key)
            where T : class, IBackgroundJob
-            => BackgroundJob.Stop(GetKey<T>(key));
+            => BackgroundJob.StopAsync(GetKey<T>(key));
     }
 }

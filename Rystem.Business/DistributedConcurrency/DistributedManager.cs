@@ -12,43 +12,39 @@ namespace Rystem.Concurrency
         private readonly Dictionary<Installation, IDistributedImplementation> Implementations = new();
         private readonly Dictionary<Installation, ProvidedService> DistributedConfigurations;
         private bool MemoryIsActive { get; }
-        private readonly object TrafficLight = new();
-        public IDistributedImplementation Implementation(Installation installation)
-        {
-            if (!Implementations.ContainsKey(installation))
-                lock (TrafficLight)
-                    if (!Implementations.ContainsKey(installation))
-                    {
-                        ProvidedService configuration = DistributedConfigurations[installation];
-                        switch (configuration.Type)
-                        {
-                            case ServiceProviderType.AzureBlockBlobStorage:
-                                Implementations.Add(installation, new BlobStorageImplementation(Manager.BlobStorage(configuration.Configurations, configuration.ServiceKey)));
-                                break;
-                            case ServiceProviderType.AzureRedisCache:
-                                Implementations.Add(installation, new RedisCacheImplementation(Manager.RedisCache(configuration.ServiceKey)));
-                                break;
-                            default:
-                                throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
-                        }
-                    }
-            return Implementations[installation];
-        }
         private readonly AzureManager Manager;
         public DistributedManager(Options<IDistributedManager<TKey>> options, AzureManager manager)
         {
             DistributedConfigurations = options.Services;
             Manager = manager;
+            foreach (var conf in DistributedConfigurations)
+            {
+                ProvidedService configuration = DistributedConfigurations[conf.Key];
+                switch (configuration.Type)
+                {
+                    case ServiceProviderType.AzureBlockBlobStorage:
+                        Implementations.Add(conf.Key, new BlobStorageImplementation(Manager.BlobStorage(configuration.Configurations, configuration.ServiceKey)));
+                        break;
+                    case ServiceProviderType.AzureRedisCache:
+                        Implementations.Add(conf.Key, new RedisCacheImplementation(Manager.RedisCache(configuration.ServiceKey)));
+                        break;
+                    case ServiceProviderType.InMemory:
+                        Implementations.Add(conf.Key, new MemoryImplementation());
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Wrong type installed {configuration.Type}");
+                }
+            }
         }
         public Task<RaceConditionResponse> RunUnderRaceConditionAsync(TKey key, Func<Task> task, Installation installation = Installation.Default, TimeSpan timeWindow = default)
-            => task.RunUnderRaceConditionAsync(key.Key, timeWindow, Implementation(installation));
+            => task.RunUnderRaceConditionAsync(key.Key, timeWindow, Implementations[installation]);
         public Task<LockResponse> LockAsync(TKey key, Func<Task> task, Installation installation = Installation.Default)
-            => task.LockAsync(key.Key, Implementation(installation));
+            => task.LockAsync(key.Key, Implementations[installation]);
         public async Task<bool> WarmUpAsync()
         {
             List<Task> tasks = new();
             foreach (var configuration in DistributedConfigurations)
-                tasks.Add(Implementation(configuration.Key).WarmUpAsync());
+                tasks.Add(Implementations[configuration.Key].WarmUpAsync());
             await Task.WhenAll(tasks).NoContext();
             return true;
         }
