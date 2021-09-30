@@ -39,5 +39,27 @@ namespace Rystem.UnitTest
                 .ExecuteAsync(ErrorAsync).NoContext();
             Assert.Equal("aaaaa", A);
         }
+        [Fact]
+        public async Task TryExtension()
+        {
+            var response = await Try.ExecuteAsync(async () =>
+            {
+                await Task.Delay(0);
+                return "a";
+            }).NoContext();
+            Assert.Equal("a", response.Result);
+            Assert.True(response.Executed);
+            var watch = Stopwatch.Start();
+            response = await Try.ExecuteAsync<string>(async () =>
+            {
+                await Task.Delay(0);
+                throw new Exception("calc");
+            }, 10, TimeSpan.FromMilliseconds(10)).NoContext();
+            var r = watch.Stop();
+            Assert.Equal(default, response.Result);
+            Assert.False(response.Executed);
+            Assert.Equal(10, response.Exceptions.Count);
+            Assert.True(r.Span > TimeSpan.FromMilliseconds(10 * 10));
+        }
     }
 }
