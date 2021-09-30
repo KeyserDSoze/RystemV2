@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace System
@@ -13,7 +14,7 @@ namespace System
             {
                 try
                 {
-                    return new TryResponse<T>(await action.Invoke().NoContext(), exceptions, true);
+                    return new TryResponse<T>(await action.Invoke().NoContext(), exceptions, true, exceptions.Select(x => x.Message).Distinct().Count());
                 }
                 catch (Exception ex)
                 {
@@ -23,7 +24,7 @@ namespace System
                         await Task.Delay((int)awaitTime.TotalMilliseconds);
                 }
             }
-            return new TryResponse<T>(default, exceptions, false);
+            return new TryResponse<T>(default, exceptions, false, exceptions.Select(x => x.Message).Distinct().Count());
         }
     }
 }

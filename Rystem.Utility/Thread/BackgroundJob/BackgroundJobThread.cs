@@ -1,5 +1,6 @@
 ﻿using Rystem.Concurrency;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ namespace Rystem.Background
 {
     internal sealed class BackgroundJobThread
     {
-        private static readonly Dictionary<string, System.Timers.Timer> Actions = new();
+        private static readonly ConcurrentDictionary<string, System.Timers.Timer> Actions = new();
         public static Task AddTaskAsync(Func<Task> action, string id, Func<double> nextRunningTime = default, bool runImmediately = false, CancellationToken cancellationToken = default)
         {
             return Lock.RunAsync(async () =>
@@ -16,7 +17,7 @@ namespace Rystem.Background
                 if (Actions.ContainsKey(id))
                 {
                     Actions[id].Stop();
-                    Actions.Remove(id);
+                    Actions.TryRemove(id, out _);
                 }
                 if (runImmediately)
                     await action.Invoke().NoContext();
@@ -38,7 +39,7 @@ namespace Rystem.Background
                     nextTimeTimer.Elapsed += async (x, e) =>
                     {
                         nextTimeTimer.Stop();
-                        Actions.Remove(id);
+                        Actions.TryRemove(id, out _);
                         if (!(cancellationToken != default && cancellationToken.IsCancellationRequested))
                         {
                             if (runAction)
@@ -47,7 +48,7 @@ namespace Rystem.Background
                         }
                     };
                     nextTimeTimer.Start();
-                    Actions.Add(id, nextTimeTimer);
+                    Actions.TryAdd(id, nextTimeTimer);
                 }
             }, $"{nameof(BackgroundJobOptions)}{id}");
         }
@@ -60,7 +61,7 @@ namespace Rystem.Background
                 if (Actions.ContainsKey(id))
                 {
                     Actions[id].Stop();
-                    Actions.Remove(id);
+                    Actions.TryRemove(id, out _);
                 }
                 return Task.CompletedTask;
             }, $"{nameof(BackgroundJobOptions)}{id}");

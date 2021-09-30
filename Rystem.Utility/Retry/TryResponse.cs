@@ -2,5 +2,5 @@
 
 namespace System
 {
-    public sealed record TryResponse<T>(T Result, List<Exception> Exceptions, bool Executed);
+    public sealed record TryResponse<T>(T Result, List<Exception> Exceptions, bool Executed, int DistinctExceptions);
 }

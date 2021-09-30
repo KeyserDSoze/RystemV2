@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class StopwatchStart
+    public sealed class StopwatchStart
     {
         public DateTime Start { get; } = DateTime.UtcNow;
         public StopwatchResult Stop() 
