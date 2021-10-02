@@ -32,15 +32,23 @@ namespace Rystem.Azure.Integration.Storage
                         BlobContainerClient blobClient = default;
                         if (!string.IsNullOrWhiteSpace(Account.AccountKey) || Account.UseKeyVault)
                         {
-                            var client = new BlobServiceClient(await (Account as IRystemOptions).GetConnectionStringAsync().NoContext());
+                            var client =
+                                Account.BlobClientOptions != default ?
+                                    new BlobServiceClient(await (Account as IRystemOptions).GetConnectionStringAsync().NoContext(), Account.BlobClientOptions) :
+                                    new BlobServiceClient(await (Account as IRystemOptions).GetConnectionStringAsync().NoContext());
                             blobClient = client.GetBlobContainerClient(Configuration.Name.ToLower());
                         }
                         else
                         {
-                            blobClient = new BlobContainerClient(new Uri(string.Format("https://{0}.blob.core.windows.net/{1}",
-                                                Account.AccountName,
-                                                Configuration.Name.ToLower())),
-                                                new DefaultAzureCredential());
+                            blobClient = Account.BlobClientOptions != default ?
+                                        new BlobContainerClient(new Uri(string.Format("https://{0}.blob.core.windows.net/{1}",
+                                            Account.AccountName,
+                                            Configuration.Name.ToLower())),
+                                            new DefaultAzureCredential(), Account.BlobClientOptions) :
+                                        new BlobContainerClient(new Uri(string.Format("https://{0}.blob.core.windows.net/{1}",
+                                            Account.AccountName,
+                                            Configuration.Name.ToLower())),
+                                            new DefaultAzureCredential());
                         }
                         Context = blobClient;
                         if (!await blobClient.ExistsAsync().NoContext())
@@ -59,14 +67,14 @@ namespace Rystem.Azure.Integration.Storage
             var client = Context ?? await GetContextAsync();
             return await client.GetBlobClient(name).ExistsAsync().NoContext();
         }
-        public async Task<List<string>> SearchAsync(string prefix = default, int? takeCount = default, CancellationToken token = default)
+        public async Task<List<(string Uri, string Name)>> SearchAsync(string prefix = default, int? takeCount = default, CancellationToken token = default)
         {
             var client = Context ?? await GetContextAsync().NoContext();
-            List<string> items = new();
+            List<(string Uri, string Name)> items = new();
             int count = 0;
             await foreach (var t in client.GetBlobsAsync(BlobTraits.None, BlobStates.None, prefix, token))
             {
-                items.Add($"{client.Uri}/{t.Name}");
+                items.Add(($"{client.Uri}/{t.Name}", t.Name));
                 count++;
                 if (takeCount != default && items.Count >= takeCount)
                     break;

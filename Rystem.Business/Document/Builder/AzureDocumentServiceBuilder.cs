@@ -12,17 +12,17 @@ namespace Rystem.Business
         public RystemDocumentServicePrimaryKey<T> WithTableStorage(TableStorageConfiguration configuration = default, string serviceKey = default)
         {
             var options = new RystemDocumentServiceProviderOptions();
-            return new RystemDocumentServicePrimaryKey<T>(WithIntegration(ServiceProviderType.AzureTableStorage, configuration, serviceKey, options), options);
+            return new RystemDocumentServicePrimaryKey<T>(WithIntegration<T, TableStorageConfiguration>(ServiceProviderType.AzureTableStorage, configuration, serviceKey, options), options);
         }
         public RystemDocumentServicePrimaryKey<T> WithBlobStorage(BlobStorageConfiguration configuration = default, string serviceKey = default)
         {
             var options = new RystemDocumentServiceProviderOptions();
-            return new RystemDocumentServicePrimaryKey<T>(WithIntegration(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey, options), options);
+            return new RystemDocumentServicePrimaryKey<T>(WithIntegration<T, BlobStorageConfiguration>(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey, options), options);
         }
         public RystemDocumentServicePrimaryKey<T> WithCosmosNoSql(CosmosConfiguration configuration = default, string serviceKey = default)
         {
             var options = new RystemDocumentServiceProviderOptions();
-            return new RystemDocumentServicePrimaryKey<T>(WithIntegration(ServiceProviderType.AzureCosmosNoSql, configuration, serviceKey, options), options);
+            return new RystemDocumentServicePrimaryKey<T>(WithIntegration<T, CosmosConfiguration>(ServiceProviderType.AzureCosmosNoSql, configuration, serviceKey, options), options);
         }
     }
 }

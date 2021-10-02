@@ -1,4 +1,5 @@
 ﻿using Rystem.IO;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -21,6 +22,14 @@ namespace Rystem
                 entity.Position = 0;
             using StreamReader streamReader = new(entity);
             return streamReader.ReadToEndAsync();
+        }
+        public static async IAsyncEnumerable<string> ReadLinesAsync(this Stream entity)
+        {
+            if (entity.CanSeek)
+                entity.Position = 0;
+            using StreamReader streamReader = new(entity);
+            while (!streamReader.EndOfStream)
+                yield return await streamReader.ReadLineAsync().NoContext();
         }
         public static string ConvertToString(this Stream entity)
             => ConvertToStringAsync(entity).ToResult();

@@ -11,13 +11,13 @@ namespace Rystem.Business
             RystemServiceProvider = rystemServiceProvider;
             Installation = installation;
         }
-        private protected ServiceProvider WithIntegration<TConfiguration>(ServiceProviderType serviceProviderType, TConfiguration configuration, string serviceKey, dynamic options = default)
+        private protected ServiceProvider WithIntegration<TName, TConfiguration>(ServiceProviderType serviceProviderType, TConfiguration configuration, string serviceKey, dynamic options = default)
             where TConfiguration : Configuration, new()
         {
             if (configuration == default)
-                configuration = new TConfiguration() { Name = ReflectionHelper.NameOfCallingClass(2) };
+                configuration = new TConfiguration() { Name = typeof(TName).Name };
             else if (configuration.Name == default)
-                configuration = configuration with { Name = ReflectionHelper.NameOfCallingClass(2) };
+                configuration = configuration with { Name = typeof(TName).Name };
             RystemServiceProvider.Services.Add(Installation,
                 new ProvidedService(serviceProviderType, configuration, serviceKey ?? string.Empty, options));
             return RystemServiceProvider;

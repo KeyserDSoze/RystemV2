@@ -9,10 +9,10 @@ namespace Rystem.Business
         {
         }
         public RystemQueueServiceProvider<T> WithQueueStorage(QueueStorageConfiguration configuration = default, string serviceKey = default)
-            => (RystemQueueServiceProvider<T>)WithIntegration(ServiceProviderType.AzureQueueStorage, configuration, serviceKey);
+            => (RystemQueueServiceProvider<T>)WithIntegration<T, QueueStorageConfiguration>(ServiceProviderType.AzureQueueStorage, configuration, serviceKey);
         public RystemQueueServiceProvider<T> WithEventHub(EventHubConfiguration configuration = default, string serviceKey = default)
-            => (RystemQueueServiceProvider<T>)WithIntegration(ServiceProviderType.AzureEventHub, configuration, serviceKey);
+            => (RystemQueueServiceProvider<T>)WithIntegration<T, EventHubConfiguration>(ServiceProviderType.AzureEventHub, configuration, serviceKey);
         public RystemQueueServiceProvider<T> WithServiceBus(ServiceBusConfiguration configuration = default, string serviceKey = default)
-            => (RystemQueueServiceProvider<T>)WithIntegration(ServiceProviderType.AzureServiceBus, configuration, serviceKey);
+            => (RystemQueueServiceProvider<T>)WithIntegration<T, ServiceBusConfiguration>(ServiceProviderType.AzureServiceBus, configuration, serviceKey);
     }
 }

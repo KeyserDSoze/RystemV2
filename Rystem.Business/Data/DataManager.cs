@@ -97,7 +97,7 @@ namespace Rystem.Business.Data
         public string GetName(TEntity entity, Installation installation = Installation.Default)
         {
             var implementation = Implementations[installation];
-            return implementation.Options.Name.GetValue(entity).ToString();
+            return implementation.Options.Name.GetValue(entity)?.ToString();
         }
         public async Task<bool> WarmUpAsync()
         {
@@ -107,5 +107,7 @@ namespace Rystem.Business.Data
             await Task.WhenAll(tasks);
             return true;
         }
+        public Task<List<(string Uri, string Name)>> SearchAsync(string startsWith, int? takeCount = null, Installation installation = Installation.Default) 
+            => Implementations[installation].SearchAsync(startsWith, takeCount);
     }
 }

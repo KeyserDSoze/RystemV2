@@ -10,12 +10,12 @@ namespace Rystem.Business
         public RystemDataServiceName<T> WithBlockBlob(BlobStorageConfiguration configuration = default, string serviceKey = default)
         {
             var option = new RystemDataServiceProviderOptions();
-            return new RystemDataServiceName<T>(WithIntegration(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey, option), option);
+            return new RystemDataServiceName<T>(WithIntegration<T, BlobStorageConfiguration>(ServiceProviderType.AzureBlockBlobStorage, configuration, serviceKey, option), option);
         }
         public RystemDataServiceName<T> WithAppendBlob(BlobStorageConfiguration configuration = default, string serviceKey = default)
         {
             var option = new RystemDataServiceProviderOptions();
-            return new RystemDataServiceName<T>(WithIntegration(ServiceProviderType.AzureAppendBlobStorage, configuration, serviceKey, option), option);
+            return new RystemDataServiceName<T>(WithIntegration<T, BlobStorageConfiguration>(ServiceProviderType.AzureAppendBlobStorage, configuration, serviceKey, option), option);
         }
     }
 }

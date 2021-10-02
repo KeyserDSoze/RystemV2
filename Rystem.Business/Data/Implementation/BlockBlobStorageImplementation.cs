@@ -34,5 +34,8 @@ namespace Rystem.Business.Data.Implementantion
             => Integration.SetBlobPropertiesAsync(name, properties);
         public Task<bool> WarmUpAsync()
             => Integration.WarmUpAsync();
+
+        public Task<List<(string Uri, string Name)>> SearchAsync(string filter, int? takeCount = null) 
+            => Integration.SearchAsync(filter, takeCount);
     }
 }

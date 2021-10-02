@@ -67,6 +67,7 @@ namespace Rystem.Business.Data
         /// <param name="installation">Rystem installation value.</param>
         /// <returns>Get "takeCount" items with its Name and a list T objects.</returns>
         IAsyncEnumerable<(string Name, TEntity Content)> ListAsync(string startsWith, int? takeCount = null, Installation installation = Installation.Default);
+        Task<List<(string Uri, string Name)>> SearchAsync(string startsWith, int? takeCount = null, Installation installation = Installation.Default);
         /// <summary>
         /// Write a stream as Data on the right installation of IData.
         /// </summary>

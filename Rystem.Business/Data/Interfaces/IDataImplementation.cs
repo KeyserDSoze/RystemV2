@@ -12,6 +12,7 @@ namespace Rystem.Business.Data
         Task<bool> DeleteAsync(string name);
         Task<bool> ExistsAsync(string name);
         Task<bool> SetPropertiesAsync(string name, dynamic properties);
+        Task<List<(string Uri, string Name)>> SearchAsync(string filter, int? takeCount = null);
         bool IsMultipleLines { get; }
         RystemDataServiceProviderOptions Options { get; }
     }

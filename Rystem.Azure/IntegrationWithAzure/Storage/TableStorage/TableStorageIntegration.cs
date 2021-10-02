@@ -22,7 +22,8 @@ namespace Rystem.Azure.Integration.Storage
                     if (Context == default)
                     {
                         var storageAccount = CloudStorageAccount.Parse(await (Account as IRystemOptions).GetConnectionStringAsync().NoContext());
-                        var client = storageAccount.CreateCloudTableClient();
+                        var client = Account.TableClientConfiguration != default ?
+                                storageAccount.CreateCloudTableClient(Account.TableClientConfiguration) : storageAccount.CreateCloudTableClient();
                         var tableClient = client.GetTableReference(Configuration.Name);
                         if (!await tableClient.ExistsAsync().NoContext())
                             await tableClient.CreateIfNotExistsAsync().NoContext();

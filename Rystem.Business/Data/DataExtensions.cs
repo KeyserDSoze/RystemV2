@@ -113,6 +113,12 @@ namespace System
             var manager = data.Manager();
             return manager.ReadAsync<TEntity>(manager.GetName(data, installation), installation);
         }
+        public static Task<List<(string Uri, string Name)>> SearchAsync<T>(this T data, int? takeCount = null, Installation installation = Installation.Default)
+            where T : IData
+        {
+            var manager = data.Manager();
+            return manager.SearchAsync(manager.GetName(data, installation), takeCount, installation);
+        }
 
         /// <summary>
         /// Read a Stream from Data.
