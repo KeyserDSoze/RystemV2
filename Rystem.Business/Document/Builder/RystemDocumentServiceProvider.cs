@@ -3,8 +3,13 @@ using Rystem.Business.Document;
 
 namespace Rystem.Business
 {
+    public sealed class RystemDocumentServiceProvider
+    {
+        internal static readonly RystemDocumentServiceProvider Instance = new();
+        public static RystemDocumentServiceProvider<T> Configure<T>() 
+            => new RystemDocumentServiceProvider<T>(ServiceLocatorAtRuntime.PrepareToAddNewService());
+    }
     public sealed class RystemDocumentServiceProvider<T> : ServiceProvider
-        where T : new()
     {
         public RystemDocumentServiceProvider(IServiceCollection services) : base(services)
         {
@@ -19,6 +24,12 @@ namespace Rystem.Business
             ServiceCollection.AddSingleton<IDocumentManager<T>, DocumentManager<T>>();
             ServiceCollection.AddRystemFullyAddedCallback(() => ServiceLocator.GetService<IDocumentManager<T>>().WarmUpAsync());
             return ServiceCollection;
+        }
+        public RystemDocumentServiceProvider ConfigureAfterBuild()
+        {
+            Configure();
+            ServiceLocatorAtRuntime.Rebuild();
+            return RystemDocumentServiceProvider.Instance;
         }
     }
 }

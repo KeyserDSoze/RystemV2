@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 namespace Rystem.Business.Document.Implementantion
 {
     internal sealed class CosmosNoSqlImplementation<TEntity> : IDocumentImplementation<TEntity>
-        where TEntity : new()
     {
         private readonly Type EntityType;
         private readonly CosmosNoSqlIntegration Integration;

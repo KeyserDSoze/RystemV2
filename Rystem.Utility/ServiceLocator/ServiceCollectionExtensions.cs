@@ -2,7 +2,7 @@
 
 namespace Rystem
 {
-    public static class ServiceLocatorExtensions
+    public static partial class ServiceCollectionExtensions
     {
         public static void FinalizeWithoutDependencyInjection(this IServiceCollection services)
         {

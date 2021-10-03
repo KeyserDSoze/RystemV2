@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Rystem.Azure;
 using Rystem.Cache;
+using Rystem.Test.WebApi.Models;
 
 namespace Rystem.Test.WebApi
 {
@@ -25,9 +26,11 @@ namespace Rystem.Test.WebApi
             services.AddApplicationInsightsTelemetry();
             services.AddControllers();
             services
+                .AddRystem()
                 .AddAzureService()
                 .AddStorage(new Azure.Integration.Storage.StorageAccount(storage["Name"], storage["Key"]))
                 .EndConfiguration();
+            services.AddSingleton<FirstSingleton>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Rystem.Test.WebApi", Version = "v1" });
@@ -60,6 +63,7 @@ namespace Rystem.Test.WebApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseRystem();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

@@ -1,4 +1,6 @@
 ﻿using Rystem.Azure;
+using Rystem.Azure.Integration.Cosmos;
+using Rystem.Azure.Integration.Storage;
 using Rystem.Business.Document.Implementantion;
 using System;
 using System.Collections.Generic;
@@ -9,7 +11,6 @@ using System.Threading.Tasks;
 namespace Rystem.Business.Document
 {
     internal sealed class DocumentManager<TEntity> : IDocumentManager<TEntity>
-        where TEntity : new()
     {
         private readonly IDictionary<Installation, IDocumentImplementation<TEntity>> Implementations = new Dictionary<Installation, IDocumentImplementation<TEntity>>();
         private readonly IDictionary<Installation, ProvidedService> DocumentConfigurations;
@@ -21,16 +22,17 @@ namespace Rystem.Business.Document
             foreach(var conf in DocumentConfigurations)
             {
                 ProvidedService configuration = DocumentConfigurations[conf.Key];
+                RystemDocumentServiceProviderOptions configuratedOptions = configuration.Options as RystemDocumentServiceProviderOptions;
                 switch (configuration.Type)
                 {
                     case ServiceProviderType.AzureTableStorage:
-                        Implementations.Add(conf.Key, new TableStorageImplementation<TEntity>(Manager.TableStorage(configuration.Configurations, configuration.ServiceKey), configuration.Options));
+                        Implementations.Add(conf.Key, new TableStorageImplementation<TEntity>(Manager.TableStorage(configuration.Configurations as TableStorageConfiguration, configuration.ServiceKey), configuratedOptions));
                         break;
                     case ServiceProviderType.AzureBlockBlobStorage:
-                        Implementations.Add(conf.Key, new BlobStorageImplementation<TEntity>(Manager.BlobStorage(configuration.Configurations, configuration.ServiceKey), configuration.Options));
+                        Implementations.Add(conf.Key, new BlobStorageImplementation<TEntity>(Manager.BlobStorage(configuration.Configurations as BlobStorageConfiguration, configuration.ServiceKey), configuratedOptions));
                         break;
                     case ServiceProviderType.AzureCosmosNoSql:
-                        Implementations.Add(conf.Key, new CosmosNoSqlImplementation<TEntity>(Manager.CosmosNoSql(configuration.Configurations, configuration.ServiceKey), configuration.Options));
+                        Implementations.Add(conf.Key, new CosmosNoSqlImplementation<TEntity>(Manager.CosmosNoSql(configuration.Configurations as CosmosConfiguration, configuration.ServiceKey), configuratedOptions));
                         break;
                     default:
                         throw new InvalidOperationException($"Wrong type installed {configuration.Type}");

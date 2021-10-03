@@ -3,7 +3,7 @@ using System;
 
 namespace Rystem
 {
-    public sealed class ServiceLocator
+    public static class ServiceLocator
     {
         public static T GetService<T>() => (T)Providers.GetService(typeof(T));
         public static object GetService(Type type) => Providers.GetService(type);
@@ -12,6 +12,7 @@ namespace Rystem
         internal static IServiceCollection Services { get; set; }
         private static IServiceProvider providers;
         internal static IServiceProvider Providers => providers ??= Services.BuildServiceProvider();
+        internal static void ResetProviders() => providers = Services.BuildServiceProvider();
         public static IServiceCollection Create() => Services = new ServiceCollection();
     }
 }

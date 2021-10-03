@@ -14,5 +14,7 @@ namespace Rystem.Concurrency
         /// <returns></returns>
         public static async Task<RaceConditionResponse> RunAsync(Func<Task> task, string raceId = "", TimeSpan timeWindow = default, IDistributedImplementation distributedImplementation = default)
             => await task.RunUnderRaceConditionAsync(raceId, timeWindow, distributedImplementation).NoContext();
+        public static RaceConditionResponse Run(Action action, string raceId = "", TimeSpan timeWindow = default, IDistributedImplementation distributedImplementation = default)
+            => action.RunUnderRaceCondition(raceId, timeWindow, distributedImplementation);
     }
 }

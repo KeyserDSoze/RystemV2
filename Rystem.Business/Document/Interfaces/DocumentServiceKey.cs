@@ -1,7 +1,6 @@
 ﻿namespace Rystem.Business
 {
     public abstract class DocumentServiceKey<T>
-        where T : new()
     {
         private protected readonly RystemDocumentServiceProvider<T> RystemDocumentServiceProvider;
         private protected readonly RystemDocumentServiceProviderOptions Options;

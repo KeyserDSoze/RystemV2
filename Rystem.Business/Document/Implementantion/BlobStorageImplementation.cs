@@ -10,12 +10,11 @@ using static Rystem.Azure.Integration.Storage.BlobStorageIntegration;
 namespace Rystem.Business.Document.Implementantion
 {
     internal sealed class BlobStorageImplementation<TEntity> : IDocumentImplementation<TEntity>
-        where TEntity : new()
     {
         private static readonly Type NoDocumentProperty = typeof(NoDocumentAttribute);
         private readonly BlobStorageIntegration Integration;
         public RystemDocumentServiceProviderOptions Options { get; }
-        internal BlobStorageImplementation(BlobStorageIntegration integration, RystemDocumentServiceProviderOptions options)
+        public BlobStorageImplementation(BlobStorageIntegration integration, RystemDocumentServiceProviderOptions options)
         {
             Integration = integration;
             Options = options;

@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 namespace Rystem.Business.Document.Implementantion
 {
     internal sealed class TableStorageImplementation<TEntity> : IDocumentImplementation<TEntity>
-        where TEntity : new()
     {
         private readonly List<PropertyInfo> Properties = new();
         private readonly List<PropertyInfo> SpecialProperties = new();
@@ -23,8 +22,8 @@ namespace Rystem.Business.Document.Implementantion
         private readonly Type EntityType;
         private readonly TableStorageIntegration Integration;
         public RystemDocumentServiceProviderOptions Options { get; }
-
-        internal TableStorageImplementation(TableStorageIntegration integration, RystemDocumentServiceProviderOptions options)
+        private readonly ConstructorInfo Constructor;
+        public TableStorageImplementation(TableStorageIntegration integration, RystemDocumentServiceProviderOptions options)
         {
             Integration = integration;
             Options = options;
@@ -41,6 +40,9 @@ namespace Rystem.Business.Document.Implementantion
                 else
                     SpecialProperties.Add(pi);
             }
+            Constructor = EntityType.GetConstructors().FirstOrDefault(x => x.GetParameters().Length == 0);
+            if (Constructor == default)
+                throw new ArgumentException($"Constructor with 0 parameters for {EntityType.FullName} is missing.");
         }
         private const string Asterisk = "*";
         private DynamicTableEntity GetBase(TEntity entity)
@@ -103,7 +105,7 @@ namespace Rystem.Business.Document.Implementantion
 
         private TEntity ReadEntity(DynamicTableEntity dynamicTableEntity)
         {
-            TEntity entity = new();
+            TEntity entity = (TEntity)Constructor.Invoke(null);
             Options.PrimaryKey.SetValue(entity, dynamicTableEntity.PartitionKey);
             Options.SecondaryKey.SetValue(entity, dynamicTableEntity.RowKey);
             Options.Timestamp.SetValue(entity, dynamicTableEntity.Timestamp.DateTime.ToUniversalTime());
