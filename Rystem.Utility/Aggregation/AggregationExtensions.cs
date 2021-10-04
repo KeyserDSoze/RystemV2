@@ -1,13 +1,10 @@
-﻿using Rystem.Business;
-using System.Threading.Tasks;
-
-namespace Rystem.Background
+﻿namespace Rystem.Background
 {
-    public static class SequenceExtensions
+    public static class AggregationExtensions
     {
-        private static ISequenceManager<T> Manager<T>(this T entity)
+        private static IAggregationManager<T> Manager<T>(this T entity)
             where T : IAggregation
-            => ServiceLocator.GetService<ISequenceManager<T>>();
+            => ServiceLocator.GetService<IAggregationManager<T>>();
         public static void Add<T>(this T key, T entity, Installation installation = Installation.Default)
             where T : IAggregation
             => key.Manager().Add(entity, installation);

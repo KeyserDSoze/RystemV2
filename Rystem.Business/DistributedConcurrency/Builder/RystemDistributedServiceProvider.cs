@@ -3,10 +3,10 @@ using Rystem.Business;
 
 namespace Rystem.Concurrency
 {
-    public sealed class RystemDistributedServiceProvider<T> : Business.ServiceProvider
+    public sealed class RystemDistributedServiceProvider<T> : ServiceProvider
         where T : IDistributedConcurrencyKey
     {
-        public RystemDistributedServiceProvider(IServiceCollection services) : base(services)
+        internal RystemDistributedServiceProvider(IServiceCollection services) : base(services)
         {
         }
         public AzureDistributedServiceBuilder<T> WithAzure(Installation installation = Installation.Default)

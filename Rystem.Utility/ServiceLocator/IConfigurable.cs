@@ -1,12 +1,11 @@
-﻿using System;
-
-namespace Rystem
+﻿namespace Rystem
 {
-    public interface IConfigurable
+    public interface IConfigurable<TProvider>
     {
-        public void Build(Action<string> action = default)
+        TProvider Configure(string callerName);
+        public void Build()
         {
-            action?.Invoke(this.GetType().Name);
+            Configure(GetType().Name);
         }
     }
 }

@@ -13,22 +13,9 @@ namespace System
     {
         private static IDocumentManager<TEntity> Manager<TEntity>(this TEntity entity)
             where TEntity : IDocument
-            => ServiceLocator.GetService<IDocumentManager<TEntity>>() ?? entity.ManagerToConfigure();
-        private static readonly string DocumentRaceConditionKey = $"{nameof(DocumentExtensions)}";
-        private static IDocumentManager<TEntity> ManagerToConfigure<TEntity>(this TEntity entity)
-            where TEntity : IDocument
-        {
-            if (entity is IConfigurableDocument configurableEntity)
-            {
-                RaceCondition.Run(() =>
-                {
-                    configurableEntity.Build((x) => configurableEntity.Configure(x));
-                }, DocumentRaceConditionKey);
-                return ServiceLocator.GetService<IDocumentManager<TEntity>>();
-            }
-            else
-                return default;
-        }
+            => ServiceLocator.GetService<IDocumentManager<TEntity>>() ??
+                    ConfigurableManagerHelper<TEntity, IDocumentManager<TEntity>, RystemDocumentServiceProvider>.ManagerToConfigure(entity);
+        
         public static async Task<bool> UpdateAsync<TEntity>(this TEntity entity, Installation installation = Installation.Default)
             where TEntity : IDocument
            => await entity.Manager().UpdateAsync(entity, installation).NoContext();

@@ -1,7 +1,6 @@
 ﻿namespace Rystem.Business
 {
-    public interface IConfigurableDocument : IDocument, IConfigurable
+    public interface IConfigurableDocument : IDocument, IConfigurable<RystemDocumentServiceProvider>
     {
-        RystemDocumentServiceProvider Configure(string callerName);
     }
 }

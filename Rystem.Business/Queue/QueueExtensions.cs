@@ -10,7 +10,8 @@ namespace System
     {
         private static IQueueManager<TEntity> Manager<TEntity>(this TEntity entity)
             where TEntity : IQueue
-            => ServiceLocator.GetService<IQueueManager<TEntity>>();
+            => ServiceLocator.GetService<IQueueManager<TEntity>>() ??
+                ConfigurableManagerHelper<TEntity, IQueueManager<TEntity>, RystemQueueServiceProvider>.ManagerToConfigure(entity);
 
         public static async Task<bool> SendAsync<TEntity>(this TEntity message, string partitionKey = default, string rowKey = default, Installation installation = Installation.Default)
             where TEntity : IQueue

@@ -6,12 +6,12 @@ namespace Rystem.Business
     public sealed class RystemDocumentServiceProvider
     {
         internal static readonly RystemDocumentServiceProvider Instance = new();
-        public static RystemDocumentServiceProvider<T> Configure<T>() 
-            => new RystemDocumentServiceProvider<T>(ServiceLocatorAtRuntime.PrepareToAddNewService());
+        public static RystemDocumentServiceProvider<T> Configure<T>(T entity) 
+            => new(ServiceLocatorAtRuntime.PrepareToAddNewService());
     }
     public sealed class RystemDocumentServiceProvider<T> : ServiceProvider
     {
-        public RystemDocumentServiceProvider(IServiceCollection services) : base(services)
+        internal RystemDocumentServiceProvider(IServiceCollection services) : base(services)
         {
         }
         public AzureDocumentServiceBuilder<T> WithAzure(Installation installation = Installation.Default)

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Rystem
@@ -12,7 +13,13 @@ namespace Rystem
         internal static IServiceCollection Services { get; set; }
         private static IServiceProvider providers;
         internal static IServiceProvider Providers => providers ??= Services.BuildServiceProvider();
-        internal static void ResetProviders() => providers = Services.BuildServiceProvider();
+        internal static void ResetProviders()
+        {
+            providers = Services.BuildServiceProvider();
+            if (ApplicationBuilder != default)
+                ApplicationBuilder.ApplicationServices = providers;
+        }
         public static IServiceCollection Create() => Services = new ServiceCollection();
+        internal static IApplicationBuilder ApplicationBuilder { get; set; }
     }
 }

@@ -9,6 +9,7 @@ namespace Rystem
         private static event Action AfterRystemIsFullyAdded;
         public static IApplicationBuilder UseRystem(this IApplicationBuilder applicationBuilder)
         {
+            ServiceLocator.ApplicationBuilder = applicationBuilder;
             ServiceLocatorAtRuntime.Rebuild((type) => (applicationBuilder?.ApplicationServices ?? ServiceLocator.Providers).GetService(type));
             AfterRystemIsFullyAdded?.Invoke();
             return applicationBuilder;

@@ -23,7 +23,6 @@ namespace Rystem.Test.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             var storage = Configuration.GetSection("Storage");
-            services.AddApplicationInsightsTelemetry();
             services.AddControllers();
             services
                 .AddRystem()

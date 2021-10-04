@@ -1,8 +1,6 @@
-﻿using Rystem.Business;
-
-namespace Rystem.Background
+﻿namespace Rystem.Background
 {
-    public interface ISequenceManager<T> : IWarmUp
+    public interface IAggregationManager<T> : IWarmUp
     {
         void Add(T entity, Installation installation);
         void Flush(Installation installation);

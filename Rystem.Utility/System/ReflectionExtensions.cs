@@ -28,13 +28,13 @@ namespace Rystem.Reflection
     }
     public static class ReflectionExtensions
     {
-        private readonly static Dictionary<string, PropertyInfo[]> AllProperties = new Dictionary<string, PropertyInfo[]>();
-        private readonly static Dictionary<string, ConstructorInfo[]> AllConstructors = new Dictionary<string, ConstructorInfo[]>();
-        private readonly static object TrafficCard = new object();
+        private static readonly Dictionary<string, PropertyInfo[]> AllProperties = new();
+        private static readonly Dictionary<string, ConstructorInfo[]> AllConstructors = new();
+        private static readonly object Semaphore = new();
         public static PropertyInfo[] FetchProperties(this Type type, params Type[] attributesToIgnore)
         {
             if (!AllProperties.ContainsKey(type.FullName))
-                lock (TrafficCard)
+                lock (Semaphore)
                     if (!AllProperties.ContainsKey(type.FullName))
                         AllProperties.Add(type.FullName, type.GetProperties()
                             .Where(x =>
@@ -49,7 +49,7 @@ namespace Rystem.Reflection
         public static ConstructorInfo[] FectConstructors(this Type type)
         {
             if (!AllConstructors.ContainsKey(type.FullName))
-                lock (TrafficCard)
+                lock (Semaphore)
                     if (!AllConstructors.ContainsKey(type.FullName))
                         AllConstructors.Add(type.FullName, type.GetConstructors().ToArray());
             return AllConstructors[type.FullName];

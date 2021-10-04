@@ -5,7 +5,7 @@ namespace Rystem.Business
 {
     public sealed class RystemDataServiceProvider<T> : ServiceProvider
     {
-        public RystemDataServiceProvider(IServiceCollection services) : base(services)
+        internal RystemDataServiceProvider(IServiceCollection services) : base(services)
         {
         }
         public AzureDataServiceBuilder<T> WithAzure(Installation installation = Installation.Default)

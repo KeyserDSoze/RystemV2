@@ -1,4 +1,4 @@
-﻿namespace Rystem.Business
+﻿namespace Rystem
 {
     public enum ServiceProviderType
     {

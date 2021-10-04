@@ -1,20 +1,16 @@
-﻿using Rystem.Azure;
-using Rystem.Business;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Rystem.Background
 {
-    internal sealed class SequenceManager<T> : ISequenceManager<T>
+    internal sealed class AggregationManager<T> : IAggregationManager<T>
     {
         private readonly Dictionary<Installation, string> Implementations = new();
         private readonly Dictionary<Installation, ProvidedService> SequenceConfigurations;
-        private readonly AzureManager Manager;
-        public SequenceManager(Options<ISequenceManager<T>> options, AzureManager manager)
+        public AggregationManager(Options<IAggregationManager<T>> options)
         {
             SequenceConfigurations = options.Services;
-            Manager = manager;
             foreach(var conf in SequenceConfigurations)
             {
                 ProvidedService configuration = SequenceConfigurations[conf.Key];

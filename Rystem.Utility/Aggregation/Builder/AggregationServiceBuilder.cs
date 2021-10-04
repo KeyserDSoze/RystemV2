@@ -1,6 +1,4 @@
-﻿using Rystem.Business;
-
-namespace Rystem.Background
+﻿namespace Rystem.Background
 {
     public sealed class AggregationServiceBuilder<T> : ServiceBuilder
     {

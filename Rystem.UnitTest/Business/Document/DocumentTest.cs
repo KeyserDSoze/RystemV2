@@ -65,7 +65,7 @@ namespace Rystem.UnitTest.Business.Document
             await Task.WhenAll(new MyGreatDocument().FirstOrDefaultAsync(), new MyGuruDocument().FirstOrDefaultAsync(), new MyDocument().FirstOrDefaultAsync()).NoContext();
             var t = await new MyDocument().FirstOrDefaultAsync().NoContext();
             Assert.Null(t);
-#warning to manage the abstracions
+#warning to manage the abstracions, probably there's a bug on c#
             //string name = new MyRealDocument().GetName();
             //Assert.Equal(nameof(MyRealDocument), name);
             //name = new MyRealDocument2().GetName();
@@ -88,8 +88,7 @@ namespace Rystem.UnitTest.Business.Document
             public DateTime Timestamp { get; set; }
             public RystemDocumentServiceProvider Configure(string callerName)
             {
-                return RystemDocumentServiceProvider
-                    .Configure<MyFirstDocument>()
+                return this.StartConfiguration()
                     .WithAzure()
                     .WithTableStorage(new Azure.Integration.Storage.TableStorageConfiguration(callerName))
                     .WithPrimaryKey(x => x.PrimaryKey)
@@ -107,8 +106,7 @@ namespace Rystem.UnitTest.Business.Document
             public DateTime Timestamp { get; set; }
             public RystemDocumentServiceProvider Configure(string callerName)
             {
-                return RystemDocumentServiceProvider
-                    .Configure<MyDocument>()
+                return this.StartConfiguration()
                     .WithAzure()
                     .WithTableStorage(new Azure.Integration.Storage.TableStorageConfiguration(callerName))
                     .WithPrimaryKey(x => x.PrimaryKey)
@@ -126,8 +124,7 @@ namespace Rystem.UnitTest.Business.Document
             public DateTime Timestamp { get; set; }
             public RystemDocumentServiceProvider Configure(string callerName)
             {
-                return RystemDocumentServiceProvider
-                    .Configure<MyGreatDocument>()
+                return this.StartConfiguration()
                     .WithAzure()
                     .WithTableStorage(new Azure.Integration.Storage.TableStorageConfiguration(callerName))
                     .WithPrimaryKey(x => x.PrimaryKey)
@@ -145,8 +142,7 @@ namespace Rystem.UnitTest.Business.Document
             public DateTime Timestamp { get; set; }
             public RystemDocumentServiceProvider Configure(string callerName)
             {
-                return RystemDocumentServiceProvider
-                    .Configure<MyGuruDocument>()
+                return this.StartConfiguration()
                     .WithAzure()
                     .WithTableStorage(new Azure.Integration.Storage.TableStorageConfiguration(callerName))
                     .WithPrimaryKey(x => x.PrimaryKey)

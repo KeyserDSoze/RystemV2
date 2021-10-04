@@ -1,11 +1,10 @@
 ﻿using Rystem.Background;
-using Rystem.Business;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Rystem.UnitTest.Business.BackgroundWork
+namespace Rystem.UnitTest.Utility.BackgroundWork
 {
     public class AggregationTest
     {

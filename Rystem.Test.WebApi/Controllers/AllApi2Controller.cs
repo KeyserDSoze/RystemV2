@@ -7,12 +7,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Rystem.Test.WebApi.Controllers.AllApiController;
 
 namespace Rystem.Test.WebApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AllApiController : ControllerBase
+    public class AllApi2Controller : ControllerBase
     {
         private static readonly string[] Summaries = new[]
         {
@@ -21,7 +22,8 @@ namespace Rystem.Test.WebApi.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly FirstSingleton F;
-        public AllApiController(ILogger<WeatherForecastController> logger, FirstSingleton f)
+        
+        public AllApi2Controller(ILogger<WeatherForecastController> logger, FirstSingleton f, IDocumentManager<MyLock> manager)
         {
             _logger = logger;
             F = f;
@@ -33,23 +35,6 @@ namespace Rystem.Test.WebApi.Controllers
             _ = new MyLock().Configure("A");
             q = new Service<IDocumentManager<MyLock>>();
             return (new Service<FirstSingleton>().Value.Ale, F.Ale);
-        }
-
-        public class MyLock : IConfigurableDocument
-        {
-            public string A { get; set; }
-            public string N { get; set; }
-            public DateTime C { get; set; }
-            public RystemDocumentServiceProvider Configure(string callerName)
-            {
-                return this.StartConfiguration()
-                    .WithAzure()
-                    .WithTableStorage()
-                    .WithPrimaryKey(x => x.A)
-                    .WithSecondaryKey(x => x.N)
-                    .WithTimestamp(x => x.C)
-                    .ConfigureAfterBuild();
-            }
         }
     }
 }

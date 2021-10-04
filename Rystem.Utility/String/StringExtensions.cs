@@ -53,7 +53,9 @@ namespace Rystem
                 case EncodingType.UTF8:
                     return Encoding.UTF8.GetString(entity);
                 case EncodingType.UTF7:
+#pragma warning disable SYSLIB0001 // Type or member is obsolete
                     return Encoding.UTF7.GetString(entity);
+#pragma warning restore SYSLIB0001 // Type or member is obsolete
                 case EncodingType.UTF32:
                     return Encoding.UTF32.GetString(entity);
                 case EncodingType.Latin1:
