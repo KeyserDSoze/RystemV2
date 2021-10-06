@@ -42,5 +42,29 @@ namespace Rystem.UnitTest.Business.Cache
         {
             await Sample.Run(Installation.Inst01).NoContext();
         }
+        [Fact]
+        public async Task Runtime()
+        {
+            await new MyKey().IsPresentAsync().NoContext();
+        }
+        public class MyValue
+        {
+            public string Ale { get; set; }
+        }
+        public class MyKey : IConfigurableCacheKey<MyValue>
+        {
+            public string Val { get; set; } = Guid.NewGuid().ToString();
+            public RystemCacheServiceProvider Configure(string callerName)
+            {
+                return this.StartConfiguration<MyKey, MyValue>()
+                    .WithMemory()
+                    .ConfigureAfterBuild();
+            }
+
+            public Task<MyValue> FetchAsync()
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

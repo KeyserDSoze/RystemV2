@@ -2,6 +2,14 @@
 
 namespace Rystem.Business
 {
+    public sealed class RystemCacheServiceProvider
+    {
+        private RystemCacheServiceProvider() { }
+        internal static readonly RystemCacheServiceProvider Instance = new();
+        public static RystemCacheServiceProvider<TCacheKey, TCache> Configure<TCacheKey, TCache>(TCacheKey entity)
+            where TCacheKey : ICacheKey<TCache>
+            => new(ServiceLocatorAtRuntime.PrepareToAddNewService());
+    }
     public sealed class RystemCacheServiceProvider<TCacheKey, TCache> : ServiceProvider
         where TCacheKey : ICacheKey<TCache>
     {
@@ -23,6 +31,12 @@ namespace Rystem.Business
             ServiceCollection.AddSingleton<ICacheManager<ICacheKey<TCache>, TCache>, CacheManager<ICacheKey<TCache>, TCache>>();
             ServiceCollection.AddRystemFullyAddedCallback(() => ServiceLocator.GetService<ICacheManager<ICacheKey<TCache>, TCache>>().WarmUpAsync());
             return ServiceCollection;
+        }
+        public RystemCacheServiceProvider ConfigureAfterBuild()
+        {
+            Configure();
+            ServiceLocatorAtRuntime.Rebuild();
+            return RystemCacheServiceProvider.Instance;
         }
     }
 }

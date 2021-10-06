@@ -36,5 +36,22 @@ namespace Rystem.UnitTest.Business.Data
         {
             await Sample.Run(Installation.Inst00).NoContext();
         }
+        [Fact]
+        public async Task Runtime()
+        {
+            await new MySuperTest() { Name = "a" }.ExistsAsync().NoContext();
+        }
+        public class MySuperTest : IConfigurableData
+        {
+            public string Name { get; set; }
+            public RystemDataServiceProvider Configure(string callerName)
+            {
+                return this.StartConfiguration()
+                    .WithAzure()
+                    .WithBlockBlob()
+                    .WithName(x => x.Name)
+                    .ConfigureAfterBuild();
+            }
+        }
     }
 }

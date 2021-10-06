@@ -5,8 +5,9 @@ namespace Rystem.Business
 {
     public sealed class RystemDocumentServiceProvider
     {
+        private RystemDocumentServiceProvider() { }
         internal static readonly RystemDocumentServiceProvider Instance = new();
-        public static RystemDocumentServiceProvider<T> Configure<T>(T entity) 
+        public static RystemDocumentServiceProvider<T> Configure<T>(T entity)
             => new(ServiceLocatorAtRuntime.PrepareToAddNewService());
     }
     public sealed class RystemDocumentServiceProvider<T> : ServiceProvider

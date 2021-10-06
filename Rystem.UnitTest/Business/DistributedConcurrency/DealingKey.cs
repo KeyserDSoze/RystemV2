@@ -6,4 +6,16 @@ namespace Rystem.UnitTest.Business.DistributedConcurrency
     {
         public string Key { get; init; }
     }
+    internal sealed class SecondDealingKey : IConfigurableDistributedConcurrencyKey
+    {
+        public string Key { get; init; }
+
+        public RystemDistributedServiceProvider Configure(string callerName)
+        {
+            return this.StartConfiguration()
+                .WithAzure()
+                .WithBlobStorage()
+                .ConfigureAfterBuild();
+        }
+    }
 }

@@ -11,7 +11,8 @@ namespace System
     {
         private static ICacheManager<TCacheKey, TCache> Manager<TCacheKey, TCache>(this TCacheKey entity)
             where TCacheKey : ICacheKey<TCache>
-            => ServiceLocator.GetService<ICacheManager<TCacheKey, TCache>>();
+            => ServiceLocator.GetService<ICacheManager<TCacheKey, TCache>>() ??
+                    ConfigurableManagerHelper<TCacheKey, ICacheManager<TCacheKey, TCache>, RystemCacheServiceProvider>.ManagerToConfigure(entity);
 
         public static async Task<TEntry> InstanceAsync<TEntry>(this ICacheKey<TEntry> entry, TimeSpan expiringTime = default, Installation installation = Installation.Default, bool withConsistency = false)
             => await entry.Manager<ICacheKey<TEntry>, TEntry>().InstanceAsync(entry, withConsistency, expiringTime, installation).NoContext();

@@ -14,7 +14,6 @@ namespace Rystem
             AfterRystemIsFullyAdded?.Invoke();
             return applicationBuilder;
         }
-
         public static IServiceCollection AddRystemFullyAddedCallback(this IServiceCollection services, Action action)
         {
             AfterRystemIsFullyAdded += action;

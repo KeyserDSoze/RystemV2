@@ -1,8 +1,15 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Rystem.Business;
 
 namespace Rystem.Concurrency
 {
+    public sealed class RystemDistributedServiceProvider
+    {
+        private RystemDistributedServiceProvider() { }
+        internal static readonly RystemDistributedServiceProvider Instance = new();
+        public static RystemDistributedServiceProvider<T> Configure<T>(T entity)
+            where T : IDistributedConcurrencyKey
+            => new(ServiceLocatorAtRuntime.PrepareToAddNewService());
+    }
     public sealed class RystemDistributedServiceProvider<T> : ServiceProvider
         where T : IDistributedConcurrencyKey
     {
@@ -26,6 +33,12 @@ namespace Rystem.Concurrency
             ServiceCollection.AddSingleton<IDistributedManager<T>, DistributedManager<T>>();
             ServiceCollection.AddRystemFullyAddedCallback(() => ServiceLocator.GetService<IDistributedManager<T>>().WarmUpAsync());
             return ServiceCollection;
+        }
+        public RystemDistributedServiceProvider ConfigureAfterBuild()
+        {
+            Configure();
+            ServiceLocatorAtRuntime.Rebuild();
+            return RystemDistributedServiceProvider.Instance;
         }
     }
 }

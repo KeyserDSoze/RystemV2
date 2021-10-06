@@ -1,8 +1,4 @@
-﻿using Rystem.Business;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -60,6 +56,11 @@ namespace Rystem.UnitTest.Business.DistributedConcurrency
         public async Task RunASingleTimeOnTwoRaceConditions2BlobStorage()
         {
             await new DealWithConcurrencyBusiness().RunASingleTimeOnTwoRaces2(Rystem.Installation.Default).NoContext();
+        }
+        [Fact]
+        public async Task Runtime()
+        {
+            await new SecondDealingKey() { Key = string.Empty }.LockAsync(() => Task.CompletedTask);
         }
     }
 }

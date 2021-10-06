@@ -13,7 +13,8 @@ namespace System
     {
         private static IDataManager<T> Manager<T>(this T entity)
             where T : IData
-            => ServiceLocator.GetService<IDataManager<T>>();
+            => ServiceLocator.GetService<IDataManager<T>>() ??
+                    ConfigurableManagerHelper<T, IDataManager<T>, RystemDataServiceProvider>.ManagerToConfigure(entity);
         /// <summary>
         /// Write a stream as Data on the right installation of IData.
         /// </summary>

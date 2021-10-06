@@ -39,6 +39,11 @@ namespace Rystem.UnitTest.Utility.BackgroundWork
         {
             await QueueSomething(Installation.Inst00).NoContext();
         }
+        [Fact]
+        public void Runtime()
+        {
+            new MyNewQueue().Add(new MyNewQueue());
+        }
         private async Task QueueSomething(Installation installation)
         {
             for (int i = 0; i < 510; i++)
@@ -67,6 +72,16 @@ namespace Rystem.UnitTest.Utility.BackgroundWork
         {
             public string Al { get; set; }
             public string Ol { get; set; }
+        }
+        public class MyNewQueue : IConfigurableAggregation
+        {
+            public RystemAggregationServiceProvider Configure(string callerName)
+            {
+                return this.StartConfiguration()
+                    .With()
+                    .WithFirstInFirstOut(new SequenceProperty<MyNewQueue>())
+                    .ConfigureAfterBuild();
+            }
         }
     }
 }

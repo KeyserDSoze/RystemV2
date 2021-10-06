@@ -9,7 +9,8 @@ namespace System
     {
         private static IDistributedManager<TKey> Manager<TKey>(this TKey entity)
             where TKey : IDistributedConcurrencyKey
-            => ServiceLocator.GetService<IDistributedManager<TKey>>();
+            => ServiceLocator.GetService<IDistributedManager<TKey>>() ??
+                    ConfigurableManagerHelper<TKey, IDistributedManager<TKey>, RystemDistributedServiceProvider>.ManagerToConfigure(entity);
         /// <summary>
         /// Deal with concurrency and allow only one method to run. Other concurrent task will be dropped.
         /// </summary>
