@@ -101,6 +101,11 @@ namespace Rystem.Cloud.Azure
         [JsonPropertyName("frequency")]
         public string Frequency { get; set; }
         [JsonPropertyName("meterDetails")]
-        public object MeterDetails { get; set; }
+        public MeterDetails MeterDetails { get; set; }
+    }
+    internal sealed class MeterDetails
+    {
+        [JsonPropertyName("unitOfMeasure")]
+        public string UnitOfMeasure { get; set; }
     }
 }

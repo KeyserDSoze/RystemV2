@@ -316,6 +316,7 @@ namespace Rystem.Cloud.Azure
                                     ƒ.Properties.OfferId,
                                     ƒ.Properties.ChargeType,
                                     ƒ.Properties.Frequency,
+                                    ƒ.Properties.MeterDetails?.UnitOfMeasure ?? string.Empty,
                                     ƒ.Properties.Date))
                                 .OrderBy(x => x.EventDate)
                                 .ToList() ?? new()

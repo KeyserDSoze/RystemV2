@@ -18,7 +18,7 @@ namespace Rystem.UnitTest.Cloud
         {
             var cloudManager = await Manager.GetManagerAsync().NoContext();
             var tenant = await cloudManager.GetTenantByMonthAsync(DateTime.UtcNow.AddMonths(-1), ManagementDeepRequest.Monitoring, false).NoContext();
-            string value = tenant.ToJson();
+            string value = tenant.Tenant.ToJson();
         }
     }
 }
