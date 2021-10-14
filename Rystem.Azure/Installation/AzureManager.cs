@@ -13,7 +13,7 @@ namespace Rystem.Azure
         internal void AddAccount<T>(T entity, AzureServiceProviderType service, string key) 
             => Accounts.TryAdd($"{service}-{key}", entity);
         public KeyVaultIntegration KeyVault(string key = "")
-         => new(Accounts[$"{AzureServiceProviderType.EventHub}-{key}"]);
+         => new(Accounts[$"{AzureServiceProviderType.KeyVault}-{key}"]);
         public RedisCacheIntegration RedisCache(string key = "")
            => new(Accounts[$"{AzureServiceProviderType.RedisCache}-{key}"]);
         public BlobStorageIntegration BlobStorage(BlobStorageConfiguration configuration, string key = "")
