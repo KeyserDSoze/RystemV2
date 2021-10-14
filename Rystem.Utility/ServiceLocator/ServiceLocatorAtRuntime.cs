@@ -22,16 +22,11 @@ namespace Rystem
                 {
                     if (service.Lifetime == ServiceLifetime.Singleton)
                     {
-                        var actualService = Try.Execute(() => retrieveObject(service.ImplementationType ?? service.ServiceType), 0).Result;
+                        var actualService = service.ImplementationInstance ?? Try.Execute(() => retrieveObject(service.ImplementationType ?? service.ServiceType), 1).Result;
                         if (actualService != default)
                             services.AddSingleton(service.ServiceType, actualService);
                         else
-                        {
-                            if (service.ImplementationInstance != default)
-                                services.AddSingleton(service.ServiceType, service.ImplementationInstance);
-                            else
-                                services.AddSingleton(service.ServiceType, service.ImplementationType ?? service.ServiceType);
-                        }
+                            services.Add(service);
                     }
                     else
                         services.Add(service);
