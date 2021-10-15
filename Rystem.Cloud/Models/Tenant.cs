@@ -10,7 +10,7 @@ namespace Rystem.Cloud
         public IEnumerable<string> Types => Subscriptions.SelectMany(x => x.Types).Distinct();
         public decimal Billed => Subscriptions.Sum(x => x.Billed);
         public decimal UsdBilled => Subscriptions.Sum(x => x.UsdBilled);
-        public DateTime TheOldestDatetime => Subscriptions.SelectMany(x => x.ResourceGroups.SelectMany(x => x.Resources.SelectMany(x => x.Costs))).OrderByDescending(x => x.EventDate).FirstOrDefault().EventDate;
+        public DateTime TheOldestDatetime => Subscriptions.SelectMany(x => x.ResourceGroups.SelectMany(t => t.Resources.SelectMany(q => q.Costs))).OrderByDescending(x => x.EventDate).FirstOrDefault()?.EventDate ?? new DateTime(1970, 1, 1);
         public void AddTenant(Tenant tenant)
         {
             var isOldest = tenant.TheOldestDatetime > TheOldestDatetime;

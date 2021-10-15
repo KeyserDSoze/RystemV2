@@ -281,12 +281,13 @@ namespace Rystem.Cloud.Azure
             try
             {
                 string body = $"{{\"type\":\"Usage\",\"dataSet\":{{\"granularity\":\"Monthly\",\"aggregation\":{{\"totalCost\":{{\"name\":\"Cost\",\"function\":\"Sum\"}},\"totalCostUSD\":{{\"name\":\"CostUSD\",\"function\":\"Sum\"}}}},\"sorting\":[{{\"direction\":\"ascending\",\"name\":\"BillingMonth\"}}],\"grouping\":[{{\"type\":\"Dimension\",\"name\":\"ResourceId\"}},{{\"type\":\"Dimension\",\"name\":\"ResourceType\"}},{{\"type\":\"Dimension\",\"name\":\"ResourceLocation\"}},{{\"type\":\"Dimension\",\"name\":\"ChargeType\"}},{{\"type\":\"Dimension\",\"name\":\"ResourceGroupName\"}},{{\"type\":\"Dimension\",\"name\":\"PublisherType\"}},{{\"type\":\"Dimension\",\"name\":\"ServiceName\"}},{{\"type\":\"Dimension\",\"name\":\"ServiceTier\"}},{{\"type\":\"Dimension\",\"name\":\"Meter\"}}]}},\"timeframe\":\"Custom\",\"timePeriod\":{{\"from\":\"{startTime:yyyy-MM-dd}T00:00:00+00:00\",\"to\":\"{endTime:yyyy-MM-dd}T23:59:59+00:00\"}}}}";
-                return (await (await GetAuthenticatedClientAsync().NoContext())
+                var request = (await (await GetAuthenticatedClientAsync().NoContext())
                     .PostAsync<AzureCost>($"https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.CostManagement/query?api-version=2019-11-01",
                         new StringContent(body, Encoding.UTF8, "application/json"),
                         Options)
-                        .NoContext())
-                    .Properties.Rows.Select(consumption =>
+                        .NoContext());
+                return request?
+                    .Properties?.Rows?.Select(consumption =>
                     {
                         consumption[2].TryGetDateTime(out DateTime eventTime);
                         consumption[0].TryGetDecimal(out decimal billed);
@@ -325,7 +326,7 @@ namespace Rystem.Cloud.Azure
                                 .ToList() ?? new()
                             );
                     }
-                    ).ToList();
+                    ).ToList() ?? new();
             }
             catch (Exception ex)
             {
