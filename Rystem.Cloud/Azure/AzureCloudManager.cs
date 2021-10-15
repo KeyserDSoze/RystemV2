@@ -125,7 +125,7 @@ namespace Rystem.Cloud.Azure
                 List<AzureResource> resources = await GetResourcesAsync(subscription.SubscriptionId);
                 if (resources == default)
                     return default;
-                List<AzureConsumption> consumptions = await GetConsumptionsAsync(subscription.SubscriptionId, startTime, endTime).NoContext();
+                List<AzureConsumption> consumptions = azureDeepRequest >= ManagementDeepRequest.Cost ? await GetConsumptionsAsync(subscription.SubscriptionId, startTime, endTime).NoContext() : new();
                 List<Cost> costs = azureDeepRequest >= ManagementDeepRequest.Cost ? await GetCostsAsync(subscription.SubscriptionId, startTime, endTime, consumptions) : new();
                 foreach (var costByResourceGroupNotMoreAvailable in costs.Where(x => !resourceGroups.Any(t => t.Name.ToLower() == x.ResourceGroup.ToLower())).GroupBy(x => x.ResourceGroup))
                 {
@@ -306,18 +306,21 @@ namespace Rystem.Cloud.Azure
                             meter,
                             azureConsumptions
                                 .Where(ƒ => ƒ.Properties != null && ƒ.Properties.ResourceId?.ToLower().Equals(resourceId) == true && ƒ.Properties.Product?.ToLower().StartsWith(startingLabelForProduct) == true)
-                                .Select(ƒ => new Consumption(
-                                    ƒ.Properties.BillingAccountId,
-                                    ƒ.Properties.Quantity,
-                                    ƒ.Properties.EffectivePrice,
-                                    ƒ.Properties.Cost,
-                                    ƒ.Properties.UnitPrice,
-                                    ƒ.Properties.BillingCurrency,
-                                    ƒ.Properties.OfferId,
-                                    ƒ.Properties.ChargeType,
-                                    ƒ.Properties.Frequency,
-                                    ƒ.Properties.MeterDetails?.UnitOfMeasure ?? string.Empty,
-                                    ƒ.Properties.Date))
+                                .Select(ƒ =>
+                                {
+                                    return new Consumption(
+                                      ƒ.Properties.BillingAccountId,
+                                      ƒ.Properties.Quantity,
+                                      ƒ.Properties.EffectivePrice,
+                                      ƒ.Properties.Cost,
+                                      ƒ.Properties.UnitPrice,
+                                      ƒ.Properties.BillingCurrency,
+                                      ƒ.Properties.OfferId,
+                                      ƒ.Properties.ChargeType,
+                                      ƒ.Properties.Frequency,
+                                      ƒ.Properties.MeterDetails?.UnitOfMeasure ?? string.Empty,
+                                      ƒ.Properties.Date);
+                                })
                                 .OrderBy(x => x.EventDate)
                                 .ToList() ?? new()
                             );
@@ -335,7 +338,7 @@ namespace Rystem.Cloud.Azure
             List<AzureConsumption> consumptions = new();
             try
             {
-                string uri = $"https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/usageDetails?$filter=properties%2FusageStart%20ge%20'{startTime:yyyy-MM-dd}'%20and%20properties%2FusageEnd%20le%20'{endTime:yyyy-MM-dd}'&$top={1_000}&api-version=2019-10-01";
+                string uri = $"https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/usageDetails?$expand=meterDetails&$filter=properties%2FusageStart%20ge%20'{startTime:yyyy-MM-dd}'%20and%20properties%2FusageEnd%20le%20'{endTime:yyyy-MM-dd}'&$top={1_000}&api-version=2019-10-01";
                 while (!string.IsNullOrWhiteSpace(uri))
                 {
                     var consumptionResponse = await (await GetAuthenticatedClientAsync().NoContext())
