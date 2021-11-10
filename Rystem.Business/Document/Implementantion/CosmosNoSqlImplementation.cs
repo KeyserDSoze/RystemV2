@@ -25,7 +25,7 @@ namespace Rystem.Business.Document.Implementantion
             EntityType = typeof(TEntity);
             foreach (PropertyInfo pi in EntityType.GetProperties())
             {
-                if (pi.GetCustomAttribute(NoDocumentAttribute) != default || pi.Name == options.PrimaryKey.Name || pi.Name == options.SecondaryKey.Name || pi.Name == options.Timestamp.Name)
+                if (pi.GetCustomAttribute(NoDocumentAttribute) != default || pi.Name == options.PrimaryKey.Name || pi.Name == options.SecondaryKey.Name || pi.Name == options.Timestamp?.Name)
                     continue;
                 else
                     Properties.Add(pi);
@@ -73,7 +73,8 @@ namespace Rystem.Business.Document.Implementantion
             flexible.TryAdd("id", Options.SecondaryKey.GetValue(entity).ToString());
             flexible.TryAdd(PrimaryKeyName, Options.PrimaryKey.GetValue(entity).ToString());
             flexible.TryAdd("SecondaryKey", Options.SecondaryKey.GetValue(entity).ToString());
-            flexible.TryAdd("Timestamp", Options.Timestamp.GetValue(entity));
+            if (Options.Timestamp != default)
+                flexible.TryAdd("Timestamp", Options.Timestamp.GetValue(entity));
             foreach (var property in Properties)
             {
                 flexible.TryAdd(property.Name, property.GetValue(entity));

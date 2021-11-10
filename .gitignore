@@ -365,3 +365,7 @@ FodyWeavers.xsd
 /Rystem.UnitTest/appsettings.json
 /Rystem.Test.WebApi/appsettings.json
 /Rystem.Test.WebApi/appsettings.json
+/Rystem.Test.Accounting/appsettings.json
+/Rystem.Test.Accounting/appsettings.Development.json
+/Rystem.Test.Identity/appsettings.Development.json
+/Rystem.Test.Identity/appsettings.json
