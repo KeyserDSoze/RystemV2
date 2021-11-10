@@ -13,5 +13,7 @@ namespace Rystem.Business
             Options.Timestamp = ((dynamic)navigationPropertyPath.Body).Member;
             return RystemDocumentServiceProvider;
         }
+        public RystemDocumentServiceProvider<T> WithoutTimestamp() 
+            => RystemDocumentServiceProvider;
     }
 }

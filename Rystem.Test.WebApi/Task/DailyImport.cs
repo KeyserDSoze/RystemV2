@@ -14,7 +14,6 @@ namespace Rystem.Test.WebApi
         public BackgroundJobOptions Options { get; init; }
         public DailyImport()
         {
-
         }
         public async Task ActionToDoAsync()
         {
