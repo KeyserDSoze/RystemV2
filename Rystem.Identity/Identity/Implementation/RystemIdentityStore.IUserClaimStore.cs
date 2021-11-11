@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rystem.Business.Identity
+namespace Rystem.Identity
 {
     internal partial class RystemIdentityStore : IUserClaimStore<IdentityUser>
     {
@@ -25,7 +25,8 @@ namespace Rystem.Business.Identity
             var claims = await ClaimForAccountStoreManager.GetAsync(default, x => x.ClaimId == claim.Type && x.ClaimValue == claim.Value).NoContext();
             List<IdentityUser> users = new();
             foreach (var user in claims)
-                users.Add(await IdentityStoreManager.FirstOrDefaultAsync(default, x => x.Id == user.Id).NoContext());
+                if (!cancellationToken.IsCancellationRequested)
+                    users.Add(await FindByIdAsync(user.Id, cancellationToken).NoContext());
             return users;
         }
         public Task RemoveClaimsAsync(IdentityUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)

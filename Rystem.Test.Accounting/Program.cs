@@ -1,9 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Rystem;
-using Rystem.Test.Accounting.Data;
 using Rystem.Test.Accounting.Models;
+using Rystem.Test.Accounting.Policies;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -22,35 +22,60 @@ services
     .AddStorage(new(storage["Name"], storage["Key"]))
     .EndConfiguration();
 
-services.AddTableStorageIdentity(x =>
-{
-    x.SignIn.RequireConfirmedPhoneNumber = false;
-    x.User.RequireUniqueEmail = true;
-    x.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-    x.SignIn.RequireConfirmedEmail = true;
-    x.SignIn.RequireConfirmedAccount = true;
-    x.Lockout.AllowedForNewUsers = true;
-    x.Lockout.MaxFailedAccessAttempts = 10;
-    x.Password.RequireUppercase = true;
-    x.Password.RequiredLength = 10;
-    x.Password.RequireDigit = true;
-    x.Password.RequireLowercase = true;
-    x.Password.RequireNonAlphanumeric = true;
-})
+services.AddTableStorageIdentity(
+    x =>
+    {
+        x.MicrosoftConfigureOptions = t =>
+        {
+            t.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
+            t.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
+        };
+    },
+    x =>
+    {
+        x.SignIn.RequireConfirmedPhoneNumber = false;
+        x.User.RequireUniqueEmail = true;
+        x.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+        x.SignIn.RequireConfirmedEmail = true;
+        x.SignIn.RequireConfirmedAccount = true;
+        x.Lockout.AllowedForNewUsers = true;
+        x.Lockout.MaxFailedAccessAttempts = 10;
+        x.Password.RequireUppercase = true;
+        x.Password.RequiredLength = 10;
+        x.Password.RequireDigit = true;
+        x.Password.RequireLowercase = true;
+        x.Password.RequireNonAlphanumeric = true;
+    })
 .AddDefaultUI()
 .AddTokenProvider<IdentityServices>(TokenOptions.DefaultProvider)
 .AddIdentityNotification<IdentityNotificator>()
-    .AddAuthentication()
-    .AddMicrosoftAccount(microsoftOptions =>
+.AddAuthorization(options =>
+{
+    options.AddPolicy("NameIdentifier", policy =>
     {
-        microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
-        microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
+        policy.RequireClaim(ClaimTypes.NameIdentifier);
     });
+    options.AddPolicy("Something", policy =>
+    {
+        policy.Requirements.Add(new CheckSomething());
+    });
+    options.AddPolicy("OtherSomething", policy =>
+    {
+        policy.Requirements.Add(new CheckOtherSomething());
+    });
+})
+.AddScoped<IAuthorizationHandler, CheckSomethingHandler>()
+.AddSingleton<IAuthorizationHandler, MultiHandler>();
 
 services.AddControllersWithViews();
 
 var app = builder.Build();
 app.UseRystem();
+
+var what = ServiceLocator.GetService<IAuthorizationHandler>();
+var what1 = ServiceLocator.GetService<CheckSomethingHandler>();
+var what2 = ServiceLocator.GetService<MultiHandler>();
+var what3 = ServiceLocator.GetService<AuthorizationHandler<CheckSomething>>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

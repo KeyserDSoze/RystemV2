@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 
-namespace Rystem.Business.Identity
+namespace Rystem.Identity
 {
     public interface IIdentityNotifications<TUser, TRole> 
         where TUser : IdentityUser

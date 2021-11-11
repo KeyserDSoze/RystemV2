@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>Alessandro Rapiti</Authors>
+		<Description>
+			Library that allows to manage identity storage, you can use:
+			- TableStorage,
+			- BlobStorage,
+			- CosmosDB NoSql.
+			And external source like:
+			- Microsoft account
+			- Google account
+			- Facebook account
+			#enjoyrystem
+		</Description>
+		<Copyright>2022</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageIcon>rystem.png</PackageIcon>
+		<RepositoryUrl>https://github.com/KeyserDSoze/RystemV2</RepositoryUrl>
+		<Version>2.0.14</Version>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Include="..\Rystem.Utility\rystem.png" Link="rystem.png">
+	    <PackagePath></PackagePath>
+	    <Pack>True</Pack>
+	  </None>
+	</ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Rystem.Business\Rystem.Business.csproj" />
+  </ItemGroup>
+
+</Project>

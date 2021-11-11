@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Rystem.Business.Identity;
+using Rystem.Identity;
 
 namespace Rystem.Test.Accounting.Models
 {

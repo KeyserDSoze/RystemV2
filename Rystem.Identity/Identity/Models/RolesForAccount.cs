@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Rystem.Business.Identity
+namespace Rystem.Identity
 {
     internal class RolesForAccount
     {

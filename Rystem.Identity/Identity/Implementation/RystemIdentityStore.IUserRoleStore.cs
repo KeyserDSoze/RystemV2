@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rystem.Business.Identity
+namespace Rystem.Identity
 {
     internal partial class RystemIdentityStore : IUserRoleStore<IdentityUser>
     {
@@ -26,7 +26,8 @@ namespace Rystem.Business.Identity
         {
             List<IdentityUser> users = new();
             foreach (var role in await RoleForAccountStoreManager.GetAsync(default, x => x.Role == roleName).NoContext())
-                users.Add(await IdentityStoreManager.FirstOrDefaultAsync(default, x => x.Id == role.Id).NoContext());
+                if (!cancellationToken.IsCancellationRequested)
+                    users.Add(await FindByIdAsync(role.Id, cancellationToken).NoContext());
             return users;
         }
 

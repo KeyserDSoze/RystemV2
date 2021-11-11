@@ -3,7 +3,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rystem.Business.Identity
+namespace Rystem.Identity
 {
     internal partial class RystemIdentityStore : IUserLockoutStore<IdentityUser>
     {
