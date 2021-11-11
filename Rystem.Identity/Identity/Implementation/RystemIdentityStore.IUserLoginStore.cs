@@ -3,17 +3,21 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rystem.Business.Identity
+namespace Rystem.Identity
 {
     internal partial class RystemIdentityStore : IUserLoginStore<IdentityUser>
     {
-        private const char Separator = '$';
+        internal const char Separator = '$';
+        private static string GetId(string loginProvider, string providerKey)
+            => $"{loginProvider}{Separator}{providerKey}";
         public Task AddLoginAsync(IdentityUser user, UserLoginInfo login, CancellationToken cancellationToken)
-            => UpdateAsync(new IdentityUser() { Id = $"{login.LoginProvider}{Separator}{login.ProviderKey}", NormalizedUserName = login.ProviderDisplayName }, cancellationToken);
+        {
+            user.Id = GetId(login.LoginProvider, login.ProviderKey);
+            return CreateAsync(user, cancellationToken);
+        }
 
         public Task<IdentityUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
-            => FindByNameAsync($"{loginProvider}{Separator}{providerKey}", cancellationToken);
-
+            => FindByIdAsync(GetId(loginProvider, providerKey), cancellationToken);
         public Task<IList<UserLoginInfo>> GetLoginsAsync(IdentityUser user, CancellationToken cancellationToken)
         {
             IList<UserLoginInfo> infos = new List<UserLoginInfo>();
@@ -21,8 +25,7 @@ namespace Rystem.Business.Identity
             infos.Add(new UserLoginInfo(id[0], id[1], user.NormalizedUserName));
             return Task.FromResult(infos);
         }
-
         public Task RemoveLoginAsync(IdentityUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
-            => IdentityStoreManager.DeleteAsync(new IdentityUser() { Id = $"{loginProvider}-{providerKey}", NormalizedUserName = user.NormalizedUserName });
+            => _ = DeleteAsync(new IdentityUser() { Id = GetId(loginProvider, providerKey), NormalizedUserName = user.NormalizedUserName }, cancellationToken);
     }
 }

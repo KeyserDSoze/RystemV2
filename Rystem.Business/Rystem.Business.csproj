@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Description>Library that allows to speed up the business operations on cloud libraries like:
 - Azure Storage, Azure Service Bus, Azure Event Hub, Azure Redis Cache, Azure Key Vault.
 It allows you to deal with multi-instances problem with IoC as central point:
