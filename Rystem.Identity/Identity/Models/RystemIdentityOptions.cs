@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+using Microsoft.AspNetCore.Authentication.Twitter;
 using System;
 
 namespace Rystem.Identity
@@ -18,5 +19,7 @@ namespace Rystem.Identity
         public bool HasGoogleAsExternalLogin => GoogleConfigureOptions != null;
         public Action<FacebookOptions> FacebookConfigureOptions { get; set; }
         public bool HasFacebookAsExternalLogin => FacebookConfigureOptions != null;
+        public Action<TwitterOptions> TwitterConfigureOptions { get; set; }
+        public bool HasTwitterAsExternalLogin => TwitterConfigureOptions != null;
     }
 }

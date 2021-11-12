@@ -7,6 +7,10 @@ using Rystem.Azure.Integration.Storage;
 using Rystem.Azure.Integration.Cosmos;
 using Microsoft.Azure.Cosmos;
 using Rystem.Identity.External;
+using Microsoft.AspNetCore.Authentication.Twitter;
+using System.Threading.Tasks;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.OAuth;
 
 namespace Rystem
 {
@@ -58,7 +62,7 @@ namespace Rystem
                    .WithSecondaryKey(x => x.Role)
                    .WithTimestamp(x => x.CreatedAt)
                    .Configure()
-               .AddIdentity<IdentityUser, IdentityRole>(options)
+               .AddIdentity<TUser, TRole>(options)
                .AddUserStore<RystemIdentityStore>()
                .AddRoleStore<RystemRoleStore>();
             if (rystemOptions.HasMicrosoftAsExternalLogin)
@@ -69,7 +73,8 @@ namespace Rystem
                         rystemOptions.MicrosoftConfigureOptions(configureOptions);
                         if (rystemOptions.ExternalIsAutoregistered)
                             configureOptions.Events.OnCreatingTicket +=
-                                (ticket) => BasicAutoRegistrationManager.RegisterAsync<IdentityUser>(ticket, "Microsoft");
+                                (OAuthCreatingTicketContext ticket) => 
+                                BasicAutoRegistrationManager.RegisterAsync<TUser>(ticket.Identity, "Microsoft");
                     });
             }
             if (rystemOptions.HasGoogleAsExternalLogin)
@@ -80,7 +85,8 @@ namespace Rystem
                         rystemOptions.GoogleConfigureOptions(options);
                         if (rystemOptions.ExternalIsAutoregistered)
                             options.Events.OnCreatingTicket +=
-                                (ticket) => BasicAutoRegistrationManager.RegisterAsync<IdentityUser>(ticket, "Google");
+                                (OAuthCreatingTicketContext ticket) =>
+                                BasicAutoRegistrationManager.RegisterAsync<TUser>(ticket.Identity, "Google");
                     });
             }
             if (rystemOptions.HasFacebookAsExternalLogin)
@@ -91,7 +97,22 @@ namespace Rystem
                         rystemOptions.FacebookConfigureOptions(options);
                         if (rystemOptions.ExternalIsAutoregistered)
                             options.Events.OnCreatingTicket +=
-                                (ticket) => BasicAutoRegistrationManager.RegisterAsync<IdentityUser>(ticket, "Facebook");
+                                (OAuthCreatingTicketContext ticket) => 
+                                BasicAutoRegistrationManager.RegisterAsync<TUser>(ticket.Identity, "Facebook");
+                    });
+            }
+            if (rystemOptions.HasTwitterAsExternalLogin)
+            {
+                services.AddAuthentication()
+                    .AddTwitter(options =>
+                    {
+                        rystemOptions.TwitterConfigureOptions(options);
+                        if (rystemOptions.ExternalIsAutoregistered)
+                            options.Events.OnCreatingTicket +=
+                                (TwitterCreatingTicketContext ticket) => 
+                                ticket.HttpContext.User.Identity.IsAuthenticated ? 
+                                    BasicAutoRegistrationManager.RegisterAsync<TUser>(ticket.HttpContext.User.Identity as ClaimsIdentity, "Twitter") 
+                                    : Task.CompletedTask;
                     });
             }
             return builder;
