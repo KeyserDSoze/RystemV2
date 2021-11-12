@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31129.286
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RystemV2", "RystemV2\RystemV2.csproj", "{05411F2F-74BF-4CAB-8479-BB66266D57C9}"
 EndProject
@@ -19,7 +19,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{F9B48BB8
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rystem.Test.WebApi", "Rystem.Test.WebApi\Rystem.Test.WebApi.csproj", "{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rystem.FluentApi", "Rystem.FluentApi\Rystem.FluentApi.csproj", "{4A178C68-3DB0-4594-BDBB-D29F05297FD0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rystem.Test.Accounting", "Rystem.Test.Accounting\Rystem.Test.Accounting.csproj", "{2119AA3A-9648-40BF-AF6F-F5BC12C3577D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rystem.Identity", "Rystem.Identity\Rystem.Identity.csproj", "{0771EA4B-E06A-4156-872B-DB38AA00F132}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,10 +57,14 @@ Global
 		{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4A178C68-3DB0-4594-BDBB-D29F05297FD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A178C68-3DB0-4594-BDBB-D29F05297FD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A178C68-3DB0-4594-BDBB-D29F05297FD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A178C68-3DB0-4594-BDBB-D29F05297FD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2119AA3A-9648-40BF-AF6F-F5BC12C3577D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2119AA3A-9648-40BF-AF6F-F5BC12C3577D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2119AA3A-9648-40BF-AF6F-F5BC12C3577D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2119AA3A-9648-40BF-AF6F-F5BC12C3577D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0771EA4B-E06A-4156-872B-DB38AA00F132}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0771EA4B-E06A-4156-872B-DB38AA00F132}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0771EA4B-E06A-4156-872B-DB38AA00F132}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0771EA4B-E06A-4156-872B-DB38AA00F132}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +73,7 @@ Global
 		{05411F2F-74BF-4CAB-8479-BB66266D57C9} = {F9B48BB8-FC9B-4C97-8CFF-654A8862C928}
 		{CE156CA5-DD83-4F0C-A1EE-403680EDCA0E} = {F9B48BB8-FC9B-4C97-8CFF-654A8862C928}
 		{C0DC99E7-EEE5-4A33-B4E7-CF17185640F8} = {F9B48BB8-FC9B-4C97-8CFF-654A8862C928}
+		{2119AA3A-9648-40BF-AF6F-F5BC12C3577D} = {F9B48BB8-FC9B-4C97-8CFF-654A8862C928}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {752F3EA7-DF16-46EC-9F54-7A975ABC0144}

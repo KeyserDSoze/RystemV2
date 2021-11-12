@@ -30,7 +30,7 @@ namespace Rystem.Business.Document.Implementantion
             EntityType = typeof(TEntity);
             foreach (PropertyInfo pi in EntityType.GetProperties())
             {
-                if (pi.GetCustomAttribute(NoDocumentAttribute) != default || pi.Name == options.PrimaryKey.Name || pi.Name == options.SecondaryKey.Name || pi.Name == options.Timestamp.Name)
+                if (pi.GetCustomAttribute(NoDocumentAttribute) != default || pi.Name == options.PrimaryKey.Name || pi.Name == options.SecondaryKey.Name || pi.Name == options.Timestamp?.Name)
                     continue;
                 else if (pi.PropertyType == typeof(int) || pi.PropertyType == typeof(long) ||
                     pi.PropertyType == typeof(double) || pi.PropertyType == typeof(string) ||
@@ -71,7 +71,7 @@ namespace Rystem.Business.Document.Implementantion
             {
                 if (expressionAsExpression == default)
                     return string.Empty;
-                string result = QueryStrategy.Create(expressionAsExpression, Options.PrimaryKey.Name, Options.SecondaryKey.Name, Options.Timestamp.Name);
+                string result = QueryStrategy.Create(expressionAsExpression, Options.PrimaryKey.Name, Options.SecondaryKey.Name, Options.Timestamp?.Name);
                 if (!string.IsNullOrWhiteSpace(result))
                     return result;
                 BinaryExpression binaryExpression = (BinaryExpression)expressionAsExpression;
@@ -108,7 +108,7 @@ namespace Rystem.Business.Document.Implementantion
             TEntity entity = (TEntity)Constructor.Invoke(null);
             Options.PrimaryKey.SetValue(entity, dynamicTableEntity.PartitionKey);
             Options.SecondaryKey.SetValue(entity, dynamicTableEntity.RowKey);
-            Options.Timestamp.SetValue(entity, dynamicTableEntity.Timestamp.DateTime.ToUniversalTime());
+            Options.Timestamp?.SetValue(entity, dynamicTableEntity.Timestamp.DateTime.ToUniversalTime());
             foreach (PropertyInfo pi in this.Properties)
                 if (dynamicTableEntity.Properties.ContainsKey(pi.Name))
                     SetValue(dynamicTableEntity.Properties[pi.Name], pi);
