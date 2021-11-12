@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Authentication.Twitter;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Linq;
@@ -9,16 +10,16 @@ namespace Rystem.Identity.External
 {
     internal static class BasicAutoRegistrationManager
     {
-        public static async Task RegisterAsync<T>(OAuthCreatingTicketContext ticket, string providerName)
+        public static async Task RegisterAsync<T>(ClaimsIdentity identity, string providerName)
             where T : IdentityUser, new()
         {
-            if (ticket.Identity.IsAuthenticated)
+            if (identity.IsAuthenticated)
             {
                 var userManager = ServiceLocator.GetService<UserManager<T>>();
-                string id = $"{providerName}{RystemIdentityStore.Separator}{ticket.Identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value}";
+                string id = $"{providerName}{RystemIdentityStore.Separator}{identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value}";
                 if (await userManager.FindByIdAsync(id).NoContext() == default)
                 {
-                    string email = ticket.Identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value;
+                    string email = identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value;
                     var user = new T()
                     {
                         Id = id,
