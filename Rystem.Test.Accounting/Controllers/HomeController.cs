@@ -9,7 +9,7 @@ namespace Rystem.Test.Accounting.Controllers
     [Authorize(Roles = "ADMIN,READER", Policy = "NameIdentifier")]
     [Authorize(Roles = "ADMIN,READER", Policy = "Something")]
     [Authorize(Roles = "ADMIN,READER", Policy = "OtherSomething")]
-    [Authorize(Roles = "ADMIN,READER")]
+    //[Authorize(Roles = "ADMIN,READER")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
