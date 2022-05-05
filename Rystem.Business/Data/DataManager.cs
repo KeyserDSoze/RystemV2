@@ -79,7 +79,7 @@ namespace Rystem.Business.Data
             => await WriteAsync(name, await value.ToStreamAsync().NoContext(), options, installation).NoContext();
         public Task<bool> WriteAsync(string name, byte[] value, dynamic options, Installation installation = Installation.Default)
             => WriteAsync(name, value.ToStream(), options, installation);
-        private static BlobUploadOptions JsonBlobUploadOptions = new BlobUploadOptions
+        private static readonly BlobUploadOptions JsonBlobUploadOptions = new()
         {
             HttpHeaders = new BlobHttpHeaders
             {
@@ -87,11 +87,30 @@ namespace Rystem.Business.Data
             }
         };
         public async Task<bool> WriteAsync(string name, TEntity value, Installation installation = Installation.Default)
-            => await WriteAsync(name, await (Implementations[installation].IsMultipleLines ? $"{value.ToJson()}\n" : value.ToJson()).ToStreamAsync(),
-                JsonBlobUploadOptions, installation).NoContext();
+        {
+            if (value is Stream stream)
+            {
+                return await WriteAsync(name, stream, null, installation).NoContext();
+            }
+            else
+            {
+                return await WriteAsync(name, await (Implementations[installation].IsMultipleLines ? $"{value.ToJson()}\n" : value.ToJson()).ToStreamAsync(),
+                               JsonBlobUploadOptions, installation).NoContext();
+            }
+        }
+
         public async Task<bool> WriteAsync<T>(string name, T value, Installation installation = Installation.Default)
-           => await WriteAsync(name, await (Implementations[installation].IsMultipleLines ? $"{value.ToJson()}\n" : value.ToJson()).ToStreamAsync(),
+        {
+            if (value is Stream stream)
+            {
+                return await WriteAsync(name, stream, null, installation).NoContext();
+            }
+            else
+            {
+                return await WriteAsync(name, await (Implementations[installation].IsMultipleLines ? $"{value.ToJson()}\n" : value.ToJson()).ToStreamAsync(),
                JsonBlobUploadOptions, installation).NoContext();
+            }
+        }
         public Task<bool> SetPropertiesAsync(string name, dynamic properties, Installation installation = Installation.Default)
             => Implementations[installation].SetPropertiesAsync(name, properties);
         public string GetName(TEntity entity, Installation installation = Installation.Default)
@@ -107,7 +126,7 @@ namespace Rystem.Business.Data
             await Task.WhenAll(tasks);
             return true;
         }
-        public Task<List<(string Uri, string Name)>> SearchAsync(string startsWith, int? takeCount = null, Installation installation = Installation.Default) 
+        public Task<List<(string Uri, string Name)>> SearchAsync(string startsWith, int? takeCount = null, Installation installation = Installation.Default)
             => Implementations[installation].SearchAsync(startsWith, takeCount);
     }
 }

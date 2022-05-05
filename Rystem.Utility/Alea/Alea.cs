@@ -12,11 +12,7 @@ namespace Rystem
         public static int GetNumber(int max)
         {
             int maxPlusOne = max + 1;
-            byte[] randomNumber = new byte[1];
-            RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
-            gen.GetBytes(randomNumber);
-            int rand = Convert.ToInt32(randomNumber[0]) * maxPlusOne / 255;
-            return rand == maxPlusOne ? max : rand;
+            return RandomNumberGenerator.GetInt32(maxPlusOne);
         }
     }
 }
